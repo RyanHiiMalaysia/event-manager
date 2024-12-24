@@ -4,7 +4,7 @@ import { useState } from 'react';
 const CreateEvent = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startdate, setDate] = useState('');
+  const [startdate, setStartDate] = useState('');
   const [enddate, setEndDate] = useState('');
   const [validitydate, setValidDate] = useState('');
   const [validitytime, setValidTime] = useState('');
