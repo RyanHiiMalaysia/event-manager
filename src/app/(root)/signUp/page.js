@@ -1,34 +1,40 @@
-import { neon } from '@neondatabase/serverless';
+"use client";
+
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function SignUp() {
-  async function handleSignUp(formData) {
-    'use server';
+  const router = useRouter();
+  const [error, setError] = useState(null);
+
+  async function handleSignUp(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
     const email = formData.get('email');
     const name = formData.get('name');
 
-    // Connect to the Neon database
-    const sql = neon(`${process.env.DATABASE_URL}`);
+    const response = await fetch('/api/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email }),
+    });
 
-    // Check if the user already exists in the database
-    const result = await sql('SELECT * FROM users WHERE email = $1', [email]);
-
-    if (result.length > 0) {
-      // User already exists, redirect to the home page or show an error message
-      return { error: 'User already exists. Please sign in.' };
+    if (response.ok) {
+      router.push('/');
+    } else {
+      const result = await response.json();
+      setError(result.message);
     }
-
-    // Insert the user details into the users table
-    await sql('INSERT INTO users (name, email) VALUES ($1, $2)', [name, email]);
-
-    // Redirect to the home page after sign-up
-    return { success: true };
   }
 
   return (
-    <form action={handleSignUp}>
+    <form onSubmit={handleSignUp}>
       <input type="text" placeholder="Name" name="name" required />
       <input type="email" placeholder="Email" name="email" required />
       <button type="submit">Sign Up</button>
+      {error && <p>{error}</p>}
     </form>
   );
 }
