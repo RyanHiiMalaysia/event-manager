@@ -31,7 +31,7 @@ const CreateEvent = () => {
   };
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
+    <div className="p-6 max-w-lg mx-auto border border-black rounded-lg bg-transparent">
       <h1 className="text-2xl font-bold mb-4">Create Event</h1>
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Event Title</label>
@@ -39,7 +39,7 @@ const CreateEvent = () => {
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="input text-black w-full"
+          className="input text-black w-full p-1 max-w-lg mx-auto border border-black rounded-lg"
 
         />
       </div>
@@ -48,7 +48,7 @@ const CreateEvent = () => {
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="input text-black w-full"
+          className="input text-black w-full p-1 max-w-lg mx-auto border border-black rounded-lg"
         />
       </div>
       <div className="mb-4">
@@ -57,7 +57,7 @@ const CreateEvent = () => {
           type="date"
           value={startdate}
           onChange={(e) => setDate(e.target.value)}
-          className="input text-black w-full"
+          className="input text-black w-full p-1 max-w-lg mx-auto border border-black rounded-lg"
         />
       </div>
       <div className="mb-4">
@@ -66,7 +66,7 @@ const CreateEvent = () => {
           type="date"
           value={enddate}
           onChange={(e) => setEndDate(e.target.value)}
-          className="input text-black w-full"
+          className="input text-black w-full p-1 max-w-lg mx-auto border border-black rounded-lg"
         />
       </div>
       <div className="mb-4">
@@ -75,14 +75,14 @@ const CreateEvent = () => {
           type="date"
           value={validitydate}
           onChange={(e) => setValidDate(e.target.value)}
-          className="input text-black w-full"
+          className="input text-black w-full p-1 max-w-lg mx-auto border border-black rounded-lg"
         />
         <label className="block text-sm font-medium mb-1">Valid until Time</label>
         <input
           type="time"
           value={validitytime}
           onChange={(e) => setValidTime(e.target.value)}
-          className="input text-black w-full"
+          className="input text-black w-full p-1 max-w-lg mx-auto border border-black rounded-lg"
         />
       </div>
       <nav className='flex justify-between items-center'>
