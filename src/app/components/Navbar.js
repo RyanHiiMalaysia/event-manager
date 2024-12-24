@@ -36,14 +36,19 @@ const Navbar = async () => {
                         </Link>
                     </>
                 ) : ( // If the user is not authenticated
-                    <form action={async () => { // Form to handle sign in
-                        "use server"
-                        await signIn('google') // Sign in with Google
-                    }}>
-                        <button type='submit'>
-                            Login
-                        </button>
-                    </form>
+                    <>
+                        <form action={async () => { // Form to handle sign in
+                            "use server"
+                            await signIn('google') // Sign in with Google
+                        }}>
+                            <button type='submit'>
+                                Login
+                            </button>
+                        </form>
+                        <Link href="/signUp"> {/* Link to Sign-Up page */}
+                            <button>Sign Up</button>
+                        </Link>
+                    </>
                 )}
 
             </div>
