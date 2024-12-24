@@ -1,8 +1,8 @@
-import NextAuth from "next-auth"
-import Google from "next-auth/providers/google"
-import { neon } from '@neondatabase/serverless'
+import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
+import { neon } from '@neondatabase/serverless';
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const authOptions = {
   providers: [Google],
   callbacks: {
     async signIn({ user, account, profile }) {
@@ -20,4 +20,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true;
     }
   }
-});
+};
+
+export const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
