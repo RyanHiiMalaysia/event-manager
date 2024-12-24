@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState } from 'react';
 
 const CreateEvent = () => {
@@ -84,12 +85,20 @@ const CreateEvent = () => {
           className="input text-black w-full"
         />
       </div>
-      <button
-        onClick={handleCreateEvent}
-        className="btn-primary w-full"
-      >
-        Create Event
-      </button>
+      <nav className='flex justify-between items-center'>
+        <Link 
+        href="/event"
+        className="px-4 py-2 bg-red-500 text-white rounded"
+        > {/* Link to Events */}
+              <span>Back</span>
+          </Link>
+        <button
+          onClick={handleCreateEvent}
+          className="px-4 py-2 bg-green-500 text-white rounded"
+        >
+          Create Event
+        </button>
+      </nav>
     </div>
   );
 };
