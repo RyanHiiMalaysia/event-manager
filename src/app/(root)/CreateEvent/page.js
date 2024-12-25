@@ -11,10 +11,23 @@ const CreateEvent = () => {
   const [validitytime, setValidTime] = useState('');
 
   const handleCreateEvent = async () => {
+    if (!title || !description || !startdate || !enddate || !validitydate || !validitytime) {
+      alert('Please fill out all fields.');
+      return;
+    }
+    else if (new Date(startdate) > new Date(enddate)) {
+      alert('Start Date cannot be after End Date.');
+      return;
+    }
+    else if (new Date(validitydate) > new Date(startdate)) {
+      alert('Valid until Date cannot be after Start Date.');
+      return;
+    }
+    
     const response = await fetch('/api/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, description, date, time }),
+      body: JSON.stringify({ title, description, startdate, enddate, validitydate, validitytime }),
     });
 
     if (response.ok) {
@@ -31,6 +44,7 @@ const CreateEvent = () => {
   };
 
   return (
+    <div className="p-4 max-w-sm mx-auto border border-gray-300 rounded-lg bg-white shadow-lg">
     <div className="p-6 max-w-lg mx-auto border border-black rounded-lg bg-transparent">
       <h1 className="text-2xl font-bold mb-4">Create Event</h1>
       <div className="mb-4">
@@ -56,7 +70,7 @@ const CreateEvent = () => {
         <input
           type="date"
           value={startdate}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(e) => setStartDate(e.target.value)}
           className="input text-black w-full p-1 max-w-lg mx-auto border border-black rounded-lg"
         />
       </div>
@@ -99,6 +113,7 @@ const CreateEvent = () => {
           Create Event
         </button>
       </nav>
+    </div>
     </div>
   );
 };
