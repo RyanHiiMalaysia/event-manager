@@ -10,7 +10,7 @@ export const authOptions = {
       const email = user.email;
 
       // Check if the user already exists in the database
-      const result = await sql('SELECT * FROM users WHERE email = $1', [email]);
+      const result = await sql('SELECT * FROM users WHERE user_email = $1', [email]);
 
       if (result.length === 0) {
         // Redirect to sign-up page if the user does not exist
