@@ -14,7 +14,7 @@ const Navbar = async () => {
             <div className='flex items-center gap-5 text-black'> {/* Container for navigation items with flexbox layout */}
                 {session && session.user ? ( // If the user is authenticated
                     <>
-                        <Link href="/event"> {/* Link to Events */}
+                        <Link href="/"> {/* Link to Events */}
                             <span>Events</span>
                         </Link>
 
