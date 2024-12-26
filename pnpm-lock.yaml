@@ -29,6 +29,9 @@ importers:
       '@nextui-org/react':
         specifier: ^2.6.10
         version: 2.6.10(framer-motion@11.15.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.17)
+      '@nextui-org/theme':
+        specifier: ^2.4.4
+        version: 2.4.4(tailwindcss@3.4.17)
       '@vercel/postgres':
         specifier: ^0.10.0
         version: 0.10.0
