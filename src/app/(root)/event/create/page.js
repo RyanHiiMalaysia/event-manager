@@ -16,18 +16,24 @@ export default function Page() {
   const onSubmit = async (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    const { hours, minutes} = data;
+    const { hours, minutes } = data;
+
+    if (hours === "0" && minutes === "0") {
+      alert("Event duration cannot be 0 hours and 0 minutes");
+      return;
+    }
+
     const duration = `${String(hours).padStart(2, "0")}:${String(
       minutes
     ).padStart(2, "0")}`;
-    
+
     const response = await fetch("/api/create-event", {
       method: "POST",
       body: JSON.stringify({
         ...data,
         duration: duration,
-        startTime: startTime.toString(),
-        endTime: endTime.toString(),
+        startTime: startTime?.toString(),
+        endTime: endTime?.toString(),
       }),
     });
 
