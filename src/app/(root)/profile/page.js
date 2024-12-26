@@ -7,29 +7,35 @@ const Profile = () => {
   const { data: session, status } = useSession();
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (session?.user?.email) {
+      if (status === 'authenticated' && session?.user?.email) {
         try {
           const response = await fetch(`/api/user?email=${session.user.email}`);
           if (!response.ok) {
             const result = await response.json();
             setError(result.message);
+            setLoading(false);
             return;
           }
           const userData = await response.json();
           setUser(userData);
         } catch (error) {
           setError('An unexpected error occurred.');
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
     };
 
     fetchUserDetails();
-  }, [session]);
+  }, [status, session]);
 
-  if (status === 'loading') {
+  if (status === 'loading' || loading) {
     return <div>Loading...</div>;
   }
 
