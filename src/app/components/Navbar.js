@@ -14,7 +14,7 @@ const Navbar = async () => {
             <div className='flex items-center gap-5 text-black'> {/* Container for navigation items with flexbox layout */}
                 {session && session.user ? ( // If the user is authenticated
                     <>
-                        <Link href="/event"> {/* Link to Events */}
+                        <Link href="/"> {/* Link to Events */}
                             <span>Events</span>
                         </Link>
 
@@ -31,24 +31,19 @@ const Navbar = async () => {
                             </button>
                         </form>
 
-                        <Link href="/profile"> {/* Link to the user's profile */}
+                        <Link href={`/user/${session?.id}`}> {/* Link to the user's profile */}
                             <span>{session?.user?.name}</span> {/* Display the user's name */}
                         </Link>
                     </>
                 ) : ( // If the user is not authenticated
-                    <>
-                        <form action={async () => { // Form to handle sign in
-                            "use server"
-                            await signIn('google') // Sign in with Google
-                        }}>
-                            <button type='submit'>
-                                Login
-                            </button>
-                        </form>
-                        <Link href="/signUp"> {/* Link to Sign-Up page */}
-                            <button>Sign Up</button>
-                        </Link>
-                    </>
+                    <form action={async () => { // Form to handle sign in
+                        "use server"
+                        await signIn('google') // Sign in with Google
+                    }}>
+                        <button type='submit'>
+                            Login
+                        </button>
+                    </form>
                 )}
 
             </div>
