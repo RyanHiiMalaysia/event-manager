@@ -1,14 +1,19 @@
-import { NextResponse } from 'next/server';
-import { neon } from '@neondatabase/serverless';
+import { NextResponse } from "next/server";
+import { neon } from "@neondatabase/serverless";
 
 export async function POST(req) {
   try {
-
-    const {title , duration , startdate , enddate ,  maxParticipants, location ,  operatingStart ,  operatingEnd} = await req.json();
-
-    const formatedOperatingStart = new Date(operatingStart).toISOString().replace('T', ' ').replace('Z', '');
-    const formatedOperatingEnd = new Date(operatingEnd).toISOString().replace('T', ' ').replace('Z', '');
-    
+    const {
+      title,
+      startDate,
+      endDate,
+      duration,
+      location,
+      startTime,
+      endTime,
+      maxParticipants,
+      description,
+    } = await req.json();
 
     // Connect to the Neon database
     const sql = neon(`${process.env.DATABASE_URL}`);
@@ -19,14 +24,20 @@ export async function POST(req) {
         )
         VALUES (
             ${title}, ${duration}, ${maxParticipants}, ${location},
-            ${formatedOperatingStart}, ${formatedOperatingEnd}, ${startdate}, ${enddate}
+            ${startTime}, ${endTime}, ${startDate}, ${endDate}
         )
         `;
 
     // Respond with success
-    return NextResponse.json({ message: 'Event created successfully.' }, { status: 200 });
+    return NextResponse.json(
+      { message: "Event created successfully." },
+      { status: 200 }
+    );
   } catch (error) {
-    console.log(error)
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    console.log(error);
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
