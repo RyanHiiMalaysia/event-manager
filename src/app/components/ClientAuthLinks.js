@@ -14,8 +14,19 @@ import {
   Button,
 } from "@nextui-org/react";
 import { signIn, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 
 const ClientAuthLinks = ({ session }) => {
+  const currentPath = usePathname();
+
+  const renderNavbarItem = (href, label) => (
+    <NavbarItem isActive={currentPath === href}>
+      <Link color={currentPath === href ? 'primary' : 'foreground'} href={href}>
+        {label}
+      </Link>
+    </NavbarItem>
+  );
+
   return (
     <Navbar isBordered maxWidth={'full'}>
       <>
@@ -29,16 +40,8 @@ const ClientAuthLinks = ({ session }) => {
               </NavbarBrand>
             </NavbarContent>
             <NavbarContent justify="center">
-              <NavbarItem>
-                <Link color="foreground" href="/event">
-                  Events
-                </Link>
-              </NavbarItem>
-              <NavbarItem>
-                <Link color="foreground" href="/calendar">
-                  Calendar
-                </Link>
-              </NavbarItem>
+              {renderNavbarItem('/event', 'Events')}
+              {renderNavbarItem('/calendar', 'Calendar')}
             </NavbarContent>
             <NavbarContent as="div" justify="end">
               <Dropdown placement="bottom-end">
