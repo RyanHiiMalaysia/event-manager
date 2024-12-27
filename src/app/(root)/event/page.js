@@ -1,7 +1,5 @@
 "use client";
-
 import React, { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import {
   Tabs,
   Tab,
@@ -15,6 +13,9 @@ import {
 import { eventData } from "../../../components/demoData";
 import EventModal from "../../../components/EventModal";
 import moment from "moment";
+import blue from "../../../../public/blue.svg";
+import green from "../../../../public/green.svg";
+import yellow from "../../../../public/yellow.svg";
 
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -23,10 +24,6 @@ export default function Page() {
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     onOpen();
-  };
-
-  const getStart = (event) => {
-    return moment(event.start).format("DD/mm/yyyy, h:mm a");
   };
 
   return (
@@ -50,7 +47,7 @@ export default function Page() {
                         className="w-full object-cover h-[140px]"
                         radius="lg"
                         shadow="sm"
-                        src="https://raw.githubusercontent.com/RyanHiiMalaysia/event-manager/refs/heads/user-page/public/blue.svg"
+                        src={blue}
                         width="100%"
                       />
                     </CardBody>
@@ -80,7 +77,7 @@ export default function Page() {
                         className="w-full object-cover h-[140px]"
                         radius="lg"
                         shadow="sm"
-                        src="https://raw.githubusercontent.com/RyanHiiMalaysia/event-manager/refs/heads/user-page/public/green.svg"
+                        src={green}
                         width="100%"
                       />
                     </CardBody>
@@ -118,7 +115,7 @@ export default function Page() {
                         className="w-full object-cover h-[140px]"
                         radius="lg"
                         shadow="sm"
-                        src="https://raw.githubusercontent.com/RyanHiiMalaysia/event-manager/refs/heads/user-page/public/yellow.svg"
+                        src={yellow}
                         width="100%"
                       />
                     </CardBody>
