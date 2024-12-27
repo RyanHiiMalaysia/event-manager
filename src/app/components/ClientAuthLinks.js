@@ -57,12 +57,12 @@ const ClientAuthLinks = ({ session }) => {
                   />
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Profile Actions" variant="flat">
-                  <DropdownItem key="signed_in" className="h-14 gap-2">
+                  <DropdownItem key="signed_in" className="h-14 gap-2" textValue="Signed in as">
                     <p className="font-semibold">Signed in as</p>
                     <p className="font-semibold">{session.user.email}</p>
                   </DropdownItem>
-                  <DropdownItem key="profile" href="/profile">Profile</DropdownItem>
-                  <DropdownItem key="logout" color="danger" onPress={() => signOut({ redirectTo: '/' })}>
+                  <DropdownItem key="profile" href="/profile" textValue="Profile">Profile</DropdownItem>
+                  <DropdownItem key="logout" color="danger" onPress={() => signOut({ redirectTo: '/' })} textValue="Log Out">
                     Log Out
                   </DropdownItem>
                 </DropdownMenu>
