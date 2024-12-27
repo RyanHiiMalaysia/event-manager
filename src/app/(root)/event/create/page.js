@@ -6,6 +6,7 @@ import {
   TimeInput,
   DateRangePicker,
   DatePicker,
+  Textarea,
 } from "@nextui-org/react";
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
@@ -143,7 +144,7 @@ export default function Page() {
             errorMessage="Closing time must be greater than opening time"
           />
         </div>
-        <Input
+        <Textarea
           label="Description"
           labelPlacement="outside"
           name="description"

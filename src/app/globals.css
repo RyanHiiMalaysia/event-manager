@@ -24,7 +24,7 @@ body {
   display: flex;
   flex-direction: column;
   max-width: 800px;
-  /* background: #fff; */
+  background: #fff;
   border-radius: 5px;
   margin: 0 auto;
 }
