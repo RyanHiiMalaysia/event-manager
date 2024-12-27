@@ -72,7 +72,7 @@ const ClientAuthLinks = ({ session }) => {
         ) : (
           <>
             <NavbarContent justify="end">
-              <NavbarItem className="hidden lg:flex">
+              <NavbarItem>
                 <Button
                   as="button"
                   color="primary"
