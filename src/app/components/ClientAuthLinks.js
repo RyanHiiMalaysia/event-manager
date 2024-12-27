@@ -29,16 +29,16 @@ const ClientAuthLinks = ({ session }) => {
 
   return (
     <Navbar isBordered maxWidth={'full'}>
+      <NavbarContent justify="start">
+        <NavbarBrand className="mr-4">
+          <Link href="/" color="foreground">
+            <p className="hidden sm:block font-bold text-inherit">EVENT MANAGER</p>
+          </Link>
+        </NavbarBrand>
+      </NavbarContent>
       <>
         {session && session.user ? (
           <>
-            <NavbarContent justify="start">
-              <NavbarBrand className="mr-4">
-                <Link href="/" color="foreground">
-                  <p className="hidden sm:block font-bold text-inherit">EVENT MANAGER</p>
-                </Link>
-              </NavbarBrand>
-            </NavbarContent>
             <NavbarContent justify="center">
               {renderNavbarItem('/event', 'Events')}
               {renderNavbarItem('/calendar', 'Calendar')}
