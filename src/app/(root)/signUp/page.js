@@ -37,14 +37,14 @@ export default function SignUp() {
   }
 
   return (
-    <div className="flex items-center justify-center bg-gray-100" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+    <div className="flex items-center justify-center bg-gray-100 dark:bg-black" style={{ minHeight: 'calc(100vh - 4rem)' }}>
       <Form
         onSubmit={handleSignUp}
-        className="w-full max-w-md p-8 bg-white rounded-lg shadow-md items-center"
+        className="w-full max-w-md p-8 bg-white rounded-lg shadow-md items-center dark:bg-transparent dark:border-default-100 dark:border"
         validationBehavior="native"
       >
         <div className="space-y-10">
-          <h2 className="text-2xl font-bold text-center text-gray-900">
+          <h2 className="text-2xl font-bold text-center text-gray-900 dark:text-white">
             Sign Up
           </h2>
           <Input

@@ -5,6 +5,7 @@ import {
   Button,
   TimeInput,
   DateRangePicker,
+  DatePicker,
 } from "@nextui-org/react";
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
@@ -16,10 +17,13 @@ export default function Page() {
   const onSubmit = async (event) => {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
-    const { hours, minutes } = data;
+    const { hours, minutes, startDate, registrationDeadline } = data;
 
     if (hours === "0" && minutes === "0") {
       alert("Event duration cannot be 0 hours and 0 minutes");
+      return;
+    } else if (registrationDeadline >= startDate) {
+      alert("Registration deadline must be before the event start date");
       return;
     }
 
@@ -37,7 +41,9 @@ export default function Page() {
       }),
     });
 
-    response.ok ? alert("Event created successfully!") : alert("Error creating event.");
+    response.ok
+      ? alert("Event created successfully!")
+      : alert("Error creating event.");
   };
 
   const validateInteger = (value) =>
@@ -47,9 +53,9 @@ export default function Page() {
     <Form
       onSubmit={onSubmit}
       validationBehavior="native"
-      className="w-full justify-center items-center w-full space-y-4"
+      className="w-full justify-center items-center w-full space-y-4 bg-gray-100 dark:bg-black"
     >
-      <div className="flex flex-col gap-4 max-w-md p-4 border border-default-200 dark:border-default-100 rounded-lg">
+      <div className="flex flex-col gap-4 max-w-md p-4 border border-default-200 dark:border-default-100 rounded-lg shadow-lg bg-white dark:bg-transparent">
         <Input
           label="Event Title"
           labelPlacement="outside"
@@ -68,7 +74,7 @@ export default function Page() {
           endName="endDate"
           labelPlacement="outside"
           isRequired
-          description="Date range users can select"
+          description="Days where the event can take place"
           minValue={today(getLocalTimeZone())}
         />
         <div className="flex gap-4">
@@ -97,6 +103,25 @@ export default function Page() {
             }
           />
         </div>
+        <DatePicker
+          label="Registration Deadline"
+          name="registrationDeadline"
+          isRequired
+          granularity="minute"
+        />
+        <Input
+          label="Participant Limit"
+          labelPlacement="outside"
+          name="maxParticipants"
+          isRequired
+          type="number"
+          placeholder="Enter maximum participants"
+          validate={(value) =>
+            Number(value) > 0
+              ? validateInteger(value)
+              : "Please enter a valid number"
+          }
+        />
         <Input
           label="Location"
           labelPlacement="outside"
@@ -118,19 +143,6 @@ export default function Page() {
             errorMessage="Closing time must be greater than opening time"
           />
         </div>
-        <Input
-          label="Participant Limit"
-          labelPlacement="outside"
-          name="maxParticipants"
-          isRequired
-          type="number"
-          placeholder="Enter maximum participants"
-          validate={(value) =>
-            Number(value) > 0
-              ? validateInteger(value)
-              : "Please enter a valid number"
-          }
-        />
         <Input
           label="Description"
           labelPlacement="outside"
