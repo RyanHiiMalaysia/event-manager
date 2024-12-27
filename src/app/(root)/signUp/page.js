@@ -1,8 +1,9 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { Form, Input, Button } from "@nextui-org/react";
 
 export default function SignUp() {
   const router = useRouter();
@@ -11,14 +12,13 @@ export default function SignUp() {
   async function handleSignUp(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const email = formData.get('email');
-    const name = formData.get('name');
+    const { name, email } = Object.fromEntries(formData);
 
     try {
-      const response = await fetch('/api/signup', {
-        method: 'POST',
+      const response = await fetch("/api/signup", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ name, email }),
       });
@@ -30,51 +30,54 @@ export default function SignUp() {
       }
 
       // Automatically sign in the user with Google after successful sign-up
-      await signIn('google', { callbackUrl: '/' });
-
+      await signIn("google", { callbackUrl: "/" });
     } catch (error) {
-      setError('An unexpected error occurred.');
+      setError("An unexpected error occurred.");
     }
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center text-gray-900">Sign Up</h2>
-        <form onSubmit={handleSignUp} className="space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              placeholder="Name"
-              required
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              placeholder="Email"
-              required
-              className="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-          </div>
-          <div>
-            <button
-              type="submit"
-              className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Sign Up
-            </button>
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-        </form>
-      </div>
+    <div className="flex items-center justify-center bg-gray-100" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+      <Form
+        onSubmit={handleSignUp}
+        className="w-full max-w-md p-8 bg-white rounded-lg shadow-md items-center"
+        validationBehavior="native"
+      >
+        <div className="space-y-10">
+          <h2 className="text-2xl font-bold text-center text-gray-900">
+            Sign Up
+          </h2>
+          <Input
+            type="text"
+            name="name"
+            label="Name"
+            labelPlacement="outside"
+            placeholder="Enter your name"
+            variant="bordered"
+            className="mt-16"
+          />
+          <Input
+            type="email"
+            name="email"
+            label="Email"
+            labelPlacement="outside"
+            placeholder="user@gmail.com"
+            isRequired
+            variant="bordered"
+            description="Sign up with Google. We'll never share your email with anyone else."
+          />
+          <Button
+            type="submit"
+            className="w-full px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Sign Up
+          </Button>
+        </div>
+        <div className="self-start px-2">
+          {error && <p className="text-sm text-red-600 self-start">{error}</p>}
+        </div>
+      </Form>
     </div>
   );
 }
