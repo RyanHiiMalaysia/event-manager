@@ -4,11 +4,9 @@ import {
   Tabs,
   Tab,
   Card,
-  CardHeader,
   CardBody,
   CardFooter,
   useDisclosure,
-  Image,
 } from "@nextui-org/react";
 import { eventData } from "../../../components/demoData";
 import EventModal from "../../../components/EventModal";
@@ -16,16 +14,16 @@ import moment from "moment";
 import blue from "../../../../public/blue.svg";
 import green from "../../../../public/green.svg";
 import yellow from "../../../../public/yellow.svg";
+import Image from "next/image";
 
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
-
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     onOpen();
   };
-
+  eventData.forEach((event) => {console.log(event.start, event.end)});
   return (
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
       <h1 className="text-4xl font-bold">Events</h1>
@@ -33,7 +31,7 @@ export default function Page() {
         <Tab key="scheduling" title="Scheduling">
           <Card>
             <CardBody>
-              <div className="gap-2 grid grid-cols-2 sm:grid-cols-4">
+              <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {eventData.map((item, index) => (
                   <Card
                     key={index}
@@ -63,7 +61,7 @@ export default function Page() {
         <Tab key="allocated" title="Allocated">
           <Card>
             <CardBody>
-              <div className="gap-2 grid grid-cols-2 sm:grid-cols-4">
+              <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {eventData.map((item, index) => (
                   <Card
                     key={index}
@@ -101,7 +99,7 @@ export default function Page() {
         <Tab key="organising" title="Organising">
           <Card>
             <CardBody>
-              <div className="gap-2 grid grid-cols-2 sm:grid-cols-4">
+              <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {eventData.map((item, index) => (
                   <Card
                     key={index}
