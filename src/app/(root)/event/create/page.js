@@ -11,9 +11,17 @@ import {
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
 
+const generateUniqueLink = () => {
+  const timestamp = Date.now();
+  const randomString = Math.random().toString(36).substring(2, 8); // Generate a random string
+  return `http://localhost:3000/event/${timestamp}-${randomString}`;
+};
+
 export default function Page() {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
+  const [eventLink, setEventLink] = useState("");
+
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -32,25 +40,34 @@ export default function Page() {
       minutes
     ).padStart(2, "0")}`;
 
-    const response = await fetch("/api/create-event", {
+    const uniqueLink = generateUniqueLink();
+
+    const response = await fetch("/api/events", {
       method: "POST",
       body: JSON.stringify({
         ...data,
         duration: duration,
         startTime: startTime?.toString(),
         endTime: endTime?.toString(),
+        link:uniqueLink
       }),
     });
 
-    response.ok
-      ? alert("Event created successfully!")
-      : alert("Error creating event.");
+    const result = await response.json();
+    if(response.ok){
+      setEventLink(uniqueLink); 
+      alert("Event created successfully!");
+    }else{
+      alert("Error creating event.");
+    }
+
   };
 
   const validateInteger = (value) =>
     Number.isInteger(Number(value)) ? null : "Please enter an integer";
 
   return (
+    <div>
     <Form
       onSubmit={onSubmit}
       validationBehavior="native"
@@ -155,5 +172,23 @@ export default function Page() {
         </Button>
       </div>
     </Form>
-  );
+
+    {eventLink && (
+      <div className="mt-4 p-4 border border-green-500 rounded bg-green-50 dark:bg-green-900">
+        <p className="font-bold text-green-700">Event Created Successfully!</p>
+        <p>
+          Share this link with participants:{" "}
+          <a
+            href={eventLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline"
+          >
+            {eventLink}
+          </a>
+        </p>
+      </div>
+    )}
+    </div>
+  ); 
 }

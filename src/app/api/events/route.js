@@ -13,24 +13,27 @@ export async function POST(req) {
       endTime,
       maxParticipants,
       description,
+      link,
+      registrationDeadline
     } = await req.json();
 
     // Connect to the Neon database
     const sql = neon(`${process.env.DATABASE_URL}`);
     await sql`
         INSERT INTO events (
-            event_name, event_duration, event_max_participants, event_location,
-            event_operating_start, event_operating_end, event_schedule_range_start, event_schedule_range_end
+            event_name, event_duration, event_max_participants, event_description, event_location,
+            event_openingHour, event_closingHour, event_schedule_range_start, event_schedule_range_end, 
+            event_link, event_deadline
         )
         VALUES (
-            ${title}, ${duration}, ${maxParticipants}, ${location},
-            ${startTime}, ${endTime}, ${startDate}, ${endDate}
+            ${title}, ${duration}, ${maxParticipants}, ${description}, ${location},
+            ${startTime}, ${endTime}, ${startDate}, ${endDate}, ${link}, ${registrationDeadline}
         )
         `;
 
     // Respond with success
     return NextResponse.json(
-      { message: "Event created successfully." },
+      { message: "Event created successfully."},
       { status: 200 }
     );
   } catch (error) {
