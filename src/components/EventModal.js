@@ -9,11 +9,10 @@ import {
   Textarea,
   Card,
   CardBody,
-  CardHeader,
+  CardFooter,
   Input,
 } from "@nextui-org/react";
 import moment from "moment";
-import { parseAbsolute, toLocalTimeZone } from "@internationalized/date";
 
 export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
   const handleOnPress = () => {
@@ -25,21 +24,21 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
     const getTime = () => {
       if (!start || !end) {
         return (
-          <p className="flex items-center">
-            Scheduled
+          <>
+            <p>Scheduled</p>
             <Checkbox
               isSelected={scheduled}
               disableAnimation
-              className="mx-1 align-end"
+              className="mx-1"
             ></Checkbox>
-          </p>
+          </>
         );
       } else {
         const startDate = moment(start).format("MMMM Do YYYY, h:mm a");
         const endDate = moment(end).format("MMMM Do YYYY, h:mm a");
         return (
           <p>
-            {startDate} - {endDate}
+            {startDate} – {endDate}
           </p>
         );
       }
@@ -47,8 +46,8 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
 
     return (
       <div className="flex flex-col gap-2">
-        <Card>
-          <CardBody>{getTime()}</CardBody>
+        <Card shadow="sm" className="border-default-200"> 
+          <CardFooter className="justify-between">{getTime()}</CardFooter>
         </Card>
         <Input
           isReadOnly
