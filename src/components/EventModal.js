@@ -5,8 +5,15 @@ import {
   ModalBody,
   ModalFooter,
   Button,
+  Checkbox,
+  Textarea,
+  Card,
+  CardBody,
+  CardHeader,
+  Input,
 } from "@nextui-org/react";
 import moment from "moment";
+import { parseAbsolute, toLocalTimeZone } from "@internationalized/date";
 
 export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
   const handleOnPress = () => {
@@ -14,16 +21,47 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
   };
 
   const renderEventContent = (event) => {
-    const startDate = moment(event.start).format("MMMM Do YYYY, h:mm a");
-    const endDate = moment(event.end).format("MMMM Do YYYY, h:mm a");
+    const { start, end, scheduled, location, description } = event;
+    const getTime = () => {
+      if (!start || !end) {
+        return (
+          <p className="flex items-center">
+            Scheduled
+            <Checkbox
+              isSelected={scheduled}
+              disableAnimation
+              className="mx-1 align-end"
+            ></Checkbox>
+          </p>
+        );
+      } else {
+        const startDate = moment(start).format("MMMM Do YYYY, h:mm a");
+        const endDate = moment(end).format("MMMM Do YYYY, h:mm a");
+        return (
+          <p>
+            {startDate} - {endDate}
+          </p>
+        );
+      }
+    };
+
     return (
-      <div>
-        <p>
-          {startDate} – {endDate}
-        </p>
-        <br />
-        <p>Location: {event.location}</p>
-        <p>Description: {event.description}</p>
+      <div className="flex flex-col gap-2">
+        <Card>
+          <CardBody>{getTime()}</CardBody>
+        </Card>
+        <Input
+          isReadOnly
+          value={location}
+          label="Location"
+          variant="bordered"
+        />
+        <Textarea
+          label="Description"
+          value={description}
+          isReadOnly
+          variant="bordered"
+        />
       </div>
     );
   };
