@@ -33,7 +33,9 @@ export default function Page() {
         <h1 className="text-4xl font-bold">Events</h1>
         <Button
           color="primary"
-          className="p-6 mx-4 text-3xl"
+          className="mx-2 text-3xl p-7"
+          as={Link}
+          href="/event/create"
         >
           +
         </Button>
