@@ -20,7 +20,7 @@ import {
 import { signIn, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 
-const ClientAuthLinks = ({ session }) => {
+const NavbarClient = ({ session }) => {
   const currentPath = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -130,4 +130,4 @@ const ClientAuthLinks = ({ session }) => {
   );
 };
 
-export default ClientAuthLinks;
+export default NavbarClient;
