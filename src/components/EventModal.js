@@ -8,7 +8,6 @@ import {
   Checkbox,
   Textarea,
   Card,
-  CardBody,
   CardFooter,
   Input,
 } from "@nextui-org/react";

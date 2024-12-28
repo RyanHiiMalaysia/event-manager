@@ -60,6 +60,7 @@ export default function Page() {
                         shadow="sm"
                         src={blue}
                         width="100%"
+                        priority={true}
                       />
                     </CardBody>
                     <CardFooter className="text-small justify-between">
@@ -96,6 +97,7 @@ export default function Page() {
                         shadow="sm"
                         src={green}
                         width="100%"
+                        priority={true}
                       />
                     </CardBody>
                     <CardFooter className="text-small justify-between">
@@ -134,6 +136,7 @@ export default function Page() {
                         shadow="sm"
                         src={yellow}
                         width="100%"
+                        priority={true}
                       />
                     </CardBody>
                     <CardFooter className="text-small justify-between">
