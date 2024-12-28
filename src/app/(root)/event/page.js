@@ -6,9 +6,12 @@ import {
   Card,
   CardBody,
   CardFooter,
+  Checkbox,
   useDisclosure,
+  Button,
+  Link,
 } from "@nextui-org/react";
-import { eventData } from "../../../components/demoData";
+import { eventData, schedulingData } from "../../../components/demoData";
 import EventModal from "../../../components/EventModal";
 import moment from "moment";
 import blue from "../../../../public/blue.svg";
@@ -23,16 +26,24 @@ export default function Page() {
     setSelectedEvent(event);
     onOpen();
   };
-  eventData.forEach((event) => {console.log(event.start, event.end)});
+
   return (
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
-      <h1 className="text-4xl font-bold">Events</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-4xl font-bold">Events</h1>
+        <Button
+          color="primary"
+          className="p-6 mx-4 text-3xl"
+        >
+          +
+        </Button>
+      </div>
       <Tabs aria-label="Options" color="primary">
         <Tab key="scheduling" title="Scheduling">
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {eventData.map((item, index) => (
+                {schedulingData.map((item, index) => (
                   <Card
                     key={index}
                     isPressable
@@ -51,6 +62,12 @@ export default function Page() {
                     </CardBody>
                     <CardFooter className="text-small justify-between">
                       <b>{item.title}</b>
+                      <p>
+                        <Checkbox
+                          isSelected={item.scheduled}
+                          disableAnimation
+                        ></Checkbox>
+                      </p>
                     </CardFooter>
                   </Card>
                 ))}
@@ -127,6 +144,7 @@ export default function Page() {
           </Card>
         </Tab>
       </Tabs>
+
       <EventModal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
