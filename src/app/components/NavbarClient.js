@@ -71,10 +71,10 @@ const NavbarClient = ({ session }) => {
                   isBordered
                   as="button"
                   className="transition-transform"
-                  color="secondary"
-                  name={session.user.name}
+                  color="primary"
                   size="md"
                   src={session.user.image}
+                  showFallback
                 />
               </DropdownTrigger>
               <DropdownMenu aria-label="Profile Actions" variant="flat">
