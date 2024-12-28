@@ -5,11 +5,7 @@ export const eventData = [
     end: new Date().setHours(new Date().getHours() + 1),
     location: "New York",
     url: "https://www.google.com",
-    description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
-     dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea 
-     commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla 
-     pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est 
-     laborum.`,
+    description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.`,
   },
   {
     title: "Event 2",
@@ -42,6 +38,37 @@ export const eventData = [
     location: "New York",
     url: "https://www.google.com",
     description: "This is a description for event 5",
+  },
+];
+
+export const schedulingData = [
+  {
+    title: "Event 1",
+    location: "New York",
+    url: "https://www.google.com",
+    description: "This is a description for event 1",
+    scheduled: false,
+  },
+  {
+    title: "Event 2",
+    location: "New Jersey",
+    url: "https://www.google.com",
+    description: "This is a description for event 2",
+    scheduled: true,
+  },
+  {
+    title: "Event 3",
+    location: "New York",
+    url: "https://www.google.com",
+    description: "This is a description for event 3",
+    scheduled: false,
+  },
+  {
+    title: "Event 4",
+    location: "New York",
+    url: "https://www.google.com",
+    description: "This is a description for event 4",
+    scheduled: true,
   },
 ];
 
