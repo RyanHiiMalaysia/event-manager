@@ -17,8 +17,8 @@ import { today, getLocalTimeZone } from "@internationalized/date";
 const generateUniqueLink = () => {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 8); // Generate a random string
-  const baseURL = "https://event-manager-opal.vercel.app"; // Dynamically fetch the base URL
-  return `${baseURL}/event/${timestamp}-${randomString}`;
+  //const baseURL = "https://event-manager-opal.vercel.app"; // Dynamically fetch the base URL
+  return `${timestamp}-${randomString}`;
 };
 
 export default function Page() {
@@ -101,7 +101,7 @@ export default function Page() {
     });
 
     if(response.ok){
-      setEventLink(uniqueLink); 
+      setEventLink(`${process.env.NEXT_PUBLIC_API_URL}/event/${uniqueLink}`); 
       alert("Event created successfully!");
     }else{
       alert("Error creating event.");
