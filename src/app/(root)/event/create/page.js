@@ -29,6 +29,7 @@ export default function Page() {
   const { data: session, status } = useSession();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const path = "https://event-manager-opal.vercel.app";
 
   useEffect(() => {
       const fetchUserDetails = async () => {
@@ -101,7 +102,7 @@ export default function Page() {
     });
 
     if(response.ok){
-      setEventLink(`${process.env.NEXT_PUBLIC_API_URL}/event/${uniqueLink}`); 
+      setEventLink(`${path}/event/${uniqueLink}`); 
       alert("Event created successfully!");
     }else{
       alert("Error creating event.");
