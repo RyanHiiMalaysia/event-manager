@@ -1,4 +1,6 @@
 "use client";
+import { useSession } from "next-auth/react";
+import { useEffect} from 'react';
 import {
   Form,
   Input,
@@ -11,16 +13,60 @@ import {
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
 
+
 const generateUniqueLink = () => {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 8); // Generate a random string
-  return `http://localhost:3000/event/${timestamp}-${randomString}`;
+  const baseURL = "https://event-manager-opal.vercel.app"; // Dynamically fetch the base URL
+  return `${baseURL}/event/${timestamp}-${randomString}`;
 };
 
 export default function Page() {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [eventLink, setEventLink] = useState("");
+  const [user, setUser] = useState(null);
+  const { data: session, status } = useSession();
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+      const fetchUserDetails = async () => {
+        if (status === 'authenticated' && session?.user?.email) {
+          try {
+            const response = await fetch(`/api/user?email=${session.user.email}`);
+            if (!response.ok) {
+              const result = await response.json();
+              setError(result.message);
+              setLoading(false);
+              return;
+            }
+            const userData = await response.json();
+            setUser(userData);
+          } catch (error) {
+            setError('An unexpected error occurred.');
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          setLoading(false);
+        }
+      };
+  
+      fetchUserDetails();
+    }, [status, session]);
+  
+    if (status === 'loading' || loading) {
+      return <div>Loading...</div>;
+    }
+  
+    if (error) {
+      return <div>{error}</div>;
+    }
+  
+    if (!user) {
+      return <div>Loading......</div>;
+    }
 
 
   const onSubmit = async (event) => {
@@ -49,11 +95,11 @@ export default function Page() {
         duration: duration,
         startTime: startTime?.toString(),
         endTime: endTime?.toString(),
-        link:uniqueLink
+        link:uniqueLink,
+        ownerId:user.user_id
       }),
     });
 
-    const result = await response.json();
     if(response.ok){
       setEventLink(uniqueLink); 
       alert("Event created successfully!");
