@@ -12,7 +12,7 @@ export default function Page({ params }) {
   const [loading, setLoading] = useState(true);
   const [uniqueLink, setUniqueLink] = useState('');
   const [ownerName, setOwnerName] = useState('');
-
+  const path = "https://event-manager-opal.vercel.app";
 
   // Await the params when the component mounts
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function Page({ params }) {
 
     const fetchEvent = async () => {
       try {
-        const response_event = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/events`, {
+        const response_event = await fetch(`${path}/api/events`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -80,7 +80,7 @@ export default function Page({ params }) {
 
         setEvent(matchedEvent || null); // Set null if no event matches
         
-        const response_owner = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/owners?owner=${matchedEvent.event_owner}`, {
+        const response_owner = await fetch(`${path}/api/owners?owner=${matchedEvent.event_owner}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
