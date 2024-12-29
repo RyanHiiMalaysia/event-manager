@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Tabs,
   Tab,
@@ -22,10 +22,31 @@ import Image from "next/image";
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [userEvents, setUserEvents] = useState([]);
+
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     onOpen();
   };
+
+  const fetchEventDetails = async () => {
+    try {
+      const response_user = await fetch("/api/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const userData = await response_user.json();
+      setUserEvents(Array.isArray(userData.events) ? userData.events : []);
+    } catch (error) {
+      console.error("Error fetching event details:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEventDetails();
+  }, []);
 
   return (
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
@@ -45,7 +66,7 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {schedulingData.map((item, index) => (
+                {userEvents.map((item, index) => (// if not working, try changing userEvents to schedulingData
                   <Card
                     key={index}
                     isPressable
@@ -82,7 +103,7 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {eventData.map((item, index) => (
+                {userEvents.map((item, index) => ( // if not working, try changing userEvents to eventData
                   <Card
                     key={index}
                     isPressable
@@ -121,7 +142,7 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {eventData.map((item, index) => (
+                {userEvents.map((item, index) => (
                   <Card
                     key={index}
                     isPressable
