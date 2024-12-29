@@ -75,8 +75,8 @@ export default function Page({ params }) {
         const data_events = await response_event.json();
            
         // Find the event matching the uniqueLink
-        const linking = `${window.location.origin}/event/${uniqueLink}`;
-        const matchedEvent = data_events.events.find((event) => event.event_link === linking);
+         console.log(data_events)
+        const matchedEvent = data_events.events.find((event) => event.event_link === uniqueLink);
 
         setEvent(matchedEvent || null); // Set null if no event matches
         
