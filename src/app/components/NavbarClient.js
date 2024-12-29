@@ -143,9 +143,9 @@ const NavbarClient = ({ session }) => {
       </NavbarContent>
 
       <NavbarMenu>
+            {renderNavbarMenuItem('/pricing', 'Pricing')}
         {session && session.user && (
           <>
-            {renderNavbarMenuItem('/pricing', 'Pricing')}
             {renderNavbarMenuItem('/event', 'Events')}
             {renderNavbarMenuItem('/calendar', 'Calendar')}
           </>
