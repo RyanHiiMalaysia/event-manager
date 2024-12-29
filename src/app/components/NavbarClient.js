@@ -20,7 +20,7 @@ import {
 import { signIn, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 
-export const UserIcon = ({fill = "currentColor", size, height, width, ...props}) => {
+export const UserIcon = ({ fill = "currentColor", size, height, width, ...props }) => {
   return (
     <svg
       data-name="Iconly/Curved/Profile"
@@ -60,6 +60,14 @@ const NavbarClient = ({ session }) => {
     </NavbarItem>
   );
 
+  const renderNavbarMenuItem = (href, label) => (
+    <NavbarMenuItem>
+      <Link className="w-full" href={href} size="lg" color={currentPath === href ? 'primary' : 'foreground'}>
+        {label}
+      </Link>
+    </NavbarMenuItem>
+  );
+
   return (
     <Navbar isBordered isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen} maxWidth={'full'}>
       <NavbarContent className="sm:hidden" justify="start">
@@ -82,6 +90,7 @@ const NavbarClient = ({ session }) => {
         </NavbarBrand>
       </NavbarContent>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        {renderNavbarItem('/pricing', 'Pricing')}
         {session && session.user && (
           <>
             {renderNavbarItem('/event', 'Events')}
@@ -136,16 +145,9 @@ const NavbarClient = ({ session }) => {
       <NavbarMenu>
         {session && session.user && (
           <>
-            <NavbarMenuItem>
-              <Link className="w-full" href="/event" size="lg">
-                Events
-              </Link>
-            </NavbarMenuItem>
-            <NavbarMenuItem>
-              <Link className="w-full" href="/calendar" size="lg">
-                Calendar
-              </Link>
-            </NavbarMenuItem>
+            {renderNavbarMenuItem('/pricing', 'Pricing')}
+            {renderNavbarMenuItem('/event', 'Events')}
+            {renderNavbarMenuItem('/calendar', 'Calendar')}
           </>
         )}
       </NavbarMenu>
