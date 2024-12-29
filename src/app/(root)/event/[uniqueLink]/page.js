@@ -12,7 +12,7 @@ export default function Page({ params }) {
   const [loading, setLoading] = useState(true);
   const [uniqueLink, setUniqueLink] = useState('');
   const [ownerName, setOwnerName] = useState('');
-  const path = "https://event-manager-opal.vercel.app";
+  const path = window.location.origin;
 
   // Await the params when the component mounts
   useEffect(() => {
@@ -65,22 +65,23 @@ export default function Page({ params }) {
 
     const fetchEvent = async () => {
       try {
-        const response_event = await fetch(`${path}/api/events`, {
+        const response_event = await fetch(`${path}/api/events?link=${uniqueLink}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
 
         if (!response_event.ok) throw new Error('Failed to fetch event details');
 
+
         const data_events = await response_event.json();
-           
+        if (data_events.eventData.length === 0) throw new Error('Failed to fetch event details');
         // Find the event matching the uniqueLink
-         console.log(data_events)
-        const matchedEvent = data_events.events.find((event) => event.event_link === uniqueLink);
+        
+        const matchedEvent = data_events.eventData[0]
 
         setEvent(matchedEvent || null); // Set null if no event matches
         
-        const response_owner = await fetch(`${path}/api/owners?owner=${matchedEvent.event_owner}`, {
+        const response_owner = await fetch(`${path}/api/owners?owner=${matchedEvent.event_creator}`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -109,16 +110,16 @@ export default function Page({ params }) {
 
   return (
     <div className="p-10 max-w-sm mx-auto border border-default-200 dark:border-default-100 rounded-lg shadow-lg bg-white dark:bg-transparent">
-      <h1 className="text-3xl font-bold">{event.event_name}</h1>
+      <h1 className="text-3xl font-bold">{event.event_title}</h1>
       <p className="text-gray-600 mt-2">Owner: {ownerName.user_name}</p>
       <p className="text-gray-600 mt-2">
-        Date: {convertDateTimeToDate(event.event_schedule_range_start)} - {convertDateTimeToDate(event.event_schedule_range_end)}
+        Date: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
       </p>
       <p className="text-gray-600 mt-2">Duration: {convertTime(event.event_duration)}</p>
       <Accordion variant="bordered" className="mt-4">
         <AccordionItem key="1" aria-label="Location" title="Location">
           <p>{event.event_location}</p>
-          <p>Opening Hours: {condition(timeRange(event.event_openinghour, event.event_closinghour))}</p>
+          <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
         </AccordionItem>
         <AccordionItem key="2" aria-label="Description" title="Description">
           <p>{condition(event.event_description)}</p>
