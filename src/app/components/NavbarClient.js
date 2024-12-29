@@ -90,6 +90,7 @@ const NavbarClient = ({ session }) => {
         </NavbarBrand>
       </NavbarContent>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        {renderNavbarItem('/', 'Home')}
         {renderNavbarItem('/pricing', 'Pricing')}
         {session && session.user && (
           <>
@@ -143,6 +144,7 @@ const NavbarClient = ({ session }) => {
       </NavbarContent>
 
       <NavbarMenu>
+            {renderNavbarMenuItem('/', 'Home')}
             {renderNavbarMenuItem('/pricing', 'Pricing')}
         {session && session.user && (
           <>
