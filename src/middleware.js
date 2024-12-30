@@ -6,7 +6,7 @@ export async function middleware(req) {
 
   if (!session) {
     // Redirect to pricing page if user is not authenticated
-    return NextResponse.redirect(new URL('/pricing', req.url));
+    return NextResponse.redirect(new URL('/signUp', req.url));
   }
 
   const userHasPaid = session.user.user_has_paid;

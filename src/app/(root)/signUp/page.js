@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { Form, Input, Button } from "@nextui-org/react";
+import { Form, Input, Button, Link } from "@nextui-org/react";
 
 export default function SignUp() {
   const router = useRouter();
@@ -76,6 +76,12 @@ export default function SignUp() {
         </div>
         <div className="self-start px-2">
           {error && <p className="text-sm text-red-600 self-start">{error}</p>}
+        </div>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Already registered your email?{" "}
+            <Link size = "sm" href="#" onPress={() => signIn("google", { callbackUrl: "/" })}>Sign in</Link>
+          </p>
         </div>
       </Form>
     </div>
