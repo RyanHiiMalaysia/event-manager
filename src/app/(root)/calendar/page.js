@@ -23,7 +23,7 @@ export default function Page() {
     const fetchUserDetails = async () => {
       if (session?.user?.email) {
         try {
-          const response = await fetch(`/api/user/events?email=${session.user.email}&allocated=true`, {
+          const response = await fetch(`/api/user-event?email=${session.user.email}&hasAllocated=true`, {
             method: "GET",
             headers: { "Content-Type": "application/json" },
           });
