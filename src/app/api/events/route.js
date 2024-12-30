@@ -34,21 +34,6 @@ async function fetchEvent(link) {
   `;
 }
 
-async function isUserInEvent(user_email, link) {
-  const sql = getDatabaseConnection();
-  const [user] = await sql`
-    SELECT
-      user_id
-    FROM
-      users NATURAL JOIN userevent
-    WHERE
-      user_email = ${user_email}
-    AND
-      event_id = (SELECT event_id FROM events WHERE event_link = ${link})
-  `;
-  return user ? true : false;
-}
-
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
@@ -104,11 +89,6 @@ export async function GET(req) {
   try {
     const url = new URL(req.url);
     const link = url.searchParams.get("link");
-    const email = url.searchParams.get("email");
-    if (email) {
-      const isParticipant = await isUserInEvent(email, link);
-      return new Response(JSON.stringify({ isParticipant }), { status: 200 });
-    }
     const eventData = await fetchEvent(link);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {

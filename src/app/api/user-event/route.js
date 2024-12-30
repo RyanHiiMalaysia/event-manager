@@ -44,24 +44,48 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin) {
   return await sql(query, [user_email]);
 }
 
+async function isUserInEvent(user_email, link) {
+  const sql = getDatabaseConnection();
+  const [user_id, event_id] = await sql`
+    SELECT
+      user_id, event_id
+    FROM
+      users NATURAL JOIN userevent
+    WHERE
+      user_email = ${user_email}
+    AND
+      event_id = (SELECT event_id FROM events WHERE event_link = ${link})
+  `;
+  return [user_id, event_id];
+}
+
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
-    const { user_id, event_id } = await req.json();
+    const { user_email, link } = await req.json();
 
-    await sql`BEGIN`;
+    const [user_id, event_id] = await isUserInEvent(user_email, link);
 
-    await sql`
-        INSERT INTO userevent (
-          ue_user_id, ue_event_id
-        ) VALUES (
-          ${user_id}, ${event_id}
-        )
-      `;
+    const inEvent = user_id ? true : false;
 
-    await sql`COMMIT`;
+    if (!inEvent) {
+      await sql`BEGIN`;
 
-    return NextResponse.json({ message: "Event created successfully." }, { status: 200 });
+      await sql`
+          INSERT INTO userevent (
+            user_id, event_id
+          ) VALUES (
+            ${user_id}, ${event_id}
+          )
+        `;
+
+      await sql`COMMIT`;
+
+      return NextResponse.json({ message: "Successfully added into event" }, { status: 200 });
+    }
+    else {
+      return NextResponse.json({ message: "User already in event" }, { status: 500 });
+    }
   } catch (error) {
     console.log(error);
     await sql`ROLLBACK`;
