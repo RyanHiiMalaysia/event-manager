@@ -12,16 +12,9 @@ async function fetchUserEvents(user_email) {
   const sql = getDatabaseConnection();
   return await sql`
     SELECT 
-      event_id, 
       event_title, 
-      event_duration, 
-      event_schedule_start, 
-      event_schedule_end, 
       event_deadline, 
-      event_max_participants, 
       event_location, 
-      event_opening_hour, 
-      event_closing_hour, 
       event_description,
       event_allocated_time,
       event_link,
