@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-export async function middleware(req) {
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
-  console.log('Token:', token);
 
+
+export async function middleware(req) {
+  const secret = process.env.AUTH_SECRET;
+  const token = await getToken({
+    req: req,
+    secret: secret,
+    secureCookie: process.env.NODE_ENV === 'production' ? true : false 
+});
+  console.log("AHHHHHHHHHHHHHHHH")
+  console.log(process.env.NODE_ENV)
   if (!token) {
     console.log('Redirecting to home page');
     return NextResponse.redirect(new URL('/pricing', req.url));
