@@ -4,10 +4,14 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Accordion, AccordionItem } from "@nextui-org/react";
+import { fetchEvent } from '@/utils/fetchEvent';
+import React from 'react';
+
 
 export default function Page({ params }) {
   const router = useRouter();
   const [event, setEvent] = useState(null);
+  
   const [loading, setLoading] = useState(true);
   const [uniqueLink, setUniqueLink] = useState('');
   const [ownerName, setOwnerName] = useState('');
@@ -61,23 +65,17 @@ export default function Page({ params }) {
   useEffect(() => {
     if (!uniqueLink) return;
 
-    const fetchEvent = async () => {
+    const fetchSpecificEvent = async () => {
 
       try {
 
         //For the event
-        const response_event = await fetch(`${window.location.origin}/api/events`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (!response_event.ok) throw new Error('Failed to fetch event details');
-
-        const data_events = await response_event.json();
-        const matchedEvent = data_events.events.find((event) => event.event_link === uniqueLink);
-
+       
+        const matchedEvent = await fetchEvent("event_link", uniqueLink);
+      
         setEvent(matchedEvent || null); // Set null if no event matches
         
+        //setEventId(event.event_id);
 
         //For the event creator
         const response_owner = await fetch(`${window.location.origin}/api/owners?owner=${matchedEvent.event_creator}`, {
@@ -98,9 +96,9 @@ export default function Page({ params }) {
       }
     };
 
-    fetchEvent();
+    fetchSpecificEvent();
   }, [uniqueLink]);
-
+  
   if (loading) {
     return <p className="p-6 text-center">Loading event details...</p>;
   }
@@ -109,6 +107,11 @@ export default function Page({ params }) {
     return <p className="p-6 text-center">Event not found.</p>;
   }
 
+  const handleSetAvailability = () => {
+    router.push(`/datepicker/${event.event_id}`); // Correct the route here to include the event's unique identifier
+  };
+
+  console.log(event)
   return (
     <div className="p-10 max-w-sm mx-auto border border-default-200 dark:border-default-100 rounded-lg shadow-lg bg-white dark:bg-transparent">
       <h1 className="text-3xl font-bold">{event.event_title}</h1>
@@ -133,14 +136,19 @@ export default function Page({ params }) {
       <div className="mt-6">
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded"
-          onClick={() => router.push(`/availability/event/${event.event_id}`)} // Use event.event_id
+          onClick={handleSetAvailability} // Use event.event_id
         >
           Set Your Availability
         </button>
+
+        
+        
       </div>
     </div>
   );
 }
+
+
 
 
 
