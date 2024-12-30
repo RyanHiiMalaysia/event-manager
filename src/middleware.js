@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { neon } from '@neondatabase/serverless';
+import { auth } from '@/auth';
 
 export async function middleware(req) {
+  const session = await auth();
   const secret = process.env.AUTH_SECRET;
   const token = await getToken({
     req: req,
@@ -15,15 +16,7 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL('/pricing', req.url));
   }
 
-  const sql = neon(`${process.env.DATABASE_URL}`);
-  const result = await sql('SELECT user_has_paid FROM users WHERE user_email = $1', [token.email]);
-
-  if (result.length === 0) {
-    // Redirect to pricing page if user is not found in the database
-    return NextResponse.redirect(new URL('/pricing', req.url));
-  }
-
-  const userHasPaid = result[0].user_has_paid;
+  const userHasPaid = session.user.user_has_paid;
 
   const pathname = req.nextUrl.pathname;
 
