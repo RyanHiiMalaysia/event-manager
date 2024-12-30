@@ -140,9 +140,9 @@ export default function Page() {
                         <b>{item.event_title}</b>
                         <p className="text-default-500">
                           <span className="block sm:inline">
-                            {moment(item.event_allocated_start).format("DD/MM/YYYY ")}
+                            {moment.tz(item.event_allocated_start, 'Asia/Singapore').local().format("DD/MM/YYYY ")}
                           </span>
-                          <span className="block sm:inline">{moment(item.event_allocated_start).format("h:mm a")}</span>
+                          <span className="block sm:inline">{moment.tz(item.event_allocated_start, 'Asia/Singapore').local().format("h:mm a")}</span>
                         </p>
                       </CardFooter>
                     </Card>

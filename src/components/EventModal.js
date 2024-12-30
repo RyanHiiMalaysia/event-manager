@@ -30,7 +30,7 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
     } = event;
     const getTime = () => {
       if (event_allocated_start === null) {
-        const deadline = moment.utc(event.event_deadline).format("MMMM Do YYYY, h:mm a");
+        const deadline = moment.tz(event.event_deadline,'Asia/Singapore').local().format("MMMM Do YYYY, h:mm a");
         return (
           <>
             <Card shadow="sm" className="border-default-200 justify-between">
@@ -48,8 +48,8 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
           </>
         );
       } else {
-        const startDate = moment.utc(event_allocated_start).tz('Asia/Singapore').format("MMMM Do YYYY, h:mm a");
-        const endDate = moment.utc(event_allocated_end).tz('Asia/Singapore').format("MMMM Do YYYY, h:mm a");
+        const startDate = moment.tz(event_allocated_start, 'Asia/Singapore').local().format("MMMM Do YYYY, h:mm a");
+        const endDate = moment.tz(event_allocated_end, 'Asia/Singapore').local().format("MMMM Do YYYY, h:mm a");
         return (
           <Card shadow="sm" className="border-default-200">
             <CardBody>
