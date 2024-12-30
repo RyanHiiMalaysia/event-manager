@@ -8,7 +8,6 @@ import { today, getLocalTimeZone } from "@internationalized/date";
 const generateUniqueLink = () => {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 8); // Generate a random string
-  //const baseURL = "https://event-manager-opal.vercel.app"; // Dynamically fetch the base URL
   return `${timestamp}-${randomString}`;
 };
 
@@ -20,7 +19,7 @@ export default function Page() {
   const { data: session, status } = useSession();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const path = "https://event-manager-opal.vercel.app";
+  const path = window.location.origin;
 
   useEffect(() => {
     const fetchUserDetails = async () => {
