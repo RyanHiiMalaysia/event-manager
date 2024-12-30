@@ -12,7 +12,13 @@ export default function Page({ params }) {
   const [loading, setLoading] = useState(true);
   const [uniqueLink, setUniqueLink] = useState('');
   const [ownerName, setOwnerName] = useState('');
-  const path = window.location.origin;
+  const [path, setPath] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setPath(window.location.origin);
+    }
+  }, []);
 
   // Await the params when the component mounts
   useEffect(() => {

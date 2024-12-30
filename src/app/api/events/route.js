@@ -64,7 +64,7 @@ export async function POST(req) {
 
     await sql`
         INSERT INTO userevent (
-          ue_user_id, ue_event_id, ue_is_admin
+          user_id, event_id, ue_is_admin
         ) VALUES (
           ${creator}, ${eventID}, true
         )
