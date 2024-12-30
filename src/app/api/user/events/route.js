@@ -8,15 +8,65 @@ function getDatabaseConnection() {
 }
 
 // Function to fetch user events by email
-async function fetchUserEvents(user_email) {
+async function fetchUserEvents(user_email, allocated) {
   const sql = getDatabaseConnection();
-  return await sql`
+  if (allocated) {
+    return await sql`
+      SELECT 
+        event_title, 
+        event_deadline, 
+        event_location, 
+        event_description,
+        event_allocated_start,
+        event_allocated_end,
+        event_link,
+        ue_is_admin
+      FROM 
+        userevent 
+      NATURAL JOIN 
+        events 
+      WHERE 
+        user_id = (
+          SELECT user_id 
+          FROM users 
+          WHERE user_email = ${user_email}
+        )
+      AND 
+        event_allocated_start IS NOT NULL
+    `;
+  } else if (allocated === false) {
+    return await sql`
+      SELECT 
+        event_title, 
+        event_deadline, 
+        event_location, 
+        event_description,
+        event_allocated_start,
+        event_allocated_end,
+        event_link,
+        ue_is_admin
+      FROM 
+        userevent 
+      NATURAL JOIN 
+        events 
+      WHERE 
+        user_id = (
+          SELECT user_id 
+          FROM users 
+          WHERE user_email = ${user_email}
+        )
+      AND 
+        event_allocated_start IS NULL
+    `;
+  } else {
+    return await sql`
     SELECT 
       event_title, 
       event_deadline, 
       event_location, 
       event_description,
-      event_allocated_time,
+      event_allocated_start,
+      event_allocated_end,
       event_link,
       ue_is_admin
     FROM 
@@ -30,6 +80,7 @@ async function fetchUserEvents(user_email) {
         WHERE user_email = ${user_email}
       )
   `;
+  }
 }
 
 export async function POST(req) {
@@ -70,7 +121,9 @@ export async function GET(req) {
     // if (session.user.email !== email) {
     //   return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     // }
-    const eventData = await fetchUserEvents(email);
+    const allocatedParam = url.searchParams.get("allocated");
+    const allocated = allocatedParam === null ? null : allocatedParam === "true";
+    const eventData = await fetchUserEvents(email, allocated);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ message: "Failed to fetch events" }), { status: 500 });
