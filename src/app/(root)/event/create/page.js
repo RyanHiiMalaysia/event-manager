@@ -1,6 +1,4 @@
 "use client";
-import { useSession } from "next-auth/react";
-import { useEffect} from 'react';
 import {
   Form,
   Input,
@@ -10,14 +8,13 @@ import {
   DatePicker,
   Textarea,
 } from "@nextui-org/react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
-
+import { useSession } from "next-auth/react";
 
 const generateUniqueLink = () => {
   const timestamp = Date.now();
-  const randomString = Math.random().toString(36).substring(2, 8); // Generate a random string
-  //const baseURL = "https://event-manager-opal.vercel.app"; // Dynamically fetch the base URL
+  const randomString = Math.random().toString(36).substring(2, 8);
   return `${timestamp}-${randomString}`;
 };
 
@@ -29,7 +26,6 @@ export default function Page() {
   const { data: session, status } = useSession();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const path = "https://event-manager-opal.vercel.app";
 
   useEffect(() => {
       const fetchUserDetails = async () => {
@@ -102,7 +98,7 @@ export default function Page() {
     });
 
     if(response.ok){
-      setEventLink(`${path}/event/${uniqueLink}`); 
+      setEventLink(`${window.location.origin}/event/${uniqueLink}`); 
       alert("Event created successfully!");
     }else{
       alert("Error creating event.");
@@ -221,21 +217,25 @@ export default function Page() {
     </Form>
 
     {eventLink && (
-      <div className="mt-4 p-4 border border-green-500 rounded bg-green-50 dark:bg-green-900">
-        <p className="font-bold text-green-700">Event Created Successfully!</p>
-        <p>
-          Share this link with participants:{" "}
-          <a
-            href={eventLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 underline"
-          >
-            {eventLink}
-          </a>
-        </p>
-      </div>
-    )}
+  <div
+    className="fixed bottom-0 left-0 right-0 p-4 bg-green-50 dark:bg-green-900 border-t border-green-500 shadow-lg"
+  >
+    <p className="font-bold text-green-700 text-center">
+      Event Created Successfully!
+    </p>
+    <p className="text-center">
+      Share this link with participants:{" "}
+      <a
+        href={eventLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-500 underline break-all"
+      >
+        {eventLink}
+      </a>
+    </p>
+  </div>
+)}
     </div>
   ); 
 }
