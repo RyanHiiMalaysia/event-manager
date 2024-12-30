@@ -3,9 +3,6 @@ import Google from "next-auth/providers/google";
 import { neon } from '@neondatabase/serverless';
 
 export const authOptions = {
-  session: {
-    strategy: 'jwt',
-  },
   providers: [Google],
   callbacks: {
     async signIn({ user, account, profile }) {

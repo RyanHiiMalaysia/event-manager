@@ -10,10 +10,9 @@ export async function middleware(req) {
     secret: secret,
     secureCookie: process.env.NODE_ENV === 'production' ? true : false 
 });
-  console.log("AHHHHHHHHHHHHHHHH")
-  console.log(process.env.NODE_ENV)
+
   if (!token) {
-    console.log('Redirecting to home page');
+    // Redirect to pricing page if user is not authenticated
     return NextResponse.redirect(new URL('/pricing', req.url));
   }
 
