@@ -44,29 +44,33 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin) {
   return await sql(query, [user_email]);
 }
 
-async function isUserInEvent(user_email, link) {
-  const sql = getDatabaseConnection();
-  const [user_id, event_id] = await sql`
+async function getEventID(sql, link) {
+  const [event_id] = await sql`
+    SELECT event_id FROM events WHERE event_link = ${link}
+  `;
+  return event_id;
+}
+
+async function verifyParticipation(sql, user_email, event_id) {
+  const [user_id] = await sql`
     SELECT
-      user_id, event_id
+      user_id
     FROM
       users NATURAL JOIN userevent
     WHERE
       user_email = ${user_email}
     AND
-      event_id = (SELECT event_id FROM events WHERE event_link = ${link})
+      event_id = ${event_id}
   `;
-  return [user_id, event_id];
+  return user_id ? true : false;
 }
 
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
     const { user_email, link } = await req.json();
-
-    const [user_id, event_id] = await isUserInEvent(user_email, link);
-
-    const inEvent = user_id ? true : false;
+    const event_id = await getEventID(sql, link);
+    const inEvent = await verifyParticipation(sql, user_email, event_id);
 
     if (!inEvent) {
       await sql`BEGIN`;
@@ -75,15 +79,15 @@ export async function POST(req) {
           INSERT INTO userevent (
             user_id, event_id
           ) VALUES (
-            ${user_id}, ${event_id}
+            (SELECT user_id FROM users WHERE user_email = ${user_email}),
+            ${event_id}
           )
         `;
 
       await sql`COMMIT`;
 
       return NextResponse.json({ message: "Successfully added into event" }, { status: 200 });
-    }
-    else {
+    } else {
       return NextResponse.json({ message: "User already in event" }, { status: 500 });
     }
   } catch (error) {
