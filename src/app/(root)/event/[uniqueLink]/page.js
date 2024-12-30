@@ -12,7 +12,13 @@ export default function Page({ params }) {
   const [loading, setLoading] = useState(true);
   const [uniqueLink, setUniqueLink] = useState('');
   const [ownerName, setOwnerName] = useState('');
-  const path = window.location.origin;
+  const [path, setPath] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setPath(window.location.origin);
+    }
+  }, []);
 
   // Await the params when the component mounts
   useEffect(() => {
@@ -81,14 +87,14 @@ export default function Page({ params }) {
 
         setEvent(matchedEvent || null); // Set null if no event matches
         
-        const response_owner = await fetch(`${path}/api/owners?owner=${matchedEvent.event_creator}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        // const response_owner = await fetch(`${path}/api/owners?owner=${matchedEvent.event_creator}`, {
+        //   method: 'GET',
+        //   headers: { 'Content-Type': 'application/json' },
+        // });
 
-        const data_owner = await response_owner.json();
+        // const data_owner = data_events.eventData[0].event_creator;
         
-        setOwnerName(data_owner)
+        // setOwnerName(data_owner)
       } catch (error) {
         console.error('Error fetching event:', error.message);
         setEvent(null); // Handle not found
@@ -111,7 +117,7 @@ export default function Page({ params }) {
   return (
     <div className="p-10 max-w-sm mx-auto border border-default-200 dark:border-default-100 rounded-lg shadow-lg bg-white dark:bg-transparent">
       <h1 className="text-3xl font-bold">{event.event_title}</h1>
-      <p className="text-gray-600 mt-2">Owner: {ownerName.user_name}</p>
+      <p className="text-gray-600 mt-2">Owner: {event.user_name}</p>
       <p className="text-gray-600 mt-2">
         Date: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
       </p>
