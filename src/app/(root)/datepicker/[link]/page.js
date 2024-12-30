@@ -1,6 +1,5 @@
 "use client";
 import React,{ useEffect, useState } from 'react';
-import { fetchEvent } from '@/utils/fetchEvent';
 import { ScheduleCalendar } from "../../../../components/Calendar";
 import { DatePicker } from "@nextui-org/date-picker";
 import { TimeInput } from "@nextui-org/date-input";
@@ -15,24 +14,52 @@ import {
 } from "@nextui-org/react";
 import { parseDate, parseTime, parseAbsolute, toLocalTimeZone } from "@internationalized/date";
 import moment from "moment";
+import { useSession } from "next-auth/react";
 
 export default function Page({ params }) {
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const { data: session, status } = useSession();
     const [selectedDate, setSelectedDate] = useState();
     const [startTime, setStartTime] = useState();
     const [endTime, setEndTime] = useState();
     const [freeTimes, setFreeTimes] = useState([]);
     const [isEditOpen, setIsEditOpen] = useState(false);
-
+    const [error, setError] = useState(null);
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [start, setStart] = useState('');
     const [startDate, setStartDate] = useState('');
     const [end, setEnd] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [user, setUser] = useState(null);
 
+    useEffect(() => {
+          const fetchUserDetails = async () => {
+            if (status === 'authenticated' && session?.user?.email) {
+              try {
+                const response = await fetch(`/api/user?email=${session.user.email}`);
+                if (!response.ok) {
+                  const result = await response.json();
+                  setError(result.message);
+                  setLoading(false);
+                  return;
+                }
+                const userData = await response.json();
+            
+                setUser(userData);
+              } catch (error) {
+                setError('An unexpected error occurred.');
+              } finally {
+                setLoading(false);
+              }
+            } else {
+              setLoading(false);
+            }
+          };
+      
+          fetchUserDetails();
+        }, [status, session]);
     
 
     
@@ -42,13 +69,23 @@ export default function Page({ params }) {
           try {
             const linkFromParams = (await params).link;
             
-            const matchedEvent = await fetchEvent("event_link", linkFromParams);
-            console.log(matchedEvent)
+            const response_event = await fetch(`${window.location.origin}/api/events?link=${linkFromParams}`)
+  
+            if (!response_event.ok) throw new Error('Failed to fetch event details');
+        
+            const data_events = await response_event.json();
+          
+            const matchedEvent = data_events.eventData[0];
+            
             const s = matchedEvent.event_schedule_start.split("T")[0];
+
             setStart(s);
+
             setStartDate(parseDate(s));
+
             const e = matchedEvent.event_schedule_end.split("T")[0];
             setEnd(e);
+            
             setEndDate(parseDate(e));
 
             setEvent(matchedEvent || null); // Set null if no event matches
@@ -207,8 +244,20 @@ return <p className="p-6 text-center">Event not found.</p>;
             }
           }
         
-          const handleOnSavePress = () => {
-            alert(`Saved ${freeTimes.length} free times`);
+          const handleOnSavePress = async () => {
+            
+            
+            const response = await fetch("/api/freeTimes", {
+              method: "POST",
+              body: JSON.stringify({
+                user:user.user_id,
+                event:event.event_id,
+                freetimes:freeTimes
+              }),
+            });
+
+            if(response.ok){alert(`Saved ${freeTimes.length} free times`)}
+            else{alert(`Failed to save free times`)};
           }
 
           const eventRange = {
