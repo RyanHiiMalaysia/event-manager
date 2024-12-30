@@ -19,9 +19,9 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
   };
 
   const renderEventContent = (event) => {
-    const { start, end, scheduled, location, description } = event;
+    const { event_schedule_start, event_schedule_end, scheduled, event_location, event_description } = event;
     const getTime = () => {
-      if (!start || !end) {
+      if (!event_schedule_start || !event_schedule_end) {
         return (
           <>
             <p>Scheduled</p>
@@ -33,8 +33,8 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
           </>
         );
       } else {
-        const startDate = moment(start).format("MMMM Do YYYY, h:mm a");
-        const endDate = moment(end).format("MMMM Do YYYY, h:mm a");
+        const startDate = moment(event_schedule_start).format("MMMM Do YYYY, h:mm a");
+        const endDate = moment(event_schedule_end).format("MMMM Do YYYY, h:mm a");
         return (
           <p>
             {startDate} – {endDate}
@@ -50,13 +50,13 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
         </Card>
         <Input
           isReadOnly
-          value={location}
+          value={event_location}
           label="Location"
           variant="bordered"
         />
         <Textarea
           label="Description"
-          value={description}
+          value={event_description}
           isReadOnly
           variant="bordered"
         />
@@ -70,7 +70,7 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
         {() => (
           <>
             <ModalHeader className="flex flex-col gap-1">
-              {selectedEvent.title}
+              {selectedEvent.event_title}
             </ModalHeader>
             <ModalBody>{renderEventContent(selectedEvent)}</ModalBody>
             <ModalFooter>
