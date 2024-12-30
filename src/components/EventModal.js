@@ -12,7 +12,7 @@ import {
   Input,
   CardBody,
 } from "@nextui-org/react";
-import moment from "moment";
+import moment from 'moment-timezone'
 
 export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
   const handleOnPress = () => {
@@ -30,7 +30,7 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
     } = event;
     const getTime = () => {
       if (event_allocated_start === null) {
-        const deadline = moment(event_deadline).format("MMMM Do YYYY, h:mm a");
+        const deadline = moment.tz(event.event_deadline, 'Asia/Singapore').format("MMMM Do YYYY, h:mm a");
         return (
           <>
             <Card shadow="sm" className="border-default-200 justify-between">
@@ -48,8 +48,8 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
           </>
         );
       } else {
-        const startDate = moment(event_allocated_start).format("MMMM Do YYYY, h:mm a");
-        const endDate = moment(event_allocated_end).format("MMMM Do YYYY, h:mm a");
+        const startDate = moment.tz(event_allocated_start, 'Asia/Singapore').format("MMMM Do YYYY, h:mm a");
+        const endDate = moment.tz(event_allocated_end, 'Asia/Singapore').format("MMMM Do YYYY, h:mm a");
         return (
           <Card shadow="sm" className="border-default-200">
             <CardBody>

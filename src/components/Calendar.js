@@ -1,18 +1,24 @@
 import React, { useMemo } from "react";
 import { Calendar, momentLocalizer, Views } from "react-big-calendar";
-import moment from "moment";
+import moment from "moment-timezone";
 import "../../styles/calendar.css";
 import WeekView from "./WeekView";
 
 const localizer = momentLocalizer(moment);
 
 export function EventCalendar({ events, onSelectEvent }) {
+  // Adjust event times to reflect UTC+8
+  const adjustedEvents = events.map((event) => ({
+    ...event,
+    start: moment.tz(event.start, "Asia/Singapore").toDate(),
+    end: moment.tz(event.end, "Asia/Singapore").toDate(),
+  }));
 
   return (
     <div>
       <Calendar
         localizer={localizer}
-        events={events}
+        events={adjustedEvents}
         startAccessor="start"
         endAccessor="end"
         style={{ height: 600 }}
@@ -38,18 +44,18 @@ export function ScheduleCalendar({ onSelectEvent, eventRange, freeTimes }) {
   return (
     <div className="height-400">
       <Calendar
-      localizer={localizer}
-      events={freeTimes}
-      startAccessor="start"
-      endAccessor="end"
-      style={{ height: '100%' }}
-      defaultView={Views.WEEK}
-      defaultDate={defaultDate}
-      views={views}
-      scrollToTime={defaultDate}
-      popup
-      onSelectEvent={onSelectEvent}
-    />
-  </div>
+        localizer={localizer}
+        events={freeTimes}
+        startAccessor="start"
+        endAccessor="end"
+        style={{ height: "100%" }}
+        defaultView={Views.WEEK}
+        defaultDate={defaultDate}
+        views={views}
+        scrollToTime={defaultDate}
+        popup
+        onSelectEvent={onSelectEvent}
+      />
+    </div>
   );
 }
