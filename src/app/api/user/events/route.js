@@ -10,77 +10,32 @@ function getDatabaseConnection() {
 // Function to fetch user events by email
 async function fetchUserEvents(user_email, allocated) {
   const sql = getDatabaseConnection();
-  if (allocated) {
-    return await sql`
-      SELECT 
-        event_title, 
-        event_deadline, 
-        event_location, 
-        event_description,
-        event_allocated_start,
-        event_allocated_end,
-        event_link,
-        ue_is_admin
-      FROM 
-        userevent 
-      NATURAL JOIN 
-        events 
-      WHERE 
-        user_id = (
-          SELECT user_id 
-          FROM users 
-          WHERE user_email = ${user_email}
-        )
-      AND 
-        event_allocated_start IS NOT NULL
-    `;
-  } else if (allocated === false) {
-    return await sql`
-      SELECT 
-        event_title, 
-        event_deadline, 
-        event_location, 
-        event_description,
-        event_allocated_start,
-        event_allocated_end,
-        event_link,
-        ue_is_admin
-      FROM 
-        userevent 
-      NATURAL JOIN 
-        events 
-      WHERE 
-        user_id = (
-          SELECT user_id 
-          FROM users 
-          WHERE user_email = ${user_email}
-        )
-      AND 
-        event_allocated_start IS NULL
-    `;
-  } else {
-    return await sql`
-    SELECT 
-      event_title, 
-      event_deadline, 
-      event_location, 
-      event_description,
-      event_allocated_start,
-      event_allocated_end,
-      event_link,
-      ue_is_admin
-    FROM 
-      userevent 
-    NATURAL JOIN 
-      events 
-    WHERE 
-      user_id = (
-        SELECT user_id 
-        FROM users 
-        WHERE user_email = ${user_email}
-      )
-  `;
-  }
+  const allocatedQuery =
+    allocated === null ? "" : allocated ? "AND event_allocated_start IS NOT NULL" : "AND event_allocated_start IS NULL";
+  let query = `
+  SELECT 
+    event_title, 
+    event_deadline, 
+    event_location, 
+    event_description,
+    event_allocated_start,
+    event_allocated_end,
+    event_link,
+    ue_is_admin
+  FROM 
+    userevent 
+  NATURAL JOIN 
+    events 
+  WHERE 
+    user_id = (
+      SELECT user_id 
+      FROM users 
+      WHERE user_email = $1
+    )
+  ${allocatedQuery}
+`;
+
+  return await sql(query, [user_email]);
 }
 
 export async function POST(req) {
