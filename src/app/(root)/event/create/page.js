@@ -19,7 +19,13 @@ export default function Page() {
   const { data: session, status } = useSession();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const path = window.location.origin;
+  const [path, setPath] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setPath(window.location.origin);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
