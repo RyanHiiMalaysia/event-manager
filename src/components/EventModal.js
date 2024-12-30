@@ -16,21 +16,20 @@ import moment from "moment";
 
 export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
   const handleOnPress = () => {
-    const url = `${window.location.href}/${selectedEvent.event_link}`;
+    const url = `${window.location.origin}/event/${selectedEvent.event_link}`;
     window.open(url, "_blank");
   };
 
   const renderEventContent = (event) => {
     const {
-      event_schedule_start,
-      event_schedule_end,
+      event_allocated_start,
+      event_allocated_end,
       event_location,
       event_description,
-      event_allocated_time,
       event_deadline,
     } = event;
     const getTime = () => {
-      if (event_allocated_time === null) {
+      if (event_allocated_start === null) {
         const deadline = moment(event_deadline).format("MMMM Do YYYY, h:mm a");
         return (
           <>
@@ -43,14 +42,14 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
             <Card shadow="sm" className="border-default-200">
               <CardFooter className="justify-between">
                 <p>Scheduled</p>
-                <Checkbox isSelected={event_allocated_time === null} disableAnimation className="mx-1"></Checkbox>
+                <Checkbox isSelected={event_allocated_start === null} disableAnimation className="mx-1"></Checkbox>
               </CardFooter>
             </Card>
           </>
         );
       } else {
-        const startDate = moment(event_schedule_start).format("MMMM Do YYYY, h:mm a");
-        const endDate = moment(event_schedule_end).format("MMMM Do YYYY, h:mm a");
+        const startDate = moment(event_allocated_start).format("MMMM Do YYYY, h:mm a");
+        const endDate = moment(event_allocated_end).format("MMMM Do YYYY, h:mm a");
         return (
           <Card shadow="sm" className="border-default-200">
             <CardBody>
