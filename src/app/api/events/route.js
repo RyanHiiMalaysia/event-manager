@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 
+// Function to initialize the database connection
+function getDatabaseConnection() {
+  return neon(`${process.env.DATABASE_URL}`);
+}
+
 async function fetchEvent(link) {
-  const sql = neon(`${process.env.DATABASE_URL}`);
+  const sql = getDatabaseConnection();
   return await sql`
     SELECT 
       event_title, 
@@ -30,7 +35,7 @@ async function fetchEvent(link) {
 }
 
 export async function POST(req) {
-  const sql = neon(`${process.env.DATABASE_URL}`);
+  const sql = getDatabaseConnection();
   try {
     const {
       title,

@@ -12,11 +12,12 @@ import { useSession } from "next-auth/react";
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [userEvents, setUserEvents] = useState([]);
+  const [schedulingEvents, setSchedulingEvents] = useState([]);
+  const [allocatedEvents, setAllocatedEvents] = useState([]);
+  const [organisingEvents, setOrganisingEvents] = useState([]);
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [user, setUser] = useState(null);
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
@@ -27,17 +28,29 @@ export default function Page() {
     const fetchUserDetails = async () => {
       if (session?.user?.email) {
         try {
-          const response = await fetch(`/api/user/events?email=${session.user.email}`, {
+          const headers = {
             method: "GET",
             headers: { "Content-Type": "application/json" },
-          });
-          const result = await response.json();
+          };
 
-          if (!response.ok) {
-            setError(result.message || "Failed to fetch events");
-            return;
-          }
-          setUserEvents(result.eventData);
+          const fetchEvents = async (param) => {
+            const response = await fetch(`/api/user-event?email=${session.user.email}&${param}`, headers);
+            const result = await response.json();
+            if (!response.ok) {
+              throw new Error(result.message || "Failed to fetch events");
+            }
+            return result.eventData;
+          };
+
+          const [scheduling, allocated, organising] = await Promise.all([
+            fetchEvents("hasAllocated=false"),
+            fetchEvents("hasAllocated=true"),
+            fetchEvents("isAdmin=true"),
+          ]);
+
+          setSchedulingEvents(scheduling);
+          setAllocatedEvents(allocated);
+          setOrganisingEvents(organising);
         } catch (error) {
           setError(error);
         } finally {
@@ -54,10 +67,6 @@ export default function Page() {
   if (error) {
     return <div>{error}</div>;
   }
-
-  const schedulingEvents = userEvents.filter((event) => event.event_allocated_start === null);
-  const allocatedEvents = userEvents.filter((event) => event.event_allocated_start !== null);
-  const organisingEvents = userEvents.filter((event) => event.ue_is_admin);
 
   return (
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
