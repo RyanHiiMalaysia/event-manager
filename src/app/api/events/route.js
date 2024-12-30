@@ -1,17 +1,24 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 
-
-// async function fetchEventsDetails(link) {
-//   const sql = neon(`${process.env.DATABASE_URL}`);
-//   return await sql('SELECT * FROM events WHERE event_link = $1', [link]);
-// }
-
-async function fetchEventsDetails() {
+async function fetchEvent(link) {
   const sql = neon(`${process.env.DATABASE_URL}`);
-  return await sql('SELECT * FROM events');
+  return await sql`
+    SELECT 
+      *
+    FROM 
+      events 
+    JOIN 
+      users 
+    ON 
+      user_id = event_creator 
+    WHERE 
+      event_link = ${link}
+  `;
 }
+
 export async function POST(req) {
+  const sql = neon(`${process.env.DATABASE_URL}`);
   try {
     const {
       title,
@@ -24,47 +31,50 @@ export async function POST(req) {
       maxParticipants,
       description,
       link,
-      registrationDeadline,
-      ownerId
+      deadline,
+      creator,
     } = await req.json();
 
-    // Connect to the Neon database
-    const sql = neon(`${process.env.DATABASE_URL}`);
+    await sql`BEGIN`;
+
+    const [insertedEvent] = await sql`
+      INSERT INTO events (
+        event_title, event_duration, event_schedule_start, event_schedule_end, event_deadline, 
+        event_max_participants, event_location, event_opening_hour, event_closing_hour, event_description, 
+        event_link, event_creator
+      ) VALUES (
+        ${title}, ${duration}, ${startDate}, ${endDate}, ${deadline}, ${maxParticipants}, ${location}, ${startTime},
+        ${endTime}, ${description}, ${link}, ${creator}
+      ) RETURNING event_id
+    `;
+
+    const eventID = insertedEvent.event_id;
 
     await sql`
-        INSERT INTO events (
-            event_title, event_duration, event_max_participants, event_description, event_location,
-            event_opening_hour, event_closing_hour, event_schedule_start, event_schedule_end, 
-            event_link, event_deadline, event_creator
+        INSERT INTO userevent (
+          user_id, event_id, ue_is_admin
+        ) VALUES (
+          ${creator}, ${eventID}, true
         )
-        VALUES (
-            ${title}, ${duration}, ${maxParticipants}, ${description}, ${location},
-            ${startTime}, ${endTime}, ${startDate}, ${endDate}, ${link}, ${registrationDeadline},
-            ${ownerId}
-        )
-        `;
+      `;
 
-    // Respond with success
-    return NextResponse.json(
-      { message: "Event created successfully."},
-      { status: 200 }
-    );
+    await sql`COMMIT`;
+
+    return NextResponse.json({ message: "Event created successfully." }, { status: 200 });
   } catch (error) {
     console.log(error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    await sql`ROLLBACK`;
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
 
 export async function GET(req) {
   try {
-    const events = await fetchEventsDetails();
-    
-    return new Response(JSON.stringify({ events }), { status: 200 });
+    const url = new URL(req.url);
+    const link = url.searchParams.get("link");
+    const eventData = await fetchEvent(link);
+    return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {
-    
-    return new Response(JSON.stringify({ message: 'Failed to fetch events' }), { status: 500 });
+    return new Response(JSON.stringify({ message: "Failed to fetch events" }), { status: 500 });
   }
 }
