@@ -5,7 +5,8 @@ export async function middleware(req) {
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
 
   if (!token) {
-    return NextResponse.redirect(new URL('/', req.url));
+    console.log('Redirecting to home page');
+    return NextResponse.redirect(new URL('/pricing', req.url));
   }
 
   return NextResponse.next();
