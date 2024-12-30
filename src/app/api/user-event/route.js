@@ -8,10 +8,15 @@ function getDatabaseConnection() {
 }
 
 // Function to fetch user events by email
-async function fetchUserEvents(user_email, allocated) {
+async function fetchUserEvents(user_email, hasAllocated, isAdmin) {
   const sql = getDatabaseConnection();
-  const allocatedQuery =
-    allocated === null ? "" : allocated ? "AND event_allocated_start IS NOT NULL" : "AND event_allocated_start IS NULL";
+  const boolToQuery = (bool, trueQuery, falseQuery) => (bool === null ? "" : bool ? trueQuery : falseQuery);
+  const allocatedQuery = boolToQuery(
+    hasAllocated,
+    "AND event_allocated_start IS NOT NULL",
+    "AND event_allocated_start IS NULL"
+  );
+  const adminQuery = boolToQuery(isAdmin, "AND ue_is_admin = TRUE", "AND ue_is_admin = FALSE");
   let query = `
   SELECT 
     event_title, 
@@ -33,6 +38,7 @@ async function fetchUserEvents(user_email, allocated) {
       WHERE user_email = $1
     )
   ${allocatedQuery}
+  ${adminQuery}
 `;
 
   return await sql(query, [user_email]);
@@ -64,21 +70,13 @@ export async function POST(req) {
 }
 
 export async function GET(req) {
-  // const session = await getSession({ req });
-
-  // if (!session) {
-  //   return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  // }
-
   try {
+    const strToBool = (str) => (str === null ? null : str === "true");
     const url = new URL(req.url);
     const email = url.searchParams.get("email");
-    // if (session.user.email !== email) {
-    //   return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    // }
-    const allocatedParam = url.searchParams.get("allocated");
-    const allocated = allocatedParam === null ? null : allocatedParam === "true";
-    const eventData = await fetchUserEvents(email, allocated);
+    const hasAllocated = strToBool(url.searchParams.get("hasAllocated"));
+    const isAdmin = strToBool(url.searchParams.get("isAdmin"));
+    const eventData = await fetchUserEvents(email, hasAllocated, isAdmin);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ message: "Failed to fetch events" }), { status: 500 });
