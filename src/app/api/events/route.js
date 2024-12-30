@@ -1,9 +1,32 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 
-async function fetchEventDetails(link) {
+async function fetchEvent(link) {
   const sql = neon(`${process.env.DATABASE_URL}`);
-  return await sql("SELECT * FROM events WHERE event_link = $1", [link]);
+  return await sql`
+    SELECT 
+      event_title, 
+      event_duration, 
+      event_schedule_start, 
+      event_schedule_end, 
+      event_deadline, 
+      event_max_participants, 
+      event_location, 
+      event_opening_hour, 
+      event_closing_hour, 
+      event_description, 
+      event_link, 
+      event_creator, 
+      user_name 
+    FROM 
+      events 
+    JOIN 
+      users 
+    ON 
+      user_id = event_creator 
+    WHERE 
+      event_link = ${link}
+  `;
 }
 
 export async function POST(req) {
@@ -23,6 +46,8 @@ export async function POST(req) {
       deadline,
       creator,
     } = await req.json();
+
+    await sql`BEGIN`;
 
     const [insertedEvent] = await sql`
       INSERT INTO events (
@@ -59,7 +84,7 @@ export async function GET(req) {
   try {
     const url = new URL(req.url);
     const link = url.searchParams.get("link");
-    const eventData = await fetchEventDetails(link);
+    const eventData = await fetchEvent(link);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ message: "Failed to fetch events" }), { status: 500 });

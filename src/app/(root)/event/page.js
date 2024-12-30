@@ -1,24 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  Tabs,
-  Tab,
-  Card,
-  CardBody,
-  CardFooter,
-  Checkbox,
-  useDisclosure,
-  Button,
-  Link,
-} from "@nextui-org/react";
-// import { eventData, schedulingData } from "../../../components/demoData";
+import { Tabs, Tab, Card, CardBody, CardFooter, Checkbox, useDisclosure, Button, Link } from "@nextui-org/react";
 import EventModal from "../../../components/EventModal";
 import moment from "moment";
 import blue from "../../../../public/blue.svg";
 import green from "../../../../public/green.svg";
 import yellow from "../../../../public/yellow.svg";
 import Image from "next/image";
-import { useSession } from 'next-auth/react';
+import { useSession } from "next-auth/react";
 
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -34,31 +23,23 @@ export default function Page() {
     onOpen();
   };
 
-
-
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (status === 'authenticated' && session?.user?.email) {
+      if (session?.user?.email) {
         try {
-          const response_user_events = await fetch(`/api/events_scheduled`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
+          const response = await fetch(`/api/user/events?email=${session.user.email}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
           });
-          const userEventData = await response_user_events.json();
-          
-          const response = await fetch(`/api/user?email=${session.user.email}`);
           const result = await response.json();
+          console.log(result);
           if (!response.ok) {
-            console.log(error)
-            setError(result.message);
-            setLoading(false);
+            setError(result.message || "Failed to fetch events");
             return;
           }
-          setUserEvents(Array.isArray(userEventData) ? userEventData.filter(item => item.user_email === session.user.email) : []);
-          setUser(result);
-          console.log(userEvents)
+          setUserEvents(result.eventData);
         } catch (error) {
-          setError(error)
+          setError(error);
         } finally {
           setLoading(false);
         }
@@ -68,24 +49,21 @@ export default function Page() {
     };
 
     fetchUserDetails();
-    
   }, [status, session]);
 
   if (error) {
     return <div>{error}</div>;
   }
 
+  const schedulingEvents = userEvents.filter((event) => event.event_allocated_time === null);
+  const allocatedEvents = userEvents.filter((event) => event.event_allocated_time !== null);
+  const organisingEvents = userEvents.filter((event) => event.ue_is_admin);
 
   return (
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-bold">Events</h1>
-        <Button
-          color="primary"
-          className="mx-2 text-3xl p-7"
-          as={Link}
-          href="/event/create"
-        >
+        <Button color="primary" className="mx-2 text-3xl p-7" as={Link} href="/event/create">
           +
         </Button>
       </div>
@@ -94,40 +72,36 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {userEvents.length === 0 ? (
-                    <p>No events to display.</p>
-                  ) : (
-                    
-                  
-                userEvents.map((item, index) => (// if not working, try changing userEvents to schedulingData
-                  <Card
-                    key={index}
-                    isPressable
-                    shadow="sm"
-                    onPress={() => handleSelectEvent(item)}
-                  >
-                    <CardBody className="overflow-visible p-0">
-                      <Image
-                        alt={item.event_title}
-                        className="w-full object-cover h-[140px]"
-                        radius="lg"
-                        shadow="sm"
-                        src={blue}
-                        width="100%"
-                        priority={true}
-                      />
-                    </CardBody>
-                    <CardFooter className="text-small justify-between">
-                      <b>{item.event_title}</b>
-                      <p>
-                        <Checkbox
-                          isSelected={item.scheduled}
-                          disableAnimation
-                        ></Checkbox>
-                      </p>
-                    </CardFooter>
-                  </Card>
-                )))}
+                {schedulingEvents.length === 0 ? (
+                  <p>No events to display.</p>
+                ) : (
+                  schedulingEvents.map(
+                    (
+                      item,
+                      index // if not working, try changing userEvents to schedulingData
+                    ) => (
+                      <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
+                        <CardBody className="overflow-visible p-0">
+                          <Image
+                            alt={item.event_title}
+                            className="w-full object-cover h-[140px]"
+                            radius="lg"
+                            shadow="sm"
+                            src={blue}
+                            width="100%"
+                            priority={true}
+                          />
+                        </CardBody>
+                        <CardFooter className="text-small justify-between">
+                          <b>{item.event_title}</b>
+                          <p>
+                            <Checkbox isSelected={item.scheduled} disableAnimation></Checkbox>
+                          </p>
+                        </CardFooter>
+                      </Card>
+                    )
+                  )
+                )}
               </div>
             </CardBody>
           </Card>
@@ -136,37 +110,35 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {userEvents.map((item, index) => ( // if not working, try changing userEvents to eventData
-                  <Card
-                    key={index}
-                    isPressable
-                    shadow="sm"
-                    onPress={() => handleSelectEvent(item)}
-                  >
-                    <CardBody className="overflow-visible p-0">
-                      <Image
-                        alt={item.event_title}
-                        className="w-full object-cover h-[140px]"
-                        radius="lg"
-                        shadow="sm"
-                        src={green}
-                        width="100%"
-                        priority={true}
-                      />
-                    </CardBody>
-                    <CardFooter className="text-small justify-between">
-                      <b>{item.event_title}</b>
-                      <p className="text-default-500">
-                        <span className="block sm:inline">
-                          {moment(item.event_schedule_start).format("DD/MM/YYYY ")}
-                        </span>
-                        <span className="block sm:inline">
-                          {moment(item.event_schedule_start).format("h:mm a")}
-                        </span>
-                      </p>
-                    </CardFooter>
-                  </Card>
-                ))}
+                {allocatedEvents.map(
+                  (
+                    item,
+                    index // if not working, try changing userEvents to eventData
+                  ) => (
+                    <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
+                      <CardBody className="overflow-visible p-0">
+                        <Image
+                          alt={item.event_title}
+                          className="w-full object-cover h-[140px]"
+                          radius="lg"
+                          shadow="sm"
+                          src={green}
+                          width="100%"
+                          priority={true}
+                        />
+                      </CardBody>
+                      <CardFooter className="text-small justify-between">
+                        <b>{item.event_title}</b>
+                        <p className="text-default-500">
+                          <span className="block sm:inline">
+                            {moment(item.event_schedule_start).format("DD/MM/YYYY ")}
+                          </span>
+                          <span className="block sm:inline">{moment(item.event_schedule_start).format("h:mm a")}</span>
+                        </p>
+                      </CardFooter>
+                    </Card>
+                  )
+                )}
               </div>
             </CardBody>
           </Card>
@@ -175,13 +147,8 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {userEvents.map((item, index) => (
-                  <Card
-                    key={index}
-                    isPressable
-                    shadow="sm"
-                    onPress={() => handleSelectEvent(item)}
-                  >
+                {organisingEvents.map((item, index) => (
+                  <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
                     <CardBody className="overflow-visible p-0">
                       <Image
                         alt={item.event_title}
@@ -204,11 +171,7 @@ export default function Page() {
         </Tab>
       </Tabs>
 
-      <EventModal
-        isOpen={isOpen}
-        onOpenChange={onOpenChange}
-        selectedEvent={selectedEvent}
-      />
+      <EventModal isOpen={isOpen} onOpenChange={onOpenChange} selectedEvent={selectedEvent} />
     </div>
   );
 }
