@@ -4,7 +4,6 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Accordion, AccordionItem } from "@nextui-org/react";
-import { fetchEvent } from '@/utils/fetchEvent';
 import React from 'react';
 
 
@@ -71,8 +70,15 @@ export default function Page({ params }) {
 
         //For the event
        
-        const matchedEvent = await fetchEvent("event_link", uniqueLink);
+        const response_event = await fetch(`${window.location.origin}/api/events?link=${uniqueLink}`)
+  
+        if (!response_event.ok) throw new Error('Failed to fetch event details');
+    
+        const data_events = await response_event.json();
       
+    
+        const matchedEvent = data_events.eventData[0];
+        
         setEvent(matchedEvent || null); // Set null if no event matches
         
         //setEventId(event.event_id);
