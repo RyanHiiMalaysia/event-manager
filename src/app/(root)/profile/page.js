@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import {Spinner} from "@nextui-org/spinner";
 
 const Profile = () => {
   const { data: session, status } = useSession();
@@ -36,7 +37,7 @@ const Profile = () => {
   }, [status, session]);
 
   if (status === 'loading' || loading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   if (error) {
@@ -44,7 +45,7 @@ const Profile = () => {
   }
 
   if (!user) {
-    return <div>Loading......</div>;
+    return <div>User not found</div>;
   }
 
   return (
@@ -63,6 +64,10 @@ const Profile = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Email</label>
             <p className="mt-1 text-sm text-gray-900">{user.user_email}</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Has Paid?</label>
+            <p className="mt-1 text-sm text-gray-900">{user.user_has_paid ? 'Yes' : 'No'}</p>
           </div>
         </div>
       </div>

@@ -18,8 +18,18 @@ export const authOptions = {
       }
 
       return true;
-    }
-  }
+    },
+    async session({ session, token }) {
+      const sql = neon(`${process.env.DATABASE_URL}`);
+      const result = await sql('SELECT user_has_paid FROM users WHERE user_email = $1', [token.email]);
+
+      if (result.length > 0) {
+        session.user.user_has_paid = result[0].user_has_paid;
+      }
+
+      return session;
+    },
+  },
 };
 
 export const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
