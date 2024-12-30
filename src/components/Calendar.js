@@ -10,8 +10,8 @@ export function EventCalendar({ events, onSelectEvent }) {
   // Adjust event times to reflect UTC+8
   const adjustedEvents = events.map((event) => ({
     ...event,
-    start: moment.tz(event.start, "Asia/Singapore").toDate(),
-    end: moment.tz(event.end, "Asia/Singapore").toDate(),
+    start: moment.utc(event.start).tz('Asia/Singapore').toDate(),
+    end: moment.utc(event.end).tz('Asia/Singapore').toDate(),
   }));
 
   return (
