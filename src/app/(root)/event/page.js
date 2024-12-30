@@ -11,42 +11,70 @@ import {
   Button,
   Link,
 } from "@nextui-org/react";
-import { eventData, schedulingData } from "../../../components/demoData";
+// import { eventData, schedulingData } from "../../../components/demoData";
 import EventModal from "../../../components/EventModal";
 import moment from "moment";
 import blue from "../../../../public/blue.svg";
 import green from "../../../../public/green.svg";
 import yellow from "../../../../public/yellow.svg";
 import Image from "next/image";
+import { useSession } from 'next-auth/react';
 
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
+  const { data: session, status } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [user, setUser] = useState(null);
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
     onOpen();
   };
 
-  const fetchEventDetails = async () => {
-    try {
-      const response_user = await fetch("/api/user", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const userData = await response_user.json();
-      setUserEvents(Array.isArray(userData.events) ? userData.events : []);
-    } catch (error) {
-      console.error("Error fetching event details:", error);
-    }
-  };
+
 
   useEffect(() => {
-    fetchEventDetails();
-  }, []);
+    const fetchUserDetails = async () => {
+      if (status === 'authenticated' && session?.user?.email) {
+        try {
+          const response_user_events = await fetch(`/api/events_scheduled`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          const userEventData = await response_user_events.json();
+          
+          const response = await fetch(`/api/user?email=${session.user.email}`);
+          const result = await response.json();
+          if (!response.ok) {
+            console.log(error)
+            setError(result.message);
+            setLoading(false);
+            return;
+          }
+          setUserEvents(Array.isArray(userEventData) ? userEventData.filter(item => item.user_email === session.user.email) : []);
+          setUser(result);
+          console.log(userEvents)
+        } catch (error) {
+          setError(error)
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchUserDetails();
+    
+  }, [status, session]);
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
 
   return (
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
@@ -66,7 +94,12 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {userEvents.map((item, index) => (// if not working, try changing userEvents to schedulingData
+                {userEvents.length === 0 ? (
+                    <p>No events to display.</p>
+                  ) : (
+                    
+                  
+                userEvents.map((item, index) => (// if not working, try changing userEvents to schedulingData
                   <Card
                     key={index}
                     isPressable
@@ -75,7 +108,7 @@ export default function Page() {
                   >
                     <CardBody className="overflow-visible p-0">
                       <Image
-                        alt={item.title}
+                        alt={item.event_title}
                         className="w-full object-cover h-[140px]"
                         radius="lg"
                         shadow="sm"
@@ -85,7 +118,7 @@ export default function Page() {
                       />
                     </CardBody>
                     <CardFooter className="text-small justify-between">
-                      <b>{item.title}</b>
+                      <b>{item.event_title}</b>
                       <p>
                         <Checkbox
                           isSelected={item.scheduled}
@@ -94,7 +127,7 @@ export default function Page() {
                       </p>
                     </CardFooter>
                   </Card>
-                ))}
+                )))}
               </div>
             </CardBody>
           </Card>
@@ -112,7 +145,7 @@ export default function Page() {
                   >
                     <CardBody className="overflow-visible p-0">
                       <Image
-                        alt={item.title}
+                        alt={item.event_title}
                         className="w-full object-cover h-[140px]"
                         radius="lg"
                         shadow="sm"
@@ -122,13 +155,13 @@ export default function Page() {
                       />
                     </CardBody>
                     <CardFooter className="text-small justify-between">
-                      <b>{item.title}</b>
+                      <b>{item.event_title}</b>
                       <p className="text-default-500">
                         <span className="block sm:inline">
-                          {moment(item.start).format("DD/MM/YYYY ")}
+                          {moment(item.event_schedule_start).format("DD/MM/YYYY ")}
                         </span>
                         <span className="block sm:inline">
-                          {moment(item.start).format("h:mm a")}
+                          {moment(item.event_schedule_start).format("h:mm a")}
                         </span>
                       </p>
                     </CardFooter>
@@ -151,7 +184,7 @@ export default function Page() {
                   >
                     <CardBody className="overflow-visible p-0">
                       <Image
-                        alt={item.title}
+                        alt={item.event_title}
                         className="w-full object-cover h-[140px]"
                         radius="lg"
                         shadow="sm"
@@ -161,7 +194,7 @@ export default function Page() {
                       />
                     </CardBody>
                     <CardFooter className="text-small justify-between">
-                      <b>{item.title}</b>
+                      <b>{item.event_title}</b>
                     </CardFooter>
                   </Card>
                 ))}
