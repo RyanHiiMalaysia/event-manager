@@ -40,9 +40,10 @@ export default function Page({ params }) {
     useEffect(() => {
         const fetchSpecificEvent = async () => {
           try {
-            const eventIdFromParams = (await params).eventId;
-            const matchedEvent = await fetchEvent("event_id", Number(eventIdFromParams));
+            const linkFromParams = (await params).link;
             
+            const matchedEvent = await fetchEvent("event_link", linkFromParams);
+            console.log(matchedEvent)
             const s = matchedEvent.event_schedule_start.split("T")[0];
             setStart(s);
             setStartDate(parseDate(s));
@@ -73,7 +74,6 @@ return <p className="p-6 text-center">Loading event details...</p>;
 if (!event) {
 return <p className="p-6 text-center">Event not found.</p>;
 }
-
 
     const addFreeTime = (event) => {
         setFreeTimes([...freeTimes, event]);
@@ -212,9 +212,11 @@ return <p className="p-6 text-center">Event not found.</p>;
           }
 
           const eventRange = {
-            start: startDate,
-            end: endDate
+            start: new Date(event.event_schedule_start),
+            end: new Date(event.event_schedule_end),
           };
+
+          
 
           return (
               <div className="bg-custom-page min-h-screen">

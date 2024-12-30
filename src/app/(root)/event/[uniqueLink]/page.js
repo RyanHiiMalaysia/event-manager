@@ -108,7 +108,7 @@ export default function Page({ params }) {
   }
 
   const handleSetAvailability = () => {
-    router.push(`/datepicker/${event.event_id}`); // Correct the route here to include the event's unique identifier
+    router.push(`/datepicker/${uniqueLink}`); // Correct the route here to include the event's unique identifier
   };
 
   console.log(event)
