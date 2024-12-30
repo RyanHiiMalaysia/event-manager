@@ -33,9 +33,9 @@ export async function POST(req) {
 
     await sql`
         INSERT INTO events (
-            event_name, event_duration, event_max_participants, event_description, event_location,
-            event_openingHour, event_closingHour, event_schedule_range_start, event_schedule_range_end, 
-            event_link, event_deadline, event_owner
+            event_title, event_duration, event_max_participants, event_description, event_location,
+            event_opening_hour, event_closing_hour, event_schedule_start, event_schedule_end, 
+            event_link, event_deadline, event_creator
         )
         VALUES (
             ${title}, ${duration}, ${maxParticipants}, ${description}, ${location},
