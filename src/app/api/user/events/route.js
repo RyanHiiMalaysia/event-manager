@@ -24,6 +24,7 @@ async function fetchUserEvents(user_email) {
       event_closing_hour, 
       event_description,
       event_allocated_time,
+      event_link,
       ue_is_admin
     FROM 
       userevent 

@@ -15,7 +15,8 @@ import moment from "moment";
 
 export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
   const handleOnPress = () => {
-    window.open(selectedEvent.url, "_blank");
+    const url = `${window.location.href}/${selectedEvent.event_link}`;
+    window.open(url, "_blank");
   };
 
   const renderEventContent = (event) => {
