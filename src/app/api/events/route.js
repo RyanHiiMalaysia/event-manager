@@ -34,7 +34,7 @@ async function fetchEvent(link) {
   `;
 }
 
-async function checkUserInEvent(user_email, link) {
+async function isUserInEvent(user_email, link) {
   const sql = getDatabaseConnection();
   const [user] = await sql`
     SELECT
@@ -106,8 +106,8 @@ export async function GET(req) {
     const link = url.searchParams.get("link");
     const email = url.searchParams.get("email");
     if (email) {
-      const inEvent = await checkUserInEvent(email, link);
-      return new Response(JSON.stringify({ inEvent }), { status: 200 });
+      const isParticipant = await isUserInEvent(email, link);
+      return new Response(JSON.stringify({ isParticipant }), { status: 200 });
     }
     const eventData = await fetchEvent(link);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
