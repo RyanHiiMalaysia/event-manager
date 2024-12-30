@@ -84,7 +84,7 @@ export default function Page() {
         startTime: startTime?.toString(),
         endTime: endTime?.toString(),
         link: uniqueLink,
-        ownerId: user.user_id,
+        creator: user.user_id,
       }),
     });
 
