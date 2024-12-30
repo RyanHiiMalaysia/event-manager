@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 
+// Function to initialize the database connection
+function getDatabaseConnection() {
+  return neon(`${process.env.DATABASE_URL}`);
+}
+
 async function fetchEvent(link) {
-  const sql = neon(`${process.env.DATABASE_URL}`);
+  const sql = getDatabaseConnection();
   return await sql`
     SELECT 
       event_title, 
@@ -29,8 +34,23 @@ async function fetchEvent(link) {
   `;
 }
 
+async function checkUserInEvent(user_email, link) {
+  const sql = getDatabaseConnection();
+  const [user] = await sql`
+    SELECT
+      user_id
+    FROM
+      users NATURAL JOIN userevent
+    WHERE
+      user_email = ${user_email}
+    AND
+      event_id = (SELECT event_id FROM events WHERE event_link = ${link})
+  `;
+  return user ? true : false;
+}
+
 export async function POST(req) {
-  const sql = neon(`${process.env.DATABASE_URL}`);
+  const sql = getDatabaseConnection();
   try {
     const {
       title,
@@ -84,6 +104,11 @@ export async function GET(req) {
   try {
     const url = new URL(req.url);
     const link = url.searchParams.get("link");
+    const email = url.searchParams.get("email");
+    if (email) {
+      const inEvent = await checkUserInEvent(email, link);
+      return new Response(JSON.stringify({ inEvent }), { status: 200 });
+    }
     const eventData = await fetchEvent(link);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {
