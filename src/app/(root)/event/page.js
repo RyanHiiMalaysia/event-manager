@@ -32,7 +32,7 @@ export default function Page() {
             headers: { "Content-Type": "application/json" },
           });
           const result = await response.json();
-          console.log(result);
+
           if (!response.ok) {
             setError(result.message || "Failed to fetch events");
             return;
@@ -55,8 +55,8 @@ export default function Page() {
     return <div>{error}</div>;
   }
 
-  const schedulingEvents = userEvents.filter((event) => event.event_allocated_time === null);
-  const allocatedEvents = userEvents.filter((event) => event.event_allocated_time !== null);
+  const schedulingEvents = userEvents.filter((event) => event.event_allocated_start === null);
+  const allocatedEvents = userEvents.filter((event) => event.event_allocated_start !== null);
   const organisingEvents = userEvents.filter((event) => event.ue_is_admin);
 
   return (
