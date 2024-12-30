@@ -3,6 +3,7 @@ import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req) {
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  console.log('Token:', token);
 
   if (!token) {
     console.log('Redirecting to home page');
