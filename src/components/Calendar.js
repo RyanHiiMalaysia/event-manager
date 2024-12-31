@@ -7,6 +7,16 @@ import WeekView from "./WeekView";
 const localizer = momentLocalizer(moment);
 
 export function EventCalendar({ events, onSelectEvent }) {
+  const { views } = useMemo(
+    () => ({
+      views: {
+        day: true,
+        week: WeekView,
+        month: true,
+      },
+    }),
+    []
+  );
   return (
     <div>
       <Calendar
@@ -16,6 +26,7 @@ export function EventCalendar({ events, onSelectEvent }) {
         endAccessor="end"
         style={{ height: 600 }}
         onSelectEvent={onSelectEvent}
+        views={views}
         popup
       />
     </div>
