@@ -246,8 +246,36 @@ return <p className="p-6 text-center">Event not found.</p>;
         
           const handleOnSavePress = async () => {
             
+            //Check the user has scheduled this event or not
+            const response_check_schedule = await fetch(`/api/userevent?userId=${user.user_id}&eventId=${event.event_id}`);
+            const statusCode = response_check_schedule.status;
             
-            const response = await fetch("/api/freeTimes", {
+
+            if(statusCode === 201){
+
+              const userResponse = confirm("You have not scheduled this event yet. Do you want to schedule it now?");
+
+              if (!userResponse) {
+                  alert("You chose No! Returning to the previous page...");
+                  return;
+              } else {
+                alert("You chose Yes! Schedule this event");
+
+                const response_schedule_event = await fetch("/api/userevent", {
+                  method: "POST",
+                  body: JSON.stringify({
+                    userId:user.user_id,
+                    freetimes:freeTimes,
+                  }),
+                });
+
+                if(response_schedule_event.ok){alert("Event scheduled!")}
+                else{alert(`Failed to scheduled this event`)};
+
+              }
+            }
+
+            const response_save_freeTimes = await fetch("/api/freeTimes", {
               method: "POST",
               body: JSON.stringify({
                 user:user.user_id,
@@ -255,9 +283,10 @@ return <p className="p-6 text-center">Event not found.</p>;
                 freetimes:freeTimes
               }),
             });
-
-            if(response.ok){alert(`Saved ${freeTimes.length} free times`)}
+            
+            if(response_save_freeTimes.ok){alert(`Saved ${freeTimes.length} free times`)}
             else{alert(`Failed to save free times`)};
+
           }
 
           const eventRange = {

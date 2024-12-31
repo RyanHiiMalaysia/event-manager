@@ -13,33 +13,15 @@ const checking_freetimes = async (userId, start, end) => {
     return null;  // No issue, continue checking
 };
 
-const checking_user = async (userId, eventId) => {
-    const sql = neon(`${process.env.DATABASE_URL}`);
-    const result = await sql('SELECT * FROM userevent WHERE user_id = $1 AND event_id = $2', 
-                            [userId, eventId]);
-
-    if (result.length == 0) {//Need to add the user to the userevent table
-        await sql`
-        INSERT INTO userevent (
-            user_id, event_id,ue_is_admin
-        ) VALUES (
-            ${userId}, ${eventId}, false)`; 
-    }
-};
-
-
 export async function POST(req) {
     const sql = neon(`${process.env.DATABASE_URL}`);
     try {
       const {
         user,
-        event,
         freetimes
       } = await req.json();
     
-      checking_user(user, event);
-
-  
+      
       for (let f of freetimes) {
         const result = await checking_freetimes(user, f.start, f.end);
         
