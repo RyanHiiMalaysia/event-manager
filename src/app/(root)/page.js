@@ -1,6 +1,7 @@
 import Hero from "@/components/hero";
 import Pricing from "@/components/pricing";
 import Faq from "@/components/faq";
+import Footer from "@/components/footer";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <Hero />
       <Pricing />
       <Faq />
+      <Footer />
     </main>
   );
 }
