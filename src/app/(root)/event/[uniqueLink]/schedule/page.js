@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { ScheduleCalendar } from "../../../components/Calendar";
-import { eventRange } from "../../../components/demoData";
+import { ScheduleCalendar } from "../../../../../components/Calendar";
+import { eventRange } from "../../../../../components/demoData";
 import { DatePicker } from "@nextui-org/date-picker";
 import { TimeInput } from "@nextui-org/date-input";
 import {
