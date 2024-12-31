@@ -1,15 +1,15 @@
-"use client"
-
-import { Button, Link } from "@nextui-org/react";
+import Hero from "@/components/hero";
+import Pricing from "@/components/pricing";
+import Faq from "@/components/faq";
+import Footer from "@/components/footer";
 
 export default function Home() {
   return (
-    <>
-    <h1 className="heading">Home</h1>
-    <Button className="bg-gradient-to-tr from-pink-500 to-yellow-500 text-white shadow-lg"
-      radius="full" as={Link} href="/signUp">
-                Sign Up
-              </Button>
-    </>
+    <main className="flex flex-col min-h-dvh">
+      <Hero />
+      <Pricing />
+      <Faq />
+      <Footer />
+    </main>
   );
 }
