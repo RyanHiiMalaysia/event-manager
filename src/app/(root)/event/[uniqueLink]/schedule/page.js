@@ -13,6 +13,8 @@ export default function Page() {
   const [selectedDate, setSelectedDate] = useState();
   const [startTime, setStartTime] = useState();
   const [endTime, setEndTime] = useState();
+  const [startDate, setStartDateRange] = useState();
+  const [endDate, setEndDateRange] = useState();
   const [freeTimes, setFreeTimes] = useState([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { data: session } = useSession();
@@ -21,10 +23,7 @@ export default function Page() {
   const [eventLink, setEventLink] = useState("");
   const [dataFetched, setDataFetched] = useState(false);
 
-  const start = eventRange.start.toISOString().split("T")[0];
-  const startDate = parseDate(start);
-  const end = eventRange.end.toISOString().split("T")[0];
-  const endDate = parseDate(end);
+  
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -42,8 +41,18 @@ export default function Page() {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
-
+        const response_event_date = await fetch(`/api/events?link=${eventLink}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
         const result = await response.json();
+        const result_event_date = await response_event_date.json();
+
+        const start = result_event_date.eventData[0].event_schedule_start.split("T")[0];
+        setStartDateRange(parseDate(start));
+        const end = result_event_date.eventData[0].event_schedule_end.split("T")[0];
+        setEndDateRange(parseDate(end));
+        
         if (!response.ok) {
           setError(result.message);
           setLoading(false);
@@ -125,7 +134,7 @@ export default function Page() {
   const renderEditEventContent = () => {
     return (
       <>
-        <DatePicker
+        <DatePicker 
           isRequired
           minValue={startDate}
           maxValue={endDate}
