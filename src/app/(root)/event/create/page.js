@@ -51,7 +51,7 @@ export default function Page() {
       }
     };
 
-    if (status && !dataFetched) {
+    if (session && !dataFetched) {
       fetchUserDetails();
       setDataFetched(true);
     }
