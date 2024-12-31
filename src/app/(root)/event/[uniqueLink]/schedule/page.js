@@ -212,8 +212,8 @@ export default function Page() {
   };
 
   return (
-    <div className="bg-custom-page min-h-screen">
-      <div className="calendar-container max-w-4xl mx-auto rounded-lg">
+    <div className="bg-custom-page mt-6 md:mt-4 min-h-screen">
+      <div className="max-w-4xl mx-auto rounded-lg">
         <ScheduleCalendar onSelectEvent={handleSelectEvent} eventRange={eventRange} freeTimes={freeTimes} />
         <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
           <ModalContent>
@@ -249,7 +249,7 @@ export default function Page() {
           </ModalContent>
         </Modal>
       </div>
-      <div className="date-time-container text-center pt-10">
+      <div className="date-time-container text-center md:pt-12 pt-10">
         <DatePicker
           isRequired
           minValue={startDate}
@@ -274,7 +274,7 @@ export default function Page() {
           errorMessage="End time must be greater than start time"
         />
       </div>
-      <div className="add-button-container text-center mt-4">
+      <div className="add-button-container text-center pt-1">
         <Button onPress={handleOnAddPress} className="mr-2">
           Add
         </Button>
