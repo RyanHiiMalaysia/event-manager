@@ -45,10 +45,8 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin) {
 }
 
 async function getEventID(sql, link) {
-  const [event_id] = await sql`
-    SELECT event_id FROM events WHERE event_link = ${link}
-  `;
-  return event_id;
+  const [eventData] = await sql`SELECT event_id FROM events WHERE event_link = ${link}`;
+  return eventData.event_id;
 }
 
 async function verifyParticipation(sql, user_email, event_id) {
@@ -68,8 +66,8 @@ async function verifyParticipation(sql, user_email, event_id) {
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
-    const { user_email, link } = await req.json();
-    const event_id = await getEventID(sql, link);
+    const { user_email, event_link } = await req.json();
+    const event_id = await getEventID(sql, event_link);
     const inEvent = await verifyParticipation(sql, user_email, event_id);
 
     if (!inEvent) {
