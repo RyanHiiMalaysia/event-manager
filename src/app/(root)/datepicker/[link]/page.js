@@ -265,7 +265,7 @@ return <p className="p-6 text-center">Event not found.</p>;
                   method: "POST",
                   body: JSON.stringify({
                     userId:user.user_id,
-                    freetimes:freeTimes,
+                    eventId:event.event_id
                   }),
                 });
 
