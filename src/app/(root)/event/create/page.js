@@ -69,7 +69,7 @@ export default function Page() {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
     const { hours, minutes, startDate, deadline } = data;
-
+    console.log(data)
     if (hours === "0" && minutes === "0") {
       alert("Event duration cannot be 0 hours and 0 minutes");
       return;
@@ -87,6 +87,7 @@ export default function Page() {
       body: JSON.stringify({
         ...data,
         duration: duration,
+        deadline: new Date(deadline).toISOString(),
         startTime: startTime?.toString(),
         endTime: endTime?.toString(),
         link: uniqueLink,
