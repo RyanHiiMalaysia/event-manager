@@ -15,7 +15,11 @@ async function getTimes() {
         FROM
         timetest
     `;
-  return await sql(query);
+    const result = await sql(query);
+  return result.map(record => {
+    record.time = new Date();
+    return record;
+  });
 }
 
 export async function GET(req) {
@@ -23,6 +27,7 @@ export async function GET(req) {
     const strToBool = (str) => (str === null ? null : str === "true");
     const url = new URL(req.url);
     const times = await getTimes();
+    console.log(times)
     return new Response(JSON.stringify({ times }), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ message: "Failed to fetch events" }), { status: 500 });
