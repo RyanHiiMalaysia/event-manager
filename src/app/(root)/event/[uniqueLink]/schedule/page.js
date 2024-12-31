@@ -60,7 +60,7 @@ export default function Page() {
         setError(error);
       } finally {
         setLoading(false);
-        setDataFetched(true); // Mark data as fetched
+        setDataFetched(true);
       }
     };
 

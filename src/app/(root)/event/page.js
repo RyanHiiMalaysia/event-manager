@@ -18,6 +18,7 @@ export default function Page() {
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dataFetched, setDataFetched] = useState(false);
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
@@ -60,9 +61,11 @@ export default function Page() {
         setLoading(false);
       }
     };
-
-    fetchUserDetails();
-  }, [status, session]);
+    if (session && !dataFetched) {
+      fetchUserDetails();
+      setDataFetched(true);
+    }
+  }, [status, session, dataFetched]);
 
   if (error) {
     return <div>{error}</div>;

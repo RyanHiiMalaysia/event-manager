@@ -13,6 +13,8 @@ export default function Page() {
   const [error, setError] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dataFetched, setDataFetched] = useState(false);
+  
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
@@ -50,8 +52,11 @@ export default function Page() {
       }
     };
 
-    fetchUserDetails();
-  }, [status, session]);
+    if (session && !dataFetched) {
+      fetchUserDetails();
+      setDataFetched(true);
+    }
+  }, [status, session, dataFetched]);
 
   return (
     <div className="bg-custom-page min-h-screen">
