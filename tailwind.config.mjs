@@ -13,6 +13,10 @@ const config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        "muted-foreground": "var(--muted-foreground)",
+        light: "var(--light)",
+        card: "var(--card)",
+        border: "var(--border)",
       },
     },
   },

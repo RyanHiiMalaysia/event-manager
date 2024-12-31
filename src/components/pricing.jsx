@@ -38,7 +38,7 @@ export default function Pricing() {
           No subscriptions. A one-time payment is all you need.
         </p>
       </div>
-      <div className="mt-16 gap-10 grid lg:grid-cols-3 place-content-center">
+      <div className="mt-16 gap-10 grid lg:grid-cols-1 place-content-center">
         {plans.map((item, idx) => (
           <Card
             key={idx}
