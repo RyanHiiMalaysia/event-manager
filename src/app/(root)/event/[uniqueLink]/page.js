@@ -115,23 +115,25 @@ export default function Page({ params }) {
   }
 
   return (
-    <div className="p-10 max-w-sm mx-auto border border-default-200 dark:border-default-100 rounded-lg shadow-lg bg-white dark:bg-transparent">
+    <div className="p-10 max-w-xl mx-auto border border dark:border rounded-lg shadow-lg bg-white dark:bg-transparent">
       <h1 className="text-3xl font-bold">{event.event_title}</h1>
       <p className="text-gray-600 mt-2">Owner: {event.user_name}</p>
       <p className="text-gray-600 mt-2">
         Date: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
       </p>
       <p className="text-gray-600 mt-2">Duration: {convertTime(event.event_duration)}</p>
-      <Accordion variant="bordered" className="mt-4">
+      <Accordion variant="bordered" selectionMode="multiple">
         <AccordionItem key="1" aria-label="Location" title="Location">
+        <div className="max-h-40 overflow-y-auto break-words">
           <p>{event.event_location}</p>
           <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
+        </div>
         </AccordionItem>
         <AccordionItem key="2" aria-label="Description" title="Description">
-          <p>{condition(event.event_description)}</p>
+        <div className="max-h-40 overflow-y-auto break-words">{condition(event.event_description)}</div> 
         </AccordionItem>
         <AccordionItem key="3" aria-label="Deadline" title="Deadline">
-          <p>{condition(convertDate(event.event_deadline))}</p>
+        <div className="max-h-40 overflow-y-auto break-words">{condition(convertDate(event.event_deadline))}</div>
         </AccordionItem>
       </Accordion>
 
