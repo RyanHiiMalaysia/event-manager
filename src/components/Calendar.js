@@ -7,18 +7,11 @@ import WeekView from "./WeekView";
 const localizer = momentLocalizer(moment);
 
 export function EventCalendar({ events, onSelectEvent }) {
-  // Adjust event times to reflect UTC+8
-  const adjustedEvents = events.map((event) => ({
-    ...event,
-    start: moment.tz(event.start, 'Asia/Singapore').local().toDate(),
-    end: moment.tz(event.end, 'Asia/Singapore').local().toDate(),
-  }));
-
   return (
     <div>
       <Calendar
         localizer={localizer}
-        events={adjustedEvents}
+        events={events}
         startAccessor="start"
         endAccessor="end"
         style={{ height: 600 }}

@@ -140,10 +140,10 @@ export default function Page() {
                         <b>{item.event_title}</b>
                         <p className="text-default-500">
                           <span className="block sm:inline">
-                            {item.event_allocated_start}
+                            {moment(item.event_allocated_start).format("MMMM Do YYYY")}
                           </span>
                           <span className="block sm:inline">
-                            {item.event_allocated_end}
+                            {moment(item.event_allocated_start).format(" h:mm a")}
                           </span>
                         </p>
                       </CardFooter>
