@@ -3,7 +3,7 @@
 "use client";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Accordion, AccordionItem } from "@nextui-org/react";
+import { Accordion, AccordionItem, Link, Button } from "@nextui-org/react";
 
 
 export default function Page({ params }) {
@@ -136,12 +136,13 @@ export default function Page({ params }) {
       </Accordion>
 
       <div className="mt-6">
-        <button
+        <Button
           className="px-4 py-2 bg-blue-500 text-white rounded"
-          onClick={() => router.push(`/availability/event/${event.event_id}`)} // Use event.event_id
+          href={`/event/${uniqueLink}/schedule`}
+          as={Link}
         >
           Set Your Availability
-        </button>
+        </Button>
       </div>
     </div>
   );
