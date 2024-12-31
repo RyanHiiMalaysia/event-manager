@@ -20,6 +20,7 @@ export default function Page() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [path, setPath] = useState("");
+  const [dataFetched, setDataFetched] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -50,8 +51,11 @@ export default function Page() {
       }
     };
 
-    fetchUserDetails();
-  }, [status, session]);
+    if (status && !dataFetched) {
+      fetchUserDetails();
+      setDataFetched(true);
+    }
+  }, [status, session, dataFetched]);
 
   if (status === "loading" || loading) {
     return <div>Loading...</div>;
