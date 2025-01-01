@@ -57,6 +57,7 @@ async function verifyParticipation(sql, user_email, event_link) {
     AND
       event_id = (SELECT event_id FROM events WHERE event_link = ${event_link})
   `;
+  
   return user_id ? true : false;
 }
 
@@ -78,13 +79,21 @@ async function addUserToEvent(sql, user_email, event_link) {
 
 // Function to handle the GET request to fetch user events
 export async function GET(req) {
+  const sql = getDatabaseConnection();
   try {
     const strToBool = (str) => (str === null ? null : str === "true");
     const url = new URL(req.url);
     const email = url.searchParams.get("email");
     const hasAllocated = strToBool(url.searchParams.get("hasAllocated"));
     const isAdmin = strToBool(url.searchParams.get("isAdmin"));
+    const eventLink = url.searchParams.get("eventLink")
     
+
+    const isUserIn = await verifyParticipation(sql, email, eventLink);
+    
+    if(!isUserIn){
+      return new Response({ message: "User is not in this event" }, { status: 404 });
+    }
     const eventData = await fetchUserEvents(email, hasAllocated, isAdmin);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {
