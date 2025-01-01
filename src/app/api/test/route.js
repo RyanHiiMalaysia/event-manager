@@ -16,7 +16,7 @@ async function fetchToBeAllocatedEvents(sql) {
       FROM 
         events 
       WHERE 
-        event_deadline < NOW()
+        event_deadline < NOW() and event_allocated_start IS NULL and event_allocated_end IS NULL
     `;
     return await query;
 }
@@ -98,8 +98,8 @@ export async function GET(request) {
         eventObj.setEventRange();
 
         // Update the event with the allocated start and end times
-        if (eventInstance.eventRange) {
-            const { start, end } = eventInstance.eventRange;
+        if (eventObj.eventRange) {
+            const { start, end } = eventObj.eventRange;
             await updateEventAllocation(sql, event_id, start.toISOString(), end.toISOString());
         }
     }
