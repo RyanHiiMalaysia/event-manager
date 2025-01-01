@@ -20,8 +20,16 @@ export default function useOverflowHandler(size) {
 
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
+    return () => {
+      // Cleanup function to reset overflow styles
+      document.documentElement.style.overflow = "auto";
+      document.body.style.overflow = "auto";
+      document.documentElement.removeAttribute("style");
+      document.body.removeAttribute("style");
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [size]);
 
   return containerRef;
 }
