@@ -160,7 +160,7 @@ export default function CreateEventPage() {
               }
             />
           </div>
-          <DatePicker label="Registration Deadline" name="deadline" isRequired granularity="minute" />
+          <DatePicker label="Registration Deadline" name="deadline" isRequired minValue={today(getLocalTimeZone())} />
           <Input
             label="Participant Limit"
             labelPlacement="outside"

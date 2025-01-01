@@ -21,11 +21,8 @@ export default function Page() {
   const [error, setError] = useState(null);
   const [eventLink, setEventLink] = useState("");
   const [dataFetched, setDataFetched] = useState(false);
-
-  const start = eventRange.start.toISOString().split("T")[0];
-  const startDate = parseDate(start);
-  const end = eventRange.end.toISOString().split("T")[0];
-  const endDate = parseDate(end);
+  const [startDate, setStartDateRange] = useState();
+  const [endDate, setEndDateRange] = useState();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -44,8 +41,18 @@ export default function Page() {
           headers: { "Content-Type": "application/json" },
         });
 
+        const response_event_date = await fetch(`/api/events?link=${eventLink}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
         const result = await response.json();
-        if (!response.ok) {
+        const result_event_date = await response_event_date.json();
+        const start = result_event_date.eventData[0].event_schedule_start.split("T")[0];
+        setStartDateRange(parseDate(start));
+        const end = result_event_date.eventData[0].event_schedule_end.split("T")[0];
+        setEndDateRange(parseDate(end));
+
+        if (!response.ok || !response_event_date.ok) {
           setError(result.message);
           setLoading(false);
           return;
