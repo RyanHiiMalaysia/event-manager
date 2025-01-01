@@ -48,19 +48,13 @@ body {
   height: 400px;
 }
 
-@media (max-width: 768px) {
-  .date-time-container {
-    margin-top: 75px;
-  }
-}
-
 @layer base {
   :root {
     --background: #EEEEEC;
     --foreground: #131316;
     --muted-foreground: hsl(0, 0%, 41%);
     --light: #5ba8ff;
-    --card: #eaeaea;
+    --card: #ffffff;
     --border: #d5d5d5;
   }
   

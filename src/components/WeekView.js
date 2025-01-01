@@ -39,7 +39,7 @@ CustomWeekView.propTypes = {
 }
 
 CustomWeekView.range = (date, { localizer }) => {
-  const start = date
+  const start = localizer.startOf(date, 'day')
   const end = localizer.add(start, 2, 'day')
 
   let current = start

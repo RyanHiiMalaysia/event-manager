@@ -52,7 +52,7 @@ export default function Pricing() {
                         ) : (
                             <span className="absolute inset-[-1000%] bg-border" />
                         )}
-                        <div className="z-[2] flex flex-col justify-between w-full h-full bg-card rounded-[18px] p-5">
+                        <div className="z-[2] flex flex-col justify-between w-full h-full bg-card rounded-[18px] p-5 opacity-75">
                             <CardBody className="w-full flex items-start gap-3">
                                 <div className="flex flex-col">
                                     <h4 className="text-xl font-light">{item.name}</h4>

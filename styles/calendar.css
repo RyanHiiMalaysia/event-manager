@@ -901,10 +901,6 @@ button.rbc-input::-moz-focus-inner {
   background: #ececec;
 }
 
-.rbc-time-view{
-  height: 100%;
-}
-
 @media (max-width: 768px) {
   .rbc-event {
     font-size: 0.8rem;
@@ -915,10 +911,13 @@ button.rbc-input::-moz-focus-inner {
   .rbc-date-cell {
     text-align-last: center;
   }
+  .rbc-toolbar {
+    margin-bottom: 10px;
+  }
 }
 
 .rbc-month-view {
-  margin-bottom: 10px;
+  height: 70%;
 }
 
 
