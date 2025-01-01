@@ -114,7 +114,7 @@ export default function CreateEventPage() {
       <Form
         onSubmit={onSubmit}
         validationBehavior="native"
-        className="w-full justify-center items-center w-full space-y-4 bg-gray-100 dark:bg-black"
+        className="w-full justify-center items-center w-full space-y-4 bg-gray-100 dark:bg-black p-4 "
       >
         <div className="flex flex-col gap-4 max-w-md p-4 border border-default-200 dark:border-default-100 rounded-lg shadow-lg bg-white dark:bg-transparent">
           <Input
