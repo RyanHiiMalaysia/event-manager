@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
-import { Event, User } from "../../../utils/schedule";
+import { Event, User } from "@/utils/schedule";
 
 // Function to initialize the database connection
 function getDatabaseConnection() {
@@ -79,8 +79,9 @@ export async function GET(request) {
     for (const event of toBeAllocatedEvents) {
         const { event_id, event_duration } = event;
         const userEvents = await fetchUserEvents(sql, event_id);
-
-        const eventObj = new Event(event_duration);
+        const {hours, minutes} = event_duration;
+        const duration = ((hours?? 0) * 60 + (minutes?? 0)) * 60 * 1000;
+        const eventObj = new Event(duration);
 
         // For each user event of event, fetch freetimes and add to event object
         for (const userEvent of userEvents) {
