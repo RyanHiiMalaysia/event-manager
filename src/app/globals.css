@@ -48,12 +48,6 @@ body {
   height: 400px;
 }
 
-@media (max-width: 768px) {
-  .date-time-container {
-    margin-top: 75px;
-  }
-}
-
 @layer base {
   :root {
     --background: #EEEEEC;

@@ -50,7 +50,7 @@ export function ScheduleCalendar({ onSelectEvent, eventRange, freeTimes }) {
       events={freeTimes}
       startAccessor="start"
       endAccessor="end"
-      style={{ height: 400 }}
+      style={{ height: 500}}
       defaultDate={defaultDate}
       views={views}
       scrollToTime={defaultDate}
