@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 // Metadata for the application
 export const metadata = {
   title: {
-    template: '%s | Event Manager',
+    template: '%s - Event Manager',
     default: 'Event Manager',
   },
   description: "Event Manager is a simple event management application where you can schedule events with your friends and family using their free times.",
