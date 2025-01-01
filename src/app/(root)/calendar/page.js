@@ -14,7 +14,6 @@ export default function Page() {
   const [userEvents, setUserEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dataFetched, setDataFetched] = useState(false);
-  const containerRef = useRef(null);
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
