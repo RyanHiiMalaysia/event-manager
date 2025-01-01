@@ -68,6 +68,20 @@ export default function Page({ params }) {
         
   }
 
+  const SetAvailabilityButton = () => {
+    if(isUserIn){
+      return (<div className="mt-6">
+              <Button
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+                href={`/event/${uniqueLink}/schedule`}
+                as={Link}
+              >
+                Set Your Availability
+              </Button>
+            </div>)
+    }
+  }
+
   
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -205,8 +219,8 @@ export default function Page({ params }) {
         <div className="max-h-40 overflow-y-auto break-words">{condition(convertDate(event.event_deadline))}</div>
         </AccordionItem>
       </Accordion>
-
-      <div className="mt-6">
+      <SetAvailabilityButton/>
+      {/* <div className="mt-6">
         <Button
           className="px-4 py-2 bg-blue-500 text-white rounded"
           href={`/event/${uniqueLink}/schedule`}
@@ -214,7 +228,7 @@ export default function Page({ params }) {
         >
           Set Your Availability
         </Button>
-      </div>
+      </div> */}
     </div>
     </div>
   );
