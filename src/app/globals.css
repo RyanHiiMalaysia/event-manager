@@ -75,6 +75,36 @@ body {
 }
 
 
+/* Main styles for the overlay */
+.blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1000;
+  pointer-events: none; /* Prevent interaction with blurred elements */
+}
+
+/* SVG mask */
+.blur-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  mask: url(#mask);
+  -webkit-mask: url(#mask);
+  pointer-events: none;
+  z-index: 1001;
+}
+
+/* Animating transitions for the highlight */
+.transition {
+  transition: mask-position 0.5s, -webkit-mask-position 0.5s;
+}
 
 
 
