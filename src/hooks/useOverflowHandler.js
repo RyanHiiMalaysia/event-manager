@@ -7,7 +7,7 @@ export default function useOverflowHandler(size) {
     const handleResize = () => {
       if (containerRef.current) {
         const { clientHeight } = containerRef.current;
-        console.log(size, clientHeight);
+
         if (size <= clientHeight) {
           document.documentElement.style.overflow = "hidden";
           document.body.style.overflow = "hidden";
