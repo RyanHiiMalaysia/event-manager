@@ -1,19 +1,74 @@
 
 
 "use client";
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Accordion, AccordionItem, Link, Button } from "@nextui-org/react";
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation'
+import { Accordion, AccordionItem, Link, Button, Alert} from "@nextui-org/react";
 
 
 export default function Page({ params }) {
-  const router = useRouter();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uniqueLink, setUniqueLink] = useState('');
-  const [ownerName, setOwnerName] = useState('');
   const [path, setPath] = useState("");
+  const { data: session, status } = useSession();
+  const [hasFetchedUser, setHasFetchedUser] = useState(false);
+  const [isUserIn, setIsUserIn] = useState(false);
+  const [isAlertVisible, setIsAlertVisible] = useState(true);
 
+
+  const handleJoin = async() => {
+    console.log('Joined the event');
+
+    const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&eventLink=${uniqueLink}`,{
+        method: "POST",
+        body: JSON.stringify({
+          user_email:session.user.email, 
+          event_link:uniqueLink
+        }),
+      })
+
+    if(!response_add_user)throw new Error('Failed to add user to this event'); 
+    else{
+      setIsUserIn(true);
+      setIsAlertVisible(false)
+    }
+    setIsAlertVisible(false)
+  };
+
+  const handleDecline = () => {
+    console.log('Declined the event');
+    redirect('/event') 
+  };
+  
+  const InvitationPopup = () =>{
+    if(!isUserIn && isAlertVisible){
+      return (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 w-[50%] max-w-[600px] h-auto flex justify-center items-center">
+        <Alert
+            color="primary"
+            className="w-[80%] max-w-[600px] h-[400px] flex justify-center items-center"
+            endContent={
+                <div className="flex justify-center w-full space-x-4">
+                <Button color="warning" size="auto" variant="flat" onPress={handleJoin}>
+                    Join
+                </Button>
+                <Button color="warning" size="auto" variant="flat" onPress={handleDecline}>
+                  Decline
+                </Button>
+            </div>
+            }
+        title="You are invited to this event"
+        variant="faded"
+      />
+    </div>
+      );
+    }
+        
+  }
+
+  
   useEffect(() => {
     if (typeof window !== "undefined") {
       setPath(window.location.origin);
@@ -66,8 +121,27 @@ export default function Page({ params }) {
     return formattedDate;
   }
 
+
   useEffect(() => {
-    if (!uniqueLink) return;
+    if (!uniqueLink || status !== 'authenticated' || !session?.user?.email) return;
+    
+    const fetchUser = async () => {
+      if (hasFetchedUser) return; // Prevent duplicate calls
+      setHasFetchedUser(true);
+        try {
+          const response = await fetch(`/api/user-event?email=${session.user.email}&eventLink=${uniqueLink}`);
+          const statusCode = response.status;
+
+          if(statusCode === 404){
+            setIsUserIn(false);
+            
+          }else{
+            setIsUserIn(true);
+          }
+        } catch (error) {
+          console.log(error)
+        } 
+    };
 
     const fetchEvent = async () => {
       try {
@@ -87,14 +161,6 @@ export default function Page({ params }) {
 
         setEvent(matchedEvent || null); // Set null if no event matches
         
-        // const response_owner = await fetch(`${path}/api/owners?owner=${matchedEvent.event_creator}`, {
-        //   method: 'GET',
-        //   headers: { 'Content-Type': 'application/json' },
-        // });
-
-        // const data_owner = data_events.eventData[0].event_creator;
-        
-        // setOwnerName(data_owner)
       } catch (error) {
         console.error('Error fetching event:', error.message);
         setEvent(null); // Handle not found
@@ -104,7 +170,8 @@ export default function Page({ params }) {
     };
 
     fetchEvent();
-  }, [uniqueLink]);
+    fetchUser();
+  }, [uniqueLink, status, session]);
 
   if (loading) {
     return <p className="p-6 text-center">Loading event details...</p>;
@@ -115,7 +182,9 @@ export default function Page({ params }) {
   }
 
   return (
-    <div className="p-10 max-w-xl mx-auto border border dark:border rounded-lg shadow-lg bg-white dark:bg-transparent">
+    <div className="flex">
+    <InvitationPopup />
+    <div className="flex-grow  p-20 max-w-xl mx-auto border border dark:border rounded-lg shadow-lg bg-white dark:bg-transparent">
       <h1 className="text-3xl font-bold">{event.event_title}</h1>
       <p className="text-gray-600 mt-2">Owner: {event.user_name}</p>
       <p className="text-gray-600 mt-2">
@@ -146,6 +215,7 @@ export default function Page({ params }) {
           Set Your Availability
         </Button>
       </div>
+    </div>
     </div>
   );
 }
