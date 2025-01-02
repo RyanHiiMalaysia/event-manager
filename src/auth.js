@@ -14,7 +14,7 @@ export const authOptions = {
 
       if (result.length === 0) {
         // Redirect to sign-up page if the user does not exist
-        return '/signUp';
+        return '/signup';
       }
 
       return true;

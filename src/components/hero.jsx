@@ -39,7 +39,7 @@ export default function Hero() {
                             {session ? (
                                 <p className="text-lg font-medium text-pretty">Hey there, {session.user.chosenName}!</p>
                             ) : (
-                                <Button onPress={onOpen} color="primary" variant="shadow" as={Link} href="/signUp">
+                                <Button onPress={onOpen} color="primary" variant="shadow" as={Link} href="/signup">
                                     Sign up
                                 </Button>
                             )}
