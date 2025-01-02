@@ -54,8 +54,10 @@ export default function SignUp() {
             label="Name"
             labelPlacement="outside"
             placeholder="Enter your name"
+            isRequired
             variant="bordered"
             className="mt-16"
+            description="What should we call you?"
           />
           <Input
             type="email"
