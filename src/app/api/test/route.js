@@ -62,6 +62,20 @@ async function updateEventAllocation(sql, event_id, start, end) {
     `;
 }
 
+// Function to delete all free times associated with a specific event
+async function deleteFreetimesForEvent(sql, event_id) {
+    await sql`
+      DELETE FROM 
+        freetimes 
+      WHERE 
+        ue_id IN (
+          SELECT ue_id 
+          FROM userevent 
+          WHERE event_id = ${event_id}
+        )
+    `;
+}
+
 export async function GET(request) {
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -102,10 +116,12 @@ export async function GET(request) {
         if (eventObj.eventRange) {
             const { start, end } = eventObj.eventRange;
             await updateEventAllocation(sql, event_id, start.toISOString(), end.toISOString());
+            // Delete all free times associated with the event
+            await deleteFreetimesForEvent(sql, event_id);
         }
     }
 
     return NextResponse.json({
-        message: "Cron Job Rann at " + new Date()
+        message: "Cron Job Ran at " + new Date()
     });
 }

@@ -6,6 +6,7 @@ import moment from "moment";
 import blue from "../../../../public/blue.svg";
 import green from "../../../../public/green.svg";
 import yellow from "../../../../public/yellow.svg";
+// Add a new color for past events
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 
@@ -15,6 +16,7 @@ export default function Page() {
   const [schedulingEvents, setSchedulingEvents] = useState([]);
   const [allocatedEvents, setAllocatedEvents] = useState([]);
   const [organisingEvents, setOrganisingEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState([]);
   const { data: session, status } = useSession();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -43,15 +45,17 @@ export default function Page() {
             return result.eventData;
           };
 
-          const [scheduling, allocated, organising] = await Promise.all([
-            fetchEvents("hasAllocated=false"),
-            fetchEvents("hasAllocated=true"),
-            fetchEvents("isAdmin=true"),
+          const [scheduling, allocated, organising, past] = await Promise.all([
+            fetchEvents("hasAllocated=false&isPast=false"),
+            fetchEvents("hasAllocated=true&isPast=false"),
+            fetchEvents("isAdmin=true&isPast=false"),
+            fetchEvents("isPast=true"),
           ]);
 
           setSchedulingEvents(scheduling);
           setAllocatedEvents(allocated);
           setOrganisingEvents(organising);
+          setPastEvents(past);
         } catch (error) {
           setError(error);
         } finally {
@@ -170,6 +174,32 @@ export default function Page() {
                         radius="lg"
                         shadow="sm"
                         src={yellow}
+                        width="100%"
+                        priority={true}
+                      />
+                    </CardBody>
+                    <CardFooter className="text-small justify-between">
+                      <b>{item.event_title}</b>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
+        </Tab>
+        <Tab key="past" title="Past"> {/* New tab for past events */}
+          <Card>
+            <CardBody>
+              <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {pastEvents.map((item, index) => (
+                  <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
+                    <CardBody className="overflow-visible p-0">
+                      <Image
+                        alt={item.event_title}
+                        className="w-full object-cover h-[140px]"
+                        radius="lg"
+                        shadow="sm"
+                        src={blue}
                         width="100%"
                         priority={true}
                       />
