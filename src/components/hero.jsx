@@ -4,9 +4,12 @@ import { Button } from "@nextui-org/button";
 import { motion } from "framer-motion";
 import { useDisclosure } from "@nextui-org/use-disclosure";
 import { Link } from "@nextui-org/link";
+import { useSession } from "next-auth/react";
 
 export default function Hero() {
+    const { data: session, status } = useSession();
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     return (
         <div className="relative justify-center items-center">
             <section className="max-w-screen-xl mx-auto px-4 py-28 gap-12 md:px-8 flex flex-col justify-center items-center">
@@ -26,16 +29,22 @@ export default function Hero() {
                         Manage your events seamlessly
                     </h1>
                     <p className="max-w-2xl text-lg mx-auto text-muted-foreground text-balance">
-                    Organise and manage all your events with ease using our event management platform.
+                        Organise and manage all your events with ease using our event management platform.
                     </p>
-                    <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        className="items-center justify-center gap-x-3 space-y-3 sm:flex sm:space-y-0"
-                    >
-                        <Button onPress={onOpen} color="primary" variant="shadow" as={Link} href="/signUp">
-                            Sign up
-                        </Button>
-                    </motion.div>
+                    {status !== "loading" && (
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="items-center justify-center gap-x-3 space-y-3 sm:flex sm:space-y-0"
+                        >
+                            {session ? (
+                                <p className="text-lg font-medium text-pretty">Hey there, {session.user.chosenName}!</p>
+                            ) : (
+                                <Button onPress={onOpen} color="primary" variant="shadow" as={Link} href="/signUp">
+                                    Sign up
+                                </Button>
+                            )}
+                        </motion.div>
+                    )}
                 </motion.div>
             </section>
             <motion.div
