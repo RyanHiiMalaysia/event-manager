@@ -59,6 +59,20 @@ async function verifyParticipation(sql, user_email, event_link) {
   `;
   return user_id ? true : false;
 }
+//Function to check the event has reached maximum participants 
+async function findNumberOfParticipants(sql, event_link) {
+
+  const currentNumberOfParticipants = await sql`
+    SELECT
+      user_id
+    FROM
+      users NATURAL JOIN userevent
+    WHERE
+      event_id = (SELECT event_id FROM events WHERE event_link = ${event_link})
+  `;
+  
+  return currentNumberOfParticipants.length;
+}
 
 // Function to add user to event
 async function addUserToEvent(sql, user_email, event_link) {
@@ -78,13 +92,28 @@ async function addUserToEvent(sql, user_email, event_link) {
 
 // Function to handle the GET request to fetch user events
 export async function GET(req) {
+  const sql = getDatabaseConnection();
   try {
     const strToBool = (str) => (str === null ? null : str === "true");
     const url = new URL(req.url);
     const email = url.searchParams.get("email");
     const hasAllocated = strToBool(url.searchParams.get("hasAllocated"));
     const isAdmin = strToBool(url.searchParams.get("isAdmin"));
-    
+    const numberOfParticipants = strToBool(url.searchParams.get("findNumberOfParticipants"));
+    const eventLink = url.searchParams.get("eventLink")
+    const findIsUserIn = strToBool(url.searchParams.get("findIsUserIn"));
+    //const isUserIn = await verifyParticipation(sql, email, eventLink);
+  
+    if(numberOfParticipants){
+      
+      const result = await findNumberOfParticipants(sql, eventLink);
+      return new Response(JSON.stringify({ result:result }), { status: 200 });
+    }
+    if(findIsUserIn){
+      
+      const isUserIn = await verifyParticipation(sql, email, eventLink);
+      return isUserIn?new Response({ message: "User is in this event" }, { status: 200 }):new Response({ message: "User is not in this event" }, { status: 404 })
+    }
     const eventData = await fetchUserEvents(email, hasAllocated, isAdmin);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {

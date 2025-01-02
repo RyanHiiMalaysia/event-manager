@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Form, Input, Button, TimeInput, DateRangePicker, DatePicker, Textarea } from "@nextui-org/react";
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
+import {Alert} from "@nextui-org/react";
 
 const generateUniqueLink = () => {
   const timestamp = Date.now();
@@ -27,6 +28,15 @@ export default function CreateEventPage() {
       setPath(window.location.origin);
     }
   }, []);
+
+  useEffect(() => {
+    if (eventLink) {
+      const linkSection = document.getElementById("event-link-section");
+      if (linkSection) {
+        linkSection.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [eventLink]);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -106,6 +116,29 @@ export default function CreateEventPage() {
       alert("Error creating event.");
     }
   };
+
+  const EventLinkPopup = () => {
+    if(eventLink){
+      return (<div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50">
+                <Alert
+                  color="success"
+                  className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
+                  endContent={
+                    <p>
+                        Share this link with participants:{" "}
+                        <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                          {eventLink}
+                        </a>
+                      </p>
+                  }
+                  title={<span style={{ fontSize: "1rem", fontWeight: "bold" }}>Event Created Successfully!</span>}
+                  variant="faded"
+                  font_size
+                />
+              </div>)
+    }
+  }
+
 
   const validateInteger = (value) => (Number.isInteger(Number(value)) ? null : "Please enter an integer");
 
@@ -202,18 +235,21 @@ export default function CreateEventPage() {
           </Button>
         </div>
       </Form>
-
-      {eventLink && (
-        <div className="mt-4 p-4 border border-green-500 rounded bg-green-50 dark:bg-green-900">
-          <p className="font-bold text-green-700">Event Created Successfully!</p>
-          <p>
-            Share this link with participants:{" "}
-            <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-              {eventLink}
-            </a>
-          </p>
-        </div>
-      )}
-    </div>
+            <EventLinkPopup />
+      {/* {eventLink && (
+                    <div
+                      id="event-link-section"
+                      className="mt-4 p-4 border border-green-500 rounded bg-green-50 dark:bg-green-900"
+                    >
+                      <p className="font-bold text-green-700">Event Created Successfully!</p>
+                      <p>
+                        Share this link with participants:{" "}
+                        <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                          {eventLink}
+                        </a>
+                      </p>
+                    </div>
+                  )} */}
+      </div>
   );
 }
