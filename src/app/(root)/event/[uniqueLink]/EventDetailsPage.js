@@ -17,6 +17,7 @@ export default function EventDetailsPage({ params }) {
   const [hasFetchedUser, setHasFetchedUser] = useState(false);
   const { data: session, status } = useSession();
   const [isEventFull, setIsEventFull] = useState(false);
+  const [isEventAllocated, setIsEventAllocated] = useState(false);
 
   const handleJoin = async() => {
     console.log('Joined the event');
@@ -71,7 +72,7 @@ export default function EventDetailsPage({ params }) {
 
   const SetOrEventPageButton = () => {
 
-    if(isEventFull){
+    if(isEventFull || isEventAllocated){
       return (<div className="mt-6">
                 <p>This event has reached maximum number of participants</p>
                 <Button
@@ -95,6 +96,21 @@ export default function EventDetailsPage({ params }) {
             </div>)
       }
     
+  }
+
+  const ScheduledOrAllocated = () =>{
+    if(isEventAllocated){
+      return (<p className="text-gray-600 mt-2">
+        Allocated DateTime: {convertDateTimeToDate(event.event_allocated_start)} - {convertDateTimeToDate(event.event_allocated_end)}
+      </p>)
+    }
+
+    return (
+          <p className="text-gray-600 mt-2">
+            Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
+            </p>
+      )
+
   }
 
 
@@ -185,7 +201,7 @@ export default function EventDetailsPage({ params }) {
         if (data_events.eventData.length === 0) throw new Error('Failed to fetch event details');
         const matchedEvent = data_events.eventData[0]
         setEvent(matchedEvent || null); // Set null if no event matches
-
+        setIsEventAllocated(matchedEvent.event_allocated_start !== null);
 
         //Check is the event full
         const response_numberOfParticipants = await fetch(`/api/user-event?eventLink=${uniqueLink}&findNumberOfParticipants=true`, {
@@ -226,9 +242,10 @@ export default function EventDetailsPage({ params }) {
     style={{ marginTop: "6%" }}>
       <h1 className="text-3xl font-bold">{event.event_title}</h1>
       <p className="text-gray-600 mt-2">Owner: {event.user_name}</p>
-      <p className="text-gray-600 mt-2">
-        Date: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
-      </p>
+      {/* <p className="text-gray-600 mt-2">
+        Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
+      </p> */}
+      <ScheduledOrAllocated/>
       <p className="text-gray-600 mt-2">Duration: {convertTime(event.event_duration)}</p>
       <Accordion variant="bordered" selectionMode="multiple">
         <AccordionItem key="1" aria-label="Location" title="Location">
