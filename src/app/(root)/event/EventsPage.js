@@ -6,7 +6,7 @@ import moment from "moment";
 import blue from "../../../../public/blue.svg";
 import green from "../../../../public/green.svg";
 import yellow from "../../../../public/yellow.svg";
-// Add a new color for past events
+import grey from "../../../../public/grey.svg";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 
@@ -199,7 +199,7 @@ export default function Page() {
                         className="w-full object-cover h-[140px]"
                         radius="lg"
                         shadow="sm"
-                        src={blue}
+                        src={grey}
                         width="100%"
                         priority={true}
                       />
