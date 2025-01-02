@@ -19,6 +19,8 @@ async function fetchEvent(link) {
       event_location, 
       event_opening_hour, 
       event_closing_hour, 
+      event_allocated_start,
+      event_allocated_end,
       event_description, 
       event_link, 
       event_creator, 
