@@ -17,6 +17,7 @@ export default function useOverflowHandler(size) {
         }
       }
     };
+    window.scrollTo(0, 0);
 
     handleResize();
     window.addEventListener("resize", handleResize);
