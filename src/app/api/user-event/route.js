@@ -7,7 +7,7 @@ function getDatabaseConnection() {
 }
 
 // Function to fetch user events by email
-async function fetchUserEvents(user_email, hasAllocated, isAdmin) {
+async function fetchUserEvents(user_email, hasAllocated, isAdmin, isPast) {
   const sql = getDatabaseConnection();
   const boolToQuery = (bool, trueQuery, falseQuery) => (bool === null ? "" : bool ? trueQuery : falseQuery);
   
@@ -17,6 +17,7 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin) {
     "AND event_allocated_start IS NULL"
   );
   const adminQuery = boolToQuery(isAdmin, "AND ue_is_admin = TRUE", "AND ue_is_admin = FALSE");
+  const pastQuery = boolToQuery(isPast, "AND event_allocated_end < NOW()", "AND event_allocated_end >= NOW()");
 
   let query = `
   SELECT 
@@ -40,6 +41,7 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin) {
     )
   ${allocatedQuery}
   ${adminQuery}
+  ${pastQuery}
 `;
 
   return await sql(query, [user_email]);
@@ -99,6 +101,7 @@ export async function GET(req) {
     const email = url.searchParams.get("email");
     const hasAllocated = strToBool(url.searchParams.get("hasAllocated"));
     const isAdmin = strToBool(url.searchParams.get("isAdmin"));
+    const isPast = strToBool(url.searchParams.get("isPast"));
     const numberOfParticipants = strToBool(url.searchParams.get("findNumberOfParticipants"));
     const eventLink = url.searchParams.get("eventLink")
     const findIsUserIn = strToBool(url.searchParams.get("findIsUserIn"));
@@ -114,7 +117,7 @@ export async function GET(req) {
       const isUserIn = await verifyParticipation(sql, email, eventLink);
       return isUserIn?new Response({ message: "User is in this event" }, { status: 200 }):new Response({ message: "User is not in this event" }, { status: 404 })
     }
-    const eventData = await fetchUserEvents(email, hasAllocated, isAdmin);
+    const eventData = await fetchUserEvents(email, hasAllocated, isAdmin, isPast);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ message: "Failed to fetch events" }), { status: 500 });
