@@ -14,17 +14,18 @@ export const authOptions = {
 
       if (result.length === 0) {
         // Redirect to sign-up page if the user does not exist
-        return '/signUp';
+        return '/signup';
       }
 
       return true;
     },
     async session({ session, token }) {
       const sql = neon(`${process.env.DATABASE_URL}`);
-      const result = await sql('SELECT user_has_paid FROM users WHERE user_email = $1', [token.email]);
+      const result = await sql('SELECT user_has_paid, user_name FROM users WHERE user_email = $1', [token.email]);
 
       if (result.length > 0) {
         session.user.user_has_paid = result[0].user_has_paid;
+        session.user.chosenName = result[0].user_name; // Store user_name in session
       }
 
       return session;
