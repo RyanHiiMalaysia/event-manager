@@ -77,7 +77,7 @@ const NavbarClient = ({ session }) => {
       <NavbarContent className="sm:hidden pr-3" justify="center">
         <NavbarBrand>
           <Link href="/" color="foreground">
-            <p className="font-bold text-inherit">EVENT MANAGER</p>
+            <img src="schedule.png" alt="Schedule" className="h-8" />
           </Link>
         </NavbarBrand>
       </NavbarContent>
