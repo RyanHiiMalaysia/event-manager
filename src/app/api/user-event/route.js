@@ -17,7 +17,7 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin, isPast) {
     "AND event_allocated_start IS NULL"
   );
   const adminQuery = boolToQuery(isAdmin, "AND ue_is_admin = TRUE", "AND ue_is_admin = FALSE");
-  const pastQuery = boolToQuery(isPast, "AND event_allocated_end < NOW()", "AND event_allocated_end >= NOW()");
+  const pastQuery = boolToQuery(isPast, "AND event_allocated_end < NOW()", "AND (event_allocated_end >= NOW() OR event_allocated_end IS NULL)");
 
   let query = `
   SELECT 

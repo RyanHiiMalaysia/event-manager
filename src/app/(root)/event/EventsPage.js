@@ -6,7 +6,7 @@ import moment from "moment";
 import blue from "../../../../public/blue.svg";
 import green from "../../../../public/green.svg";
 import yellow from "../../../../public/yellow.svg";
- // Add a new color for past events
+// Add a new color for past events
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 
@@ -46,9 +46,9 @@ export default function Page() {
           };
 
           const [scheduling, allocated, organising, past] = await Promise.all([
-            fetchEvents("hasAllocated=false"),
-            fetchEvents("hasAllocated=true"),
-            fetchEvents("isAdmin=true"),
+            fetchEvents("hasAllocated=false&isPast=false"),
+            fetchEvents("hasAllocated=true&isPast=false"),
+            fetchEvents("isAdmin=true&isPast=false"),
             fetchEvents("isPast=true"),
           ]);
 
