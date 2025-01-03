@@ -66,14 +66,14 @@ async function findNumberOfParticipants(sql, event_link) {
 
   const currentNumberOfParticipants = await sql`
     SELECT
-      user_id
+      COUNT(user_id)
     FROM
       users NATURAL JOIN userevent
     WHERE
       event_id = (SELECT event_id FROM events WHERE event_link = ${event_link})
   `;
   
-  return currentNumberOfParticipants.length;
+  return currentNumberOfParticipants;
 }
 
 // Function to add user to event
@@ -103,19 +103,16 @@ export async function GET(req) {
     const isAdmin = strToBool(url.searchParams.get("isAdmin"));
     const isPast = strToBool(url.searchParams.get("isPast"));
     const numberOfParticipants = strToBool(url.searchParams.get("findNumberOfParticipants"));
-    const eventLink = url.searchParams.get("eventLink")
+    const link = url.searchParams.get("link")
     const findIsUserIn = strToBool(url.searchParams.get("findIsUserIn"));
-    //const isUserIn = await verifyParticipation(sql, email, eventLink);
   
     if(numberOfParticipants){
-      
-      const result = await findNumberOfParticipants(sql, eventLink);
+      const result = await findNumberOfParticipants(sql, link);
       return new Response(JSON.stringify({ result:result }), { status: 200 });
     }
     if(findIsUserIn){
-      
-      const isUserIn = await verifyParticipation(sql, email, eventLink);
-      return isUserIn?new Response({ message: "User is in this event" }, { status: 200 }):new Response({ message: "User is not in this event" }, { status: 404 })
+      const isUserIn = await verifyParticipation(sql, email, link);
+      return new Response(JSON.stringify({ result: isUserIn }), { status: 200 })
     }
     const eventData = await fetchUserEvents(email, hasAllocated, isAdmin, isPast);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
