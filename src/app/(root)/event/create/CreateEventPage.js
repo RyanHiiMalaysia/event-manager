@@ -5,6 +5,7 @@ import { Form, Input, Button, TimeInput, DateRangePicker, DatePicker, Textarea }
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import {Alert} from "@nextui-org/react";
+import { I18nProvider } from "@react-aria/i18n";
 
 const generateUniqueLink = () => {
   const timestamp = Date.now();
@@ -95,17 +96,22 @@ export default function CreateEventPage() {
     const duration = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 
     const uniqueLink = generateUniqueLink();
-
+    const convertToUTCTime = (date, time) => {
+      const [hours, minutes] = time.split(':').map(Number);
+      const localDate = new Date(date);
+      localDate.setHours(hours, minutes, 0, 0);
+      return localDate.toISOString().substring(11, 16); // Returns the time in HH:MM format
+    };
     const response = await fetch("/api/events", {
       method: "POST",
       body: JSON.stringify({
-        ...data,
-        duration: duration,
-        deadline: new Date(deadline).toISOString(),
-        startTime: startTime?.toString(),
-        endTime: endTime?.toString(),
-        link: uniqueLink,
-        creator: user.user_id,
+      ...data,
+      duration: duration,
+      deadline: new Date(deadline).toISOString(),
+      startTime: convertToUTCTime(new Date(), startTime),
+      endTime: convertToUTCTime(new Date(), endTime),
+      link: uniqueLink,
+      creator: user.user_id,
       }),
     });
 
@@ -162,7 +168,8 @@ export default function CreateEventPage() {
               }
             }}
           />
-          <DateRangePicker
+          <I18nProvider locale="en-MY">
+            <DateRangePicker
             label="Event Range"
             startName="startDate"
             endName="endDate"
@@ -171,6 +178,8 @@ export default function CreateEventPage() {
             description="Days where the event can take place"
             minValue={today(getLocalTimeZone())}
           />
+          </I18nProvider>
+          
           <div className="flex gap-4">
             <Input
               label="Hours"
@@ -193,7 +202,7 @@ export default function CreateEventPage() {
               }
             />
           </div>
-          <DatePicker label="Registration Deadline" name="deadline" isRequired minValue={today(getLocalTimeZone())} />
+          <I18nProvider locale="en-MY"><DatePicker label="Registration Deadline" name="deadline" isRequired minValue={today(getLocalTimeZone())} /></I18nProvider>
           <Input
             label="Participant Limit"
             labelPlacement="outside"
@@ -216,13 +225,39 @@ export default function CreateEventPage() {
             }}
           />
           <div className="flex gap-4">
-            <TimeInput label="Opening Time" onChange={setStartTime} />
-            <TimeInput
-              label="Closing Time"
-              onChange={setEndTime}
-              isInvalid={endTime && startTime ? endTime <= startTime : false}
-              errorMessage="Closing time must be greater than opening time"
+          <div className="w-full">
+          <Input
+              label="Start Time"
+              list="minute-options"
+              id="minutes"
+              name="minutes"
+              aria-label="Minutes"
+              type="time"
+              style={{ width: "100%", color: startTime ? "#000" : "#71717A" }}
+              onChange={(e) => setStartTime(e.target.value)}
+              validate={(time) =>
+                time.split(":")[1] % 15 === 0 ? null : "Please enter a valid time in 15-minute intervals"
+              }
             />
+          </div>
+          
+          <div className="w-full">
+            <Input
+              label="Closing Time"
+              list="minute-options"
+              id="minutes"
+              name="minutes"
+              aria-label="Minutes"
+              type="time"
+              style={{ width: "100%", color: endTime ? "#000" : "#71717A" }}
+
+              onChange={(e) => setEndTime(e.target.value)}
+              validate={(time) =>
+                time.split(":")[1] % 15 === 0 ? (endTime && startTime ? (startTime < endTime ? null : "Closing time must be greater than opening time"):"Please enter a valid time in 15-minute intervals") : "Please enter a valid time in 15-minute intervals"
+              }
+            />
+          </div>
+            
           </div>
           <Textarea
             label="Description"
