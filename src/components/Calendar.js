@@ -32,10 +32,10 @@ export function EventCalendar({ events, onSelectEvent }) {
   );
 }
 
-export function ScheduleCalendar({ onSelectEvent, eventRange, freeTimes }) {
+export function ScheduleCalendar({ onSelectEvent, start, freeTimes }) {
   const { defaultDate, views } = useMemo(
     () => ({
-      defaultDate: eventRange.start,
+      defaultDate: start,
       views: {
         day: true,
         week: WeekView,
