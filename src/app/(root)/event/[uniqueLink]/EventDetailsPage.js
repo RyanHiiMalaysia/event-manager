@@ -22,13 +22,13 @@ export default function EventDetailsPage({ params }) {
   const handleJoin = async () => {
     console.log('Joined the event');
 
-    const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&eventLink=${uniqueLink}`, {
-      method: "POST",
-      body: JSON.stringify({
-        user_email: session.user.email,
-        event_link: uniqueLink
-      }),
-    });
+    const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}`,{
+        method: "POST",
+        body: JSON.stringify({
+          user_email:session.user.email, 
+          event_link:uniqueLink
+        }),
+      })
 
     if (!response_add_user) throw new Error('Failed to add user to this event');
     else {
@@ -190,19 +190,13 @@ export default function EventDetailsPage({ params }) {
       if (hasFetchedUser) return; // Prevent duplicate calls
       
       setHasFetchedUser(true);
-      try {
-        const response = await fetch(`/api/user-event?email=${session.user.email}&eventLink=${uniqueLink}&findIsUserIn=true`);
-        const statusCode = response.status;
-        console.log(statusCode);
-        if (statusCode === 404) {
-          setIsUserIn(false);
-          
-        } else {
-          setIsUserIn(true);
-        }
-      } catch (error) {
-        console.log(error);
-      }
+        try {
+          const response_isUserIn = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true`);
+          const data_response = await response_isUserIn.json();
+          setIsUserIn(data_response.result)
+        } catch (error) {
+          console.log(error)
+        } 
     };
 
     const fetchEvent = async () => {
@@ -220,8 +214,8 @@ export default function EventDetailsPage({ params }) {
         setEvent(matchedEvent || null); // Set null if no event matches
         setIsEventAllocated(matchedEvent.event_allocated_start !== null);
 
-        // Check is the event full
-        const response_numberOfParticipants = await fetch(`/api/user-event?eventLink=${uniqueLink}&findNumberOfParticipants=true`, {
+        //Check is the event full
+        const response_numberOfParticipants = await fetch(`/api/user-event?link=${uniqueLink}&findNumberOfParticipants=true`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -229,7 +223,8 @@ export default function EventDetailsPage({ params }) {
         if (!response_numberOfParticipants.ok) throw new Error('Failed to fetch number of participants');
         const data_numberOfParticipants = await response_numberOfParticipants.json();
         const numberOfParticipants = data_numberOfParticipants.result;
-        setIsEventFull(numberOfParticipants === matchedEvent.event_max_participants);
+        setIsEventFull(numberOfParticipants[0].count === (matchedEvent.event_max_participants.toString()))
+        
       } catch (error) {
         console.error('Error fetching event:', error.message);
         setEvent(null); // Handle not found
