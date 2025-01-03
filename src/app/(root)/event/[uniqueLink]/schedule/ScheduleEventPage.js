@@ -2,7 +2,6 @@
 import { I18nProvider } from "@react-aria/i18n";
 import React, { useState, useEffect, useRef } from "react";
 import { ScheduleCalendar } from "@/components/Calendar";
-import { eventRange } from "@/components/demoData";
 import { DatePicker } from "@nextui-org/date-picker";
 import { TimeInput } from "@nextui-org/date-input";
 import {Input} from "@nextui-org/input";
@@ -248,7 +247,7 @@ export default function Page() {
   return (
     <div className="mt-6 md:mt-4 min-h-screen" ref={useOverflowHandler(730)}>
       <div className="max-w-4xl mx-auto rounded-lg">
-        <ScheduleCalendar onSelectEvent={handleSelectEvent} eventRange={eventRange} freeTimes={freeTimes} />
+        <ScheduleCalendar onSelectEvent={handleSelectEvent} start={startDate} freeTimes={freeTimes} />
         <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
           <ModalContent>
             {() => (
