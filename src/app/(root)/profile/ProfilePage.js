@@ -29,86 +29,84 @@ export const CancelIcon = ({ fill = "currentColor", filled, size, height, width,
 };
 
 const Profile = () => {
-    const { data: session, status } = useSession();
-    const [user, setUser] = useState(null);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [isEditingName, setIsEditingName] = useState(false); // State for edit mode
-    const [newName, setNewName] = useState(''); // State for new name input
+  const { data: session, status } = useSession();
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isEditingName, setIsEditingName] = useState(false); // State for edit mode
+  const [newName, setNewName] = useState(''); // State for new name input
 
-    useEffect(() => {
-      const fetchUserDetails = async () => {
-        if (status === 'authenticated' && session?.user?.email) {
-          try {
-            const response = await fetch(`/api/user?email=${session.user.email}`);
-            if (!response.ok) {
-              const result = await response.json();
-              setError(result.message);
-              setLoading(false);
-              return;
-            }
-            const userData = await response.json();
-            setUser(userData);
-            setNewName(userData.user_name); // Initialize newName with the current user name
-          } catch (error) {
-            setError('An unexpected error occurred.');
-          } finally {
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (status === 'authenticated' && session?.user?.email) {
+        try {
+          const response = await fetch(`/api/user?email=${session.user.email}`);
+          if (!response.ok) {
+            const result = await response.json();
+            setError(result.message);
             setLoading(false);
+            return;
           }
-        } else {
+          const userData = await response.json();
+          setUser(userData);
+          setNewName(userData.user_name); // Initialize newName with the current user name
+        } catch (error) {
+          setError('An unexpected error occurred.');
+        } finally {
           setLoading(false);
         }
-      };
-
-      fetchUserDetails();
-    }, [status, session]);
-
-    const handleEditClick = () => {
-      setIsEditingName(true);
+      } else {
+        setLoading(false);
+      }
     };
 
-    const handleNameChange = (e) => {
-      setNewName(e.target.value);
-    };
+    fetchUserDetails();
+  }, [status, session]);
 
-    const handleNameSubmit = () => {
-      // Here you can add the logic to save the new name to the server if needed
-      setUser({ ...user, user_name: newName });
-      setIsEditingName(false);
-    };
+  const handleEditClick = () => {
+    setIsEditingName(true);
+  };
 
-    if (status === 'loading' || loading) {
-      return <Spinner />;
-    }
+  const handleCancelClick = () => {
+    setIsEditingName(false);
+  };
 
-    if (error) {
-      return <div>{error}</div>;
-    }
+  const handleNameChange = (e) => {
+    setNewName(e.target.value);
+  };
 
-    if (!user) {
-      return <div>User not found</div>;
-    }
+  const handleNameSubmit = () => {
+    // Here you can add the logic to save the new name to the server if needed
+    setUser({ ...user, user_name: newName });
+    setIsEditingName(false);
+  };
 
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <Card className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-          <CardHeader className="flex flex-col items-center">
-            <Avatar referrerPolicy={'no-referrer'}
-              size="xl"
-              src={session.user.image}
-              showFallback
-            />
-            <h2 className="text-2xl font-bold text-center text-gray-900">Profile</h2>
-          </CardHeader>
-          <CardBody className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <Button size='sm' color='#FFFFFF' isIconOnly aria-label="Edit" onPress={handleEditClick} >
-                  <EditIcon />
-                </Button>
-              </div>
-            </div>
+  if (status === 'loading' || loading) {
+    return <Spinner />;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (!user) {
+    return <div>User not found</div>;
+  }
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <Card className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <CardHeader className="flex flex-col items-center">
+          <Avatar referrerPolicy={'no-referrer'}
+            size="xl"
+            src={session.user.image}
+            showFallback
+          />
+          <h2 className="text-2xl font-bold text-center text-gray-900">Profile</h2>
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
             {isEditingName ? (
               <div className="flex items-center space-x-2">
                 <Input
@@ -120,36 +118,45 @@ const Profile = () => {
                 <Button auto size="sm" onPress={handleNameSubmit}>
                   Save
                 </Button>
+                <Button isIconOnly color='FFFFFF' auto size="sm" onPress={handleCancelClick} className="p-0 ml-2 w-2 h-4">
+                  <CancelIcon size={12} />
+                </Button>
               </div>
             ) : (
-              <p className="mt-1 text-sm text-gray-900">{user.user_name}</p>
+              <div className="flex items-center">
+                <p className="mt-1 text-sm text-gray-900">{user.user_name}</p>
+                <Button isIconOnly color='FFFFFF' auto size="sm" onPress={handleEditClick} className="p-0 ml-2 w-4 h-4">
+                  <EditIcon size={12} />
+                </Button>
+              </div>
             )}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <p className="mt-1 text-sm text-gray-900">{user.user_email}</p>
-            </div>
-          </CardBody>
-          <CardFooter className="flex justify-center">
-            {session.user.user_has_paid ? (
-              <Alert color="success" title="Thank you for your purchase!" />
-            ) : (
-              <Alert
-                color="danger"
-                description="Pay to access our features"
-                endContent={
-                  <Button color="danger" size="sm" variant="flat" as={Link}
-                    href="/pricing">
-                    Pricing
-                  </Button>
-                }
-                title="You do not have a paid account"
-                variant="faded"
-              />
-            )}
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  };
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <p className="mt-1 text-sm text-gray-900">{user.user_email}</p>
+          </div>
+        </CardBody>
+        <CardFooter className="flex justify-center">
+          {session.user.user_has_paid ? (
+            <Alert color="success" title="Thank you for your purchase!" />
+          ) : (
+            <Alert
+              color="danger"
+              description="Pay to access our features"
+              endContent={
+                <Button color="danger" size="sm" variant="flat" as={Link}
+                  href="/pricing">
+                  Pricing
+                </Button>
+              }
+              title="You do not have a paid account"
+              variant="faded"
+            />
+          )}
+        </CardFooter>
+      </Card>
+    </div>
+  );
+};
 
-  export default Profile;
+export default Profile;
