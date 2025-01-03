@@ -3,9 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Spinner } from "@nextui-org/react";
-import { Card, CardBody, CardHeader, CardFooter, Alert, Button, Link, Input } from "@nextui-org/react";
+import { Card, CardBody, CardHeader, CardFooter, Alert, Button, Link, Input, Form } from "@nextui-org/react";
 import { Avatar } from "@nextui-org/react";
-import Image from 'next/image'; // Import Image component from next/image
 
 export const EditIcon = ({ fill = "currentColor", filled, size, height, width, ...props }) => {
   return (
@@ -71,14 +70,31 @@ const Profile = () => {
     setIsEditingName(false);
   };
 
-  const handleNameChange = (e) => {
-    setNewName(e.target.value);
-  };
+  const handleNameSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newName = formData.get('newName');
 
-  const handleNameSubmit = () => {
-    // Here you can add the logic to save the new name to the server if needed
-    setUser({ ...user, user_name: newName });
-    setIsEditingName(false);
+    try {
+      const response = await fetch(`/api/user`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: session.user.email, newName }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json();
+        setError(result.message);
+        return;
+      }
+
+      setUser({ ...user, user_name: newName });
+      setIsEditingName(false);
+    } catch (error) {
+      setError('An unexpected error occurred.');
+    }
   };
 
   if (status === 'loading' || loading) {
@@ -108,25 +124,33 @@ const Profile = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Name</label>
             {isEditingName ? (
-              <div className="flex items-center space-x-2">
+              <Form
+                className="flex items-center space-x-2"
+                validationBehavior="native"
+                onSubmit={handleNameSubmit}
+              >
                 <Input
-                  value={newName}
-                  onChange={handleNameChange}
+                  isRequired
+                  errorMessage="Please enter a valid name"
+                  labelPlacement="outside"
+                  name="newName"
                   placeholder="Enter new name"
                   size="sm"
                 />
-                <Button auto size="sm" onPress={handleNameSubmit}>
-                  Save
-                </Button>
-                <Button isIconOnly color='FFFFFF' auto size="sm" onPress={handleCancelClick} className="p-0 ml-2 w-2 h-4">
-                  <CancelIcon size={12} />
-                </Button>
-              </div>
+                <div className="flex items-center space-x-2">
+                  <Button auto size="sm" type="submit">
+                    Save
+                  </Button>
+                  <Button isIconOnly color='FFFFFF' auto size="sm" onPress={handleCancelClick} className="p-0 ml-2 w-2 h-4">
+                    <CancelIcon />
+                  </Button>
+                </div>
+              </Form>
             ) : (
               <div className="flex items-center">
                 <p className="mt-1 text-sm text-gray-900">{user.user_name}</p>
                 <Button isIconOnly color='FFFFFF' auto size="sm" onPress={handleEditClick} className="p-0 ml-2 w-4 h-4">
-                  <EditIcon size={12} />
+                  <EditIcon />
                 </Button>
               </div>
             )}
