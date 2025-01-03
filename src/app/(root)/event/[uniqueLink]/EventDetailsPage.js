@@ -22,7 +22,7 @@ export default function EventDetailsPage({ params }) {
   const handleJoin = async() => {
     console.log('Joined the event');
 
-    const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&eventLink=${uniqueLink}`,{
+    const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}`,{
         method: "POST",
         body: JSON.stringify({
           user_email:session.user.email, 
@@ -173,15 +173,9 @@ export default function EventDetailsPage({ params }) {
       if (hasFetchedUser) return; // Prevent duplicate calls
       setHasFetchedUser(true);
         try {
-          const response = await fetch(`/api/user-event?email=${session.user.email}&eventLink=${uniqueLink}&findIsUserIn=true`);
-          const statusCode = response.status;
-          console.log(statusCode)
-          if(statusCode === 404){
-            setIsUserIn(false);
-            
-          }else{
-            setIsUserIn(true);
-          }
+          const response_isUserIn = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true`);
+          const data_response = await response_isUserIn.json();
+          setIsUserIn(data_response.result)
         } catch (error) {
           console.log(error)
         } 
@@ -204,7 +198,7 @@ export default function EventDetailsPage({ params }) {
         setIsEventAllocated(matchedEvent.event_allocated_start !== null);
 
         //Check is the event full
-        const response_numberOfParticipants = await fetch(`/api/user-event?eventLink=${uniqueLink}&findNumberOfParticipants=true`, {
+        const response_numberOfParticipants = await fetch(`/api/user-event?link=${uniqueLink}&findNumberOfParticipants=true`, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -221,7 +215,6 @@ export default function EventDetailsPage({ params }) {
         setLoading(false); // End loading state
       }
     };
-
 
     fetchEvent();
     fetchUser();
@@ -242,9 +235,6 @@ export default function EventDetailsPage({ params }) {
     style={{ marginTop: "6%" }}>
       <h1 className="text-3xl font-bold">{event.event_title}</h1>
       <p className="text-gray-600 mt-2">Owner: {event.user_name}</p>
-      {/* <p className="text-gray-600 mt-2">
-        Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
-      </p> */}
       <ScheduledOrAllocated/>
       <p className="text-gray-600 mt-2">Duration: {convertTime(event.event_duration)}</p>
       <Accordion variant="bordered" selectionMode="multiple">
