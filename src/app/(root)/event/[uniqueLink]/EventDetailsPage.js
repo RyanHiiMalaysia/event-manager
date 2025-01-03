@@ -206,7 +206,7 @@ export default function EventDetailsPage({ params }) {
         if (!response_numberOfParticipants.ok) throw new Error('Failed to fetch number of participants');
         const data_numberOfParticipants = await response_numberOfParticipants.json();
         const numberOfParticipants = data_numberOfParticipants.result;
-        setIsEventFull(numberOfParticipants === matchedEvent.event_max_participants)
+        setIsEventFull(numberOfParticipants[0].count === (matchedEvent.event_max_participants.toString()))
         
       } catch (error) {
         console.error('Error fetching event:', error.message);

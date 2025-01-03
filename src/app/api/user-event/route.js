@@ -108,6 +108,7 @@ export async function GET(req) {
   
     if(numberOfParticipants){
       const result = await findNumberOfParticipants(sql, link);
+
       return new Response(JSON.stringify({ result:result }), { status: 200 });
     }
     if(findIsUserIn){
