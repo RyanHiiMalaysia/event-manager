@@ -90,20 +90,23 @@ export default function CreateEventPage() {
     };
     const getDeadlineDateTime = (deadline) => new Date(deadline + "T00:00:00").toISOString();
     const getDuration = (hours, minutes) => `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-
+    const convertHourToMinute = (time) => { return (Number(time.hour)*60 + Number(time.minute))}
+   
     // Get the form data and validate it
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
     const { hours, minutes, startDate, deadline } = data;
-
     if (hours === "0" && minutes === "0") {
       alert("Event duration cannot be 0 hours and 0 minutes");
       return;
     } else if (deadline >= startDate) {
       alert("Registration deadline must be before the event start date");
       return;
+    }else if(convertHourToMinute(endTime) - convertHourToMinute(startTime) < Number(hours)*60+Number(minutes)){
+      alert("The event duration must not exceed the time difference between the starting and ending times.");
+      return;
     }
-
+    
     // Send the data to the server
     const uniqueLink = generateUniqueLink();
     const response = await fetch("/api/events", {
@@ -137,7 +140,7 @@ export default function CreateEventPage() {
             endContent={
               <p>
                 Share this link with participants:
-                <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 break-words break-full underline">
                   {eventLink}
                 </a>
               </p>
@@ -211,7 +214,7 @@ export default function CreateEventPage() {
             <span
               id="react-aria7747362092-:r6:"
               data-slot="label"
-              class="block subpixel-antialiased text-small group-data-[required=true]:after:content-['*'] group-data-[required=true]:after:text-danger group-data-[required=true]:after:ml-0.5 group-data-[invalid=true]:text-danger w-full text-foreground"
+              className="block subpixel-antialiased text-small group-data-[required=true]:after:content-['*'] group-data-[required=true]:after:text-danger group-data-[required=true]:after:ml-0.5 group-data-[invalid=true]:text-danger w-full text-foreground"
             >
               Event Duration
             </span>
