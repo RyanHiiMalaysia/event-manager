@@ -185,12 +185,18 @@ export default function CreateEventPage() {
             />
           </I18nProvider>
           <div className="flex gap-4">
-            <TimeInput label="Starting Time" onChange={setStartTime} description="What times will work?" />
+            <TimeInput 
+              label="Starting Time" 
+              onChange={setStartTime} 
+              description="What times will work?" 
+              isRequired
+              />
             <TimeInput
               label="Ending Time"
               onChange={setEndTime}
               isInvalid={endTime && startTime ? endTime <= startTime : false}
               errorMessage="Ending time must be greater than starting time"
+              isRequired
             />
           </div>
           <I18nProvider locale="en-MY">
