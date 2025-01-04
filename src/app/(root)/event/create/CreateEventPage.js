@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Form, Input, Button, TimeInput, DateRangePicker, DatePicker, Textarea } from "@nextui-org/react";
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
-import {Alert} from "@nextui-org/react";
+import { Alert } from "@nextui-org/react";
 import { I18nProvider } from "@react-aria/i18n";
 
 const generateUniqueLink = () => {
@@ -81,10 +81,21 @@ export default function CreateEventPage() {
   }
 
   const onSubmit = async (event) => {
+    // Helper functions to convert data to the required format
+    const convertToUTCTime = (time) => {
+      const [hours, minutes] = time.split(":").map(Number);
+      const localDate = new Date();
+      localDate.setHours(hours, minutes, 0, 0);
+      return localDate.toISOString().substring(11, 16); // Returns the time in HH:MM format
+    };
+    const getDeadlineDateTime = (deadline) => new Date(deadline + "T00:00:00").toISOString();
+    const getDuration = (hours, minutes) => `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+
+    // Get the form data and validate it
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
     const { hours, minutes, startDate, deadline } = data;
-    console.log(data)
+
     if (hours === "0" && minutes === "0") {
       alert("Event duration cannot be 0 hours and 0 minutes");
       return;
@@ -93,25 +104,18 @@ export default function CreateEventPage() {
       return;
     }
 
-    const duration = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-
+    // Send the data to the server
     const uniqueLink = generateUniqueLink();
-    const convertToUTCTime = (date, time) => {
-      const [hours, minutes] = time.split(':').map(Number);
-      const localDate = new Date(date);
-      localDate.setHours(hours, minutes, 0, 0);
-      return localDate.toISOString().substring(11, 16); // Returns the time in HH:MM format
-    };
     const response = await fetch("/api/events", {
       method: "POST",
       body: JSON.stringify({
-      ...data,
-      duration: duration,
-      deadline: new Date(deadline).toISOString(),
-      startTime: convertToUTCTime(new Date(), startTime),
-      endTime: convertToUTCTime(new Date(), endTime),
-      link: uniqueLink,
-      creator: user.user_id,
+        ...data,
+        duration: getDuration(hours, minutes),
+        deadline: getDeadlineDateTime(deadline),
+        startTime: convertToUTCTime(startTime.toString()),
+        endTime: convertToUTCTime(endTime.toString()),
+        link: uniqueLink,
+        creator: user.user_id,
       }),
     });
 
@@ -124,27 +128,28 @@ export default function CreateEventPage() {
   };
 
   const EventLinkPopup = () => {
-    if(eventLink){
-      return (<div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50">
-                <Alert
-                  color="success"
-                  className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
-                  endContent={
-                    <p>
-                        Share this link with participants:{" "}
-                        <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                          {eventLink}
-                        </a>
-                      </p>
-                  }
-                  title={<span style={{ fontSize: "1rem", fontWeight: "bold" }}>Event Created Successfully!</span>}
-                  variant="faded"
-                  font_size
-                />
-              </div>)
+    if (eventLink) {
+      return (
+        <div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50">
+          <Alert
+            color="success"
+            className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
+            endContent={
+              <p>
+                Share this link with participants:
+                <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                  {eventLink}
+                </a>
+              </p>
+            }
+            title={<span style={{ fontSize: "1rem", fontWeight: "bold" }}>Event Created Successfully!</span>}
+            variant="faded"
+            font_size
+          />
+        </div>
+      );
     }
-  }
-
+  };
 
   const validateInteger = (value) => (Number.isInteger(Number(value)) ? null : "Please enter an integer");
 
@@ -170,39 +175,65 @@ export default function CreateEventPage() {
           />
           <I18nProvider locale="en-MY">
             <DateRangePicker
-            label="Event Range"
-            startName="startDate"
-            endName="endDate"
-            labelPlacement="outside"
-            isRequired
-            description="Days where the event can take place"
-            minValue={today(getLocalTimeZone())}
-          />
-          </I18nProvider>
-          
-          <div className="flex gap-4">
-            <Input
-              label="Hours"
-              name="hours"
+              label="Event Range"
+              startName="startDate"
+              endName="endDate"
+              labelPlacement="outside"
               isRequired
-              type="number"
-              placeholder="Enter event hours"
-              validate={(value) =>
-                Number(value) >= 0 && Number(value) <= 23 ? validateInteger(value) : "Hours must be between 0 and 23"
-              }
+              description="What dates will work?"
+              minValue={today(getLocalTimeZone()).add({ days: 1 })}
             />
-            <Input
-              label="Minutes"
-              name="minutes"
-              isRequired
-              type="number"
-              placeholder="Enter event minutes"
-              validate={(value) =>
-                Number(value) >= 0 && Number(value) <= 59 ? validateInteger(value) : "Minutes must be between 0 and 59"
-              }
+          </I18nProvider>
+          <div className="flex gap-4">
+            <TimeInput label="Starting Time" onChange={setStartTime} description="What times will work?" />
+            <TimeInput
+              label="Ending Time"
+              onChange={setEndTime}
+              isInvalid={endTime && startTime ? endTime <= startTime : false}
+              errorMessage="Ending time must be greater than starting time"
             />
           </div>
-          <I18nProvider locale="en-MY"><DatePicker label="Registration Deadline" name="deadline" isRequired minValue={today(getLocalTimeZone())} /></I18nProvider>
+          <I18nProvider locale="en-MY">
+            <DatePicker
+              label="Registration Deadline"
+              name="deadline"
+              isRequired
+              minValue={today(getLocalTimeZone()).add({ days: 1 })}
+            />
+          </I18nProvider>
+          <div className="group flex flex-col data-[has-helper=true]:pb-[calc(theme(fontSize.tiny)_+8px)] gap-y-1.5 w-full">
+            <span
+              id="react-aria7747362092-:r6:"
+              data-slot="label"
+              class="block subpixel-antialiased text-small group-data-[required=true]:after:content-['*'] group-data-[required=true]:after:text-danger group-data-[required=true]:after:ml-0.5 group-data-[invalid=true]:text-danger w-full text-foreground"
+            >
+              Event Duration
+            </span>
+            <div className="flex gap-4">
+              <Input
+                label="Hours"
+                name="hours"
+                isRequired
+                type="number"
+                placeholder="Enter event hours"
+                validate={(value) =>
+                  Number(value) >= 0 && Number(value) <= 23 ? validateInteger(value) : "Hours must be between 0 and 23"
+                }
+              />
+              <Input
+                label="Minutes"
+                name="minutes"
+                isRequired
+                type="number"
+                placeholder="Enter event minutes"
+                validate={(value) =>
+                  Number(value) >= 0 && Number(value) <= 59
+                    ? validateInteger(value)
+                    : "Minutes must be between 0 and 59"
+                }
+              />
+            </div>
+          </div>
           <Input
             label="Participant Limit"
             labelPlacement="outside"
@@ -224,41 +255,6 @@ export default function CreateEventPage() {
               }
             }}
           />
-          <div className="flex gap-4">
-          <div className="w-full">
-          <Input
-              label="Start Time"
-              list="minute-options"
-              id="minutes"
-              name="minutes"
-              aria-label="Minutes"
-              type="time"
-              style={{ width: "100%", color: startTime ? "#000" : "#71717A" }}
-              onChange={(e) => setStartTime(e.target.value)}
-              validate={(time) =>
-                time.split(":")[1] % 15 === 0 ? null : "Please enter a valid time in 15-minute intervals"
-              }
-            />
-          </div>
-          
-          <div className="w-full">
-            <Input
-              label="Closing Time"
-              list="minute-options"
-              id="minutes"
-              name="minutes"
-              aria-label="Minutes"
-              type="time"
-              style={{ width: "100%", color: endTime ? "#000" : "#71717A" }}
-
-              onChange={(e) => setEndTime(e.target.value)}
-              validate={(time) =>
-                time.split(":")[1] % 15 === 0 ? (endTime && startTime ? (startTime < endTime ? null : "Closing time must be greater than opening time"):"Please enter a valid time in 15-minute intervals") : "Please enter a valid time in 15-minute intervals"
-              }
-            />
-          </div>
-            
-          </div>
           <Textarea
             label="Description"
             labelPlacement="outside"
@@ -270,21 +266,7 @@ export default function CreateEventPage() {
           </Button>
         </div>
       </Form>
-            <EventLinkPopup />
-      {/* {eventLink && (
-                    <div
-                      id="event-link-section"
-                      className="mt-4 p-4 border border-green-500 rounded bg-green-50 dark:bg-green-900"
-                    >
-                      <p className="font-bold text-green-700">Event Created Successfully!</p>
-                      <p>
-                        Share this link with participants:{" "}
-                        <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                          {eventLink}
-                        </a>
-                      </p>
-                    </div>
-                  )} */}
-      </div>
+      <EventLinkPopup />
+    </div>
   );
 }
