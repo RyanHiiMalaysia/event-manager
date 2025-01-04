@@ -145,7 +145,7 @@ export default function CreateEventPage() {
                 </a>
               </p>
             }
-            title={<span style={{ fontSize: "1rem", fontWeight: "bold" }}>Event Created Successfully!</span>}
+            title="Event created successfully!"
             variant="faded"
             font_size
           />
