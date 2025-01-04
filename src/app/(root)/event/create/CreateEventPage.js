@@ -84,7 +84,7 @@ export default function CreateEventPage() {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
     const { hours, minutes, startDate, deadline } = data;
-    console.log(data)
+    
     if (hours === "0" && minutes === "0") {
       alert("Event duration cannot be 0 hours and 0 minutes");
       return;
@@ -102,6 +102,7 @@ export default function CreateEventPage() {
       localDate.setHours(hours, minutes, 0, 0);
       return localDate.toISOString().substring(11, 16); // Returns the time in HH:MM format
     };
+   
     const response = await fetch("/api/events", {
       method: "POST",
       body: JSON.stringify({
@@ -125,22 +126,27 @@ export default function CreateEventPage() {
 
   const EventLinkPopup = () => {
     if(eventLink){
-      return (<div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50">
+      return (
+      <div className="flex absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50"> 
                 <Alert
                   color="success"
                   className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
-                  endContent={
-                    <p>
-                        Share this link with participants:{" "}
-                        <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                          {eventLink}
-                        </a>
-                      </p>
-                  }
                   title={<span style={{ fontSize: "1rem", fontWeight: "bold" }}>Event Created Successfully!</span>}
                   variant="faded"
                   font_size
-                />
+                >
+                  <p className="text-auto auto:text-base break-words w-full">
+                    Share this link with participants:{" "}
+                    <br></br>
+                    <a 
+                    href={eventLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-blue-500 underline break-words break-all text-sm sm:text-base">
+                      {eventLink}
+                    </a>
+                  </p>
+                </Alert>
               </div>)
     }
   }
@@ -149,7 +155,9 @@ export default function CreateEventPage() {
   const validateInteger = (value) => (Number.isInteger(Number(value)) ? null : "Please enter an integer");
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
+      <EventLinkPopup className="flex"/>
+      <div className="flex">
       <Form
         onSubmit={onSubmit}
         validationBehavior="native"
@@ -270,21 +278,7 @@ export default function CreateEventPage() {
           </Button>
         </div>
       </Form>
-            <EventLinkPopup />
-      {/* {eventLink && (
-                    <div
-                      id="event-link-section"
-                      className="mt-4 p-4 border border-green-500 rounded bg-green-50 dark:bg-green-900"
-                    >
-                      <p className="font-bold text-green-700">Event Created Successfully!</p>
-                      <p>
-                        Share this link with participants:{" "}
-                        <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                          {eventLink}
-                        </a>
-                      </p>
-                    </div>
-                  )} */}
+      </div>
       </div>
   );
 }

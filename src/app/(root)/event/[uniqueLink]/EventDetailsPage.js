@@ -132,6 +132,8 @@ export default function EventDetailsPage({ params }) {
 
   function convertDateTimeToDate(dateTime) {
     const date = new Date(dateTime);
+    const ho = date.getHours()+8;
+    date.setHours(ho);
     return date.toISOString().split('T')[0];
   }
 
@@ -152,9 +154,11 @@ export default function EventDetailsPage({ params }) {
 
   function convertDate(unformattedDate){
     let date = new Date(unformattedDate);
+    const ho = date.getHours()-8;
+    date.setHours(ho);
 
     // Format the date
-    let formattedDate = date.toLocaleString('en-US', {
+    let formattedDate = date.toLocaleString('en-MY', {
       weekday: 'long',   // Optional: Add weekday name
       year: 'numeric',
       month: '2-digit',
@@ -165,6 +169,7 @@ export default function EventDetailsPage({ params }) {
     }).replace(/,/, '').replace(/:/g, '.');
     return formattedDate;
   }
+  
 
   useEffect(() => {
     if (!uniqueLink || status !== 'authenticated' || !session?.user?.email) return;
