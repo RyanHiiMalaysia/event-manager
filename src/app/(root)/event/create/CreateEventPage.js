@@ -216,7 +216,7 @@ export default function CreateEventPage() {
             <span
               id="react-aria7747362092-:r6:"
               data-slot="label"
-              class="block subpixel-antialiased text-small group-data-[required=true]:after:content-['*'] group-data-[required=true]:after:text-danger group-data-[required=true]:after:ml-0.5 group-data-[invalid=true]:text-danger w-full text-foreground"
+              className="block subpixel-antialiased text-small group-data-[required=true]:after:content-['*'] group-data-[required=true]:after:text-danger group-data-[required=true]:after:ml-0.5 group-data-[invalid=true]:text-danger w-full text-foreground"
             >
               Event Duration
             </span>
