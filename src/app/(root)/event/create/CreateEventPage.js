@@ -131,24 +131,31 @@ export default function CreateEventPage() {
   };
 
   const EventLinkPopup = () => {
+    const [isVisible, setIsVisible] = React.useState(true);
     if (eventLink) {
       return (
         <div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50">
-          <Alert
+          {isVisible ? (
+            <Alert
             color="success"
             className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
+            onClose={() => setIsVisible(false)}
             endContent={
               <p>
                 Share this link with participants:
-                <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 break-words break-full underline">
+
+                <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-all">
+
                   {eventLink}
                 </a>
               </p>
             }
-            title={<span style={{ fontSize: "1rem", fontWeight: "bold" }}>Event Created Successfully!</span>}
+            title="Event created successfully!"
             variant="faded"
             font_size
           />
+          ) : null}
+          
         </div>
       );
     }
