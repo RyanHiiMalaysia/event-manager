@@ -20,7 +20,7 @@ export default function EventDetailsPage({ params }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const handleJoin = async () => {
-    console.log('Joined the event');
+    
 
     const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}`, {
       method: "POST",
@@ -38,7 +38,6 @@ export default function EventDetailsPage({ params }) {
   };
 
   const handleDecline = () => {
-    console.log('Declined the event');
     redirect('/event');
   };
 
@@ -230,7 +229,7 @@ export default function EventDetailsPage({ params }) {
         const data_response = await response_isUserIn.json();
         setIsUserIn(data_response.result)
       } catch (error) {
-        console.log(error)
+        throw new Error(error);
       }
     };
 
