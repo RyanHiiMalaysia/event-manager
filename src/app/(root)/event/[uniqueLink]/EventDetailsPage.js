@@ -20,7 +20,7 @@ export default function EventDetailsPage({ params }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const handleJoin = async () => {
-    
+
 
     const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}`, {
       method: "POST",
@@ -172,24 +172,43 @@ export default function EventDetailsPage({ params }) {
   }
 
 
+  // function timeRange(open, close) {
+  //   if (!open && !close) return "unknown";
+  //   let utc = new Date(Date.UTC(2025, 0, 4));
+  //   let opening_time = 'unknown';
+  //   let closing_time = 'unknown';
+  //   if (open) {
+  //     utc.setUTCHours(Number(open.split(":")[0]), Number(open.split(":")[1]));
+  //     const hourMinute = utc.toLocaleString().split(", ")[1].split(":");
+  //     const amPm = hourMinute[2].slice(3);
+  //     opening_time = hourMinute[0]+":"+hourMinute[1]+" "+amPm;
+  //   }
+  //   if (close) {
+  //     utc.setUTCHours(Number(close.split(":")[0]), Number(close.split(":")[1]));
+  //     const hourMinute = utc.toLocaleString().split(", ")[1].split(":");
+  //     const amPm = hourMinute[2].slice(3);
+  //     closing_time = hourMinute[0]+":"+hourMinute[1]+" "+amPm;
+  //   }
+  //   return `${opening_time} - ${closing_time}`;
+  // }
+
   function timeRange(open, close) {
     if (!open && !close) return "unknown";
-    let utc = new Date(Date.UTC(2025, 0, 4));
-    let opening_time = 'unknown';
-    let closing_time = 'unknown';
-    if (open) {
-      utc.setUTCHours(Number(open.split(":")[0]), Number(open.split(":")[1]));
-      const hourMinute = utc.toLocaleString().split(", ")[1].split(":");
-      const amPm = hourMinute[2].slice(3);
-      opening_time = hourMinute[0]+":"+hourMinute[1]+" "+amPm;
-    }
-    if (close) {
-      utc.setUTCHours(Number(close.split(":")[0]), Number(close.split(":")[1]));
-      const hourMinute = utc.toLocaleString().split(", ")[1].split(":");
-      const amPm = hourMinute[2].slice(3);
-      closing_time = hourMinute[0]+":"+hourMinute[1]+" "+amPm;
-    }
-    return `${opening_time} - ${closing_time}`;
+
+    const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+    const openingTime = open
+      ? new Intl.DateTimeFormat('en-US', options).format(
+        new Date(Date.UTC(2025, 0, 4, ...open.split(":").map(Number)))
+      )
+      : "unknown";
+
+    const closingTime = close
+      ? new Intl.DateTimeFormat('en-US', options).format(
+        new Date(Date.UTC(2025, 0, 4, ...close.split(":").map(Number)))
+      )
+      : "unknown";
+
+    return `${openingTime} - ${closingTime}`;
   }
 
   function condition(value) {
