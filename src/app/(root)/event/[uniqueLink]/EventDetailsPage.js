@@ -11,6 +11,7 @@ export default function EventDetailsPage({ params }) {
   const [uniqueLink, setUniqueLink] = useState('');
   const [path, setPath] = useState("");
   const [isUserIn, setIsUserIn] = useState(false);
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [hasFetchedUser, setHasFetchedUser] = useState(false);
   const { data: session, status } = useSession();
   const [isEventFull, setIsEventFull] = useState(false);
@@ -20,7 +21,6 @@ export default function EventDetailsPage({ params }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const handleJoin = async () => {
-
 
     const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}`, {
       method: "POST",
@@ -40,6 +40,25 @@ export default function EventDetailsPage({ params }) {
   const handleDecline = () => {
     redirect('/event');
   };
+
+  const handleLeave = async () => {
+    try {
+      await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&leaveEvent=true`);
+      setIsUserIn(false);
+    } catch (error) {
+      throw new Error(error);
+    }
+
+  }
+
+  const handleCancel = async() => {
+    try {
+      await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&cancelEvent=true`);
+    } catch (error) {
+      throw new Error(error);
+    }
+    redirect('/event');
+  }
 
   const InvitationPopup2 = ({ event }) => {
     if (!isUserIn && !(isEventFull || isEventAllocated)) {
@@ -79,12 +98,34 @@ export default function EventDetailsPage({ params }) {
   };
 
 
+  const LeaveOrCancelEventButton = () => {
+    if (isUserAdmin) {
+      return (<Button
+        color="danger"
+        onPress={handleCancel}
+      >
+        Cancel Event
+      </Button>)
+    }
+    if (isUserIn) {
+      return (
+        <Button
+          color="danger"
+          onPress={handleLeave}
+        >
+          Leave Event
+        </Button>
+      )
+    }
+  }
 
   const SetOrInviteOrEventPageButton = () => {
     if (isEventFull || isEventAllocated) {
+      const description = setIsEventAllocated ? "This event has reached maximum number of participants" : "This event is finalized"
+
       return (
         <div className="mt-6">
-          <p>This event has reached maximum number of participants</p>
+          <p>{description}</p>
           <Button
             className="px-4 py-2 bg-blue-500 text-white rounded"
             href={`/event`}
@@ -96,7 +137,7 @@ export default function EventDetailsPage({ params }) {
       );
     } else if (isUserIn) {
       return (
-        <div className="mt-6">
+        <div className="flex justify-between w-3/4">
           <Button
             className="px-4 py-2 bg-blue-500 text-white rounded"
             href={`/event/${uniqueLink}/schedule`}
@@ -104,6 +145,7 @@ export default function EventDetailsPage({ params }) {
           >
             Set Your Availability
           </Button>
+          <LeaveOrCancelEventButton />
         </div>
       );
     }
@@ -171,27 +213,6 @@ export default function EventDetailsPage({ params }) {
     return `${time.hours ? time.hours : "0"} hours ${time.minutes ? time.minutes : "0"} minutes`;
   }
 
-
-  // function timeRange(open, close) {
-  //   if (!open && !close) return "unknown";
-  //   let utc = new Date(Date.UTC(2025, 0, 4));
-  //   let opening_time = 'unknown';
-  //   let closing_time = 'unknown';
-  //   if (open) {
-  //     utc.setUTCHours(Number(open.split(":")[0]), Number(open.split(":")[1]));
-  //     const hourMinute = utc.toLocaleString().split(", ")[1].split(":");
-  //     const amPm = hourMinute[2].slice(3);
-  //     opening_time = hourMinute[0]+":"+hourMinute[1]+" "+amPm;
-  //   }
-  //   if (close) {
-  //     utc.setUTCHours(Number(close.split(":")[0]), Number(close.split(":")[1]));
-  //     const hourMinute = utc.toLocaleString().split(", ")[1].split(":");
-  //     const amPm = hourMinute[2].slice(3);
-  //     closing_time = hourMinute[0]+":"+hourMinute[1]+" "+amPm;
-  //   }
-  //   return `${opening_time} - ${closing_time}`;
-  // }
-
   function timeRange(open, close) {
     if (!open && !close) return "unknown";
 
@@ -244,9 +265,22 @@ export default function EventDetailsPage({ params }) {
 
       setHasFetchedUser(true);
       try {
-        const response_isUserIn = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true`);
-        const data_response = await response_isUserIn.json();
-        setIsUserIn(data_response.result)
+
+        const response_isUserAdmin = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserInOrAdmin=true&isAdmin=true`);
+        const data_isUserAdmin = await response_isUserAdmin.json();
+        setIsUserAdmin(data_isUserAdmin.result);
+
+        // If the user is the admin of this event, he/she is of couse in this event
+        if (data_isUserAdmin.result) {
+          setIsUserIn(true);
+        }
+        else {
+          const response_isUserIn = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserInOrAdmin=true`);
+          const data_response = await response_isUserIn.json();
+          setIsUserIn(data_response.result);
+        }
+
+
       } catch (error) {
         throw new Error(error);
       }
@@ -276,7 +310,8 @@ export default function EventDetailsPage({ params }) {
         if (!response_numberOfParticipants.ok) throw new Error('Failed to fetch number of participants');
         const data_numberOfParticipants = await response_numberOfParticipants.json();
         const numberOfParticipants = data_numberOfParticipants.result;
-        setIsEventFull(numberOfParticipants[0].count === (matchedEvent.event_max_participants.toString()))
+        setIsEventFull(numberOfParticipants[0].count === (matchedEvent.event_max_participants.toString()));
+
 
       } catch (error) {
         console.error('Error fetching event:', error.message);
@@ -285,6 +320,8 @@ export default function EventDetailsPage({ params }) {
         setLoading(false); // End loading state
       }
     };
+
+
 
     fetchEvent();
     fetchUser();
