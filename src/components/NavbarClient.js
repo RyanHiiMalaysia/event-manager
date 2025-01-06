@@ -87,7 +87,7 @@ const NavbarClient = ({ session }) => {
         <NavbarBrand className="mr-4">
           <Link href="/" color="foreground" className="flex items-center">
             <Image src="/schedule.png" width={512} height={512} alt="Schedule" className="h-8 w-8 mr-2" />
-            <p className="hidden sm:block font-bold text-inherit">EVENT MANAGER</p>
+            <p className="hidden sm:block font-bold text-inherit">Allocato</p>
           </Link>
         </NavbarBrand>
       </NavbarContent>
