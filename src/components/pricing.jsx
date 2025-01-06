@@ -11,7 +11,7 @@ export default function Pricing() {
     const plans = [
         {
             name: "Free Plan",
-            desc: "Get started with the basics",
+            desc: "Get a taste upon signing up",
             price: 0,
             isMostPop: false,
             features: [
@@ -22,16 +22,20 @@ export default function Pricing() {
         },
         {
             name: "Pro Plan",
-            desc: "Make the best schedule for your events",
+            desc: "Simplify your event planning",
             price: 5,
             isMostPop: true,
             features: [
                 "Create unlimited events",
-                "Invite your friends",
+                "Join as many events as you want",
                 "Find the best time",
             ],
         },
     ];
+
+    const filteredPlans = session?.user?.user_has_paid
+        ? plans.filter(plan => plan.isMostPop)
+        : plans;
 
     return (
         <motion.section
@@ -52,8 +56,8 @@ export default function Pricing() {
                     No subscriptions. A one-time payment is all you need.
                 </p>
             </div>
-            <div className="mt-16 gap-10 grid lg:grid-cols-2 place-content-center">
-                {plans.map((item, idx) => (
+            <div className={`mt-16 gap-10 grid ${session?.user?.user_has_paid ? "place-content-center" : "lg:grid-cols-2 place-content-center"}`}>
+                {filteredPlans.map((item, idx) => (
                     <div key={idx} className="relative flex flex-col items-center">
                         <Card
                             shadow="none"
