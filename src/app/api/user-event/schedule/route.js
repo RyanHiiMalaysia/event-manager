@@ -21,8 +21,25 @@ async function getUsereventID(sql, email, link) {
   return ue_id;
 }
 
+async function fetchFreetimes(event_link){
+  const sql = getDatabaseConnection();
+  const query = sql`
+    SELECT
+      (user_name || '''s ' || 'freetime') as title,
+      ft_start as start,
+      ft_end as end
+    FROM 
+      freetimes NATURAL JOIN userevent NATURAL JOIN users
+    WHERE
+      event_id = (SELECT event_id FROM events WHERE event_link = ${event_link})
+    `;
+  return await query;
+}
+
+
+
 // Function to get the freetimes of a user for a specific event
-async function fetchFreetimes(user_email, event_link) {
+async function fetchUserFreetimes(user_email, event_link) {
   const sql = getDatabaseConnection();
   const query = sql`
     SELECT
@@ -63,7 +80,7 @@ export async function GET(req) {
     const email = url.searchParams.get("email");
     const link = url.searchParams.get("link");
 
-    const freeTimes = await fetchFreetimes(email, link);
+    const freeTimes = email ? await fetchUserFreetimes(email, link) : await fetchFreetimes(link);
     return new Response(JSON.stringify({ freeTimes }), { status: 200 });
   } catch (error) {
     console.error(error);
