@@ -158,21 +158,24 @@ const Profile = () => {
             <label className="block text-sm font-medium text-gray-700">Email</label>
             <p className="mt-1 text-sm text-gray-900">{user.user_email}</p>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Plan</label>
+            <p className="mt-1 text-sm text-gray-900">{user.user_has_paid ? "Pro" : "Free"}</p>
+          </div>
         </CardBody>
         <CardFooter className="flex justify-center">
           {session.user.user_has_paid ? (
             <Alert color="success" title="Thank you for your purchase!" />
           ) : (
             <Alert
-              color="danger"
-              description="Pay to access our features"
+              color="warning"
               endContent={
-                <Button color="danger" size="sm" variant="flat" as={Link}
+                <Button color="warning" size="sm" variant="flat" as={Link}
                   href="/pricing">
                   Pricing
                 </Button>
               }
-              title="You do not have a paid account"
+              title="Purchase our Pro plan for unlimited access"
               variant="faded"
             />
           )}
