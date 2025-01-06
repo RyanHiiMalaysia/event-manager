@@ -137,23 +137,23 @@ export default function CreateEventPage() {
         <div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50">
           {isVisible ? (
             <Alert
-              color="success"
-              className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
-              onClose={() => setIsVisible(false)}
-              endContent={
-                <p>
-                  Share this link with participants:
+            color="success"
+            className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
+            onClose={() => setIsVisible(false)}
+            endContent={
+              <p>
+                Share this link with participants:
 
-                  <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-all">
+                <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-all">
 
-                    {eventLink}
-                  </a>
-                </p>
-              }
-              title="Event created successfully!"
-              variant="faded"
-              font_size
-            />
+                  {eventLink}
+                </a>
+              </p>
+            }
+            title="Event created successfully!"
+            variant="faded"
+            font_size
+          />
           ) : null}
 
         </div>
