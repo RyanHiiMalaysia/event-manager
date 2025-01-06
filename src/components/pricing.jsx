@@ -90,7 +90,7 @@ export default function Pricing() {
                                     </div>
                                 </CardBody>
                                 <CardFooter className="p-0 flex items-center justify-center">
-                                    {session?.user?.user_has_paid && (
+                                    {item.isMostPop && session?.user?.user_has_paid && (
                                         <img src="dancingBear.gif" alt="Dancing Bear" className="h-16 mr-4" draggable="false"/>
                                     )}
                                     <Button
@@ -103,7 +103,7 @@ export default function Pricing() {
                                     >
                                         {session?.user?.user_has_paid ? "Thank you!" : "Get Started"}
                                     </Button>
-                                    {session?.user?.user_has_paid && (
+                                    {item.isMostPop && session?.user?.user_has_paid && (
                                         <img src="dancingBear.gif" alt="Dancing Bear" className="h-16 ml-4" draggable="false"/>
                                     )}
                                 </CardFooter>
