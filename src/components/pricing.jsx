@@ -10,7 +10,18 @@ export default function Pricing() {
     const { data: session, status } = useSession();
     const plans = [
         {
-            name: "One-Time Purchase",
+            name: "Free Plan",
+            desc: "Get started with the basics",
+            price: 0,
+            isMostPop: false,
+            features: [
+                "Create your events",
+                "Invite your friends",
+                "Find the best time",
+            ],
+        },
+        {
+            name: "Pro Plan",
             desc: "Make the best schedule for your events",
             price: 5,
             isMostPop: true,
