@@ -1,6 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
+import Error from "next/error";
 
 export default function Page() {
   const { data: session, status } = useSession();
@@ -48,12 +49,10 @@ export default function Page() {
   }, [session, eventLink, dataFetched]);
 
   if (status === "loading" || !dataFetched) {
-    return <div>Loading...</div>;
-  }
-  else if (!isAdmin) {
-    return <div>Access Denied</div>;
-  }
-  else {
+    return null;
+  } else if (!isAdmin) {
+    return <Error statusCode={403} title="You do not have permission to view this page" />;
+  } else {
     return <div>Admin Page</div>;
   }
 }
