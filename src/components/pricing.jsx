@@ -11,7 +11,7 @@ export default function Pricing() {
     const plans = [
         {
             name: "Free Plan",
-            desc: "Get a taste upon signing up",
+            desc: "Get a taste by signing up",
             price: 0,
             isMostPop: false,
             features: [
@@ -22,7 +22,7 @@ export default function Pricing() {
         },
         {
             name: "Pro Plan",
-            desc: "Simplify your event planning",
+            desc: "Optimise your event planning",
             price: 5,
             isMostPop: true,
             features: [
@@ -102,10 +102,27 @@ export default function Pricing() {
                                         variant="solid"
                                         color={item.isMostPop ? "primary" : "default"}
                                         as={Link}
-                                        href="/pricing"
-                                        isDisabled={session?.user?.user_has_paid}
+                                        href={
+                                            !session
+                                                ? "/signup"
+                                                : session.user.user_has_paid
+                                                ? "#"
+                                                : item.isMostPop
+                                                ? "/pricing"
+                                                : "/signup"
+                                        }
+                                        isDisabled={
+                                            session?.user?.user_has_paid ||
+                                            (!item.isMostPop && session && !session.user.user_has_paid)
+                                        }
                                     >
-                                        {session?.user?.user_has_paid ? "Thank you!" : "Get Started"}
+                                        {!session
+                                            ? "Sign Up"
+                                            : session.user.user_has_paid
+                                            ? "Thank you!"
+                                            : item.isMostPop
+                                            ? "Get Started"
+                                            : "Thank you!"}
                                     </Button>
                                     {item.isMostPop && session?.user?.user_has_paid && (
                                         <img src="dancingBear.gif" alt="Dancing Bear" className="h-16 ml-4" draggable="false"/>
