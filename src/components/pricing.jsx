@@ -15,8 +15,8 @@ export default function Pricing() {
             price: 0,
             isMostPop: false,
             features: [
-                "Create your events",
-                "Invite your friends",
+                "Create up to 5 events",
+                "Join as many events as you want",
                 "Find the best time",
             ],
         },
@@ -26,7 +26,7 @@ export default function Pricing() {
             price: 5,
             isMostPop: true,
             features: [
-                "Create your events",
+                "Create unlimited events",
                 "Invite your friends",
                 "Find the best time",
             ],
@@ -52,13 +52,12 @@ export default function Pricing() {
                     No subscriptions. A one-time payment is all you need.
                 </p>
             </div>
-            <div className="mt-16 gap-10 grid lg:grid-cols-1 place-content-center">
+            <div className="mt-16 gap-10 grid lg:grid-cols-2 place-content-center">
                 {plans.map((item, idx) => (
                     <div key={idx} className="relative flex flex-col items-center">
                         <Card
                             shadow="none"
-                            className={`relative rounded-[20px] p-[2px] will-change-transform ${item.isMostPop ? "sm:scale-110" : ""
-                                }`}
+                            className="relative rounded-[20px] p-[2px] will-change-transform"
                         >
                             {item.isMostPop ? (
                                 <span className="absolute inset-[-1000%] animate-[spin_6s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#016FEE_70%,#C7DBFB_100%)]" />
