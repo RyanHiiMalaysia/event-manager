@@ -61,7 +61,7 @@ export default function Pricing() {
                     <div key={idx} className="relative flex flex-col items-center">
                         <Card
                             shadow="none"
-                            className="relative rounded-[20px] p-[2px] will-change-transform"
+                            className="relative rounded-[20px] p-[2px] will-change-transform sm:scale-110"
                         >
                             {item.isMostPop ? (
                                 <span className="absolute inset-[-1000%] animate-[spin_6s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#016FEE_70%,#C7DBFB_100%)]" />
