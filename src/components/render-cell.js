@@ -37,9 +37,9 @@ export const RenderCell = ({ user, creator, userSession, columnKey }) => {
         //     <span>{user.is_admin ? "Admin" : "Participant"}</span>
         //   </div>
         // </div>
-        <Chip size="sm" variant="flat" color={user.id === creator ? "primary" : user.is_admin ? "success" : "default"}>
+        <Chip size="sm" variant="flat" color={user.id === creator ? "primary" : cellValue ? "success" : "default"}>
           <span className="capitalize text-xs">
-            {user.id === creator ? "Creator" : user.is_admin ? "Admin" : "Participant"}
+            {user.id === creator ? "Creator" : cellValue ? "Admin" : "Participant"}
           </span>
         </Chip>
       );
@@ -73,12 +73,8 @@ export const RenderCell = ({ user, creator, userSession, columnKey }) => {
             </Tooltip>
           </div> */}
             <div>
-              <Tooltip
-                content="Remove Participant"
-                color="danger"
-                onClick={() => console.log("Remove Participant", user.id)}
-              >
-                <button>
+              <Tooltip content="Remove Participant" color="danger">
+                <button onClick={() => console.log("Remove Participant", user.id)}>
                   <DeleteIcon size={20} fill="#FF0080" />
                 </button>
               </Tooltip>
