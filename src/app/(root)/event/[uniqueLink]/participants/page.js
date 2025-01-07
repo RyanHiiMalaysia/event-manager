@@ -56,18 +56,21 @@ export default function Page() {
     }
   }, [session, eventLink, dataFetched]);
 
-  return (
-    <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
-      <TableWrapper
-        items={participants}
-        creator={creator}
-        columns={[
-          { uid: "name", name: "Name" },
-          { uid: "email", name: "Email" },
-          { uid: "is_admin", name: "Role" },
-          { uid: "actions", name: "Actions" },
-        ]}
-      />
-    </div>
-  );
+  if (dataFetched && session) {
+    return (
+      <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
+        <TableWrapper
+          items={participants}
+          creator={creator}
+          userSession={session.user}
+          columns={[
+            { uid: "name", name: "Name" },
+            { uid: "email", name: "Email" },
+            { uid: "is_admin", name: "Role" },
+            { uid: "actions", name: "Actions" },
+          ]}
+        />
+      </div>
+    );
+  }
 }

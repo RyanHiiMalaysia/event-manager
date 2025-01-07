@@ -4,19 +4,22 @@ import { DeleteIcon } from "./icons/table/delete-icon";
 import { EditIcon } from "./icons/table/edit-icon";
 import { EyeIcon } from "./icons/table/eye-icon";
 
-function getUserPictureUrl(name) {
+function getUserPictureUrl(name, email, userSesion) {
+  if (email === userSesion.email) {
+    return userSesion.image;
+  }
   const formattedName = name.split(" ").join("+");
   return `https://ui-avatars.com/api/?name=${formattedName}&background=random`;
 }
 
-export const RenderCell = ({ user, creator, columnKey }) => {
+export const RenderCell = ({ user, creator, userSession, columnKey }) => {
   const cellValue = user[columnKey];
   switch (columnKey) {
     case "name":
       return (
         <User
           avatarProps={{
-            src: getUserPictureUrl(user.name),
+            src: getUserPictureUrl(user.name, user.email, userSession),
           }}
           name={cellValue}
         >

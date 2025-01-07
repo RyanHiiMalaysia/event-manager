@@ -9,7 +9,7 @@ import {
   import React from "react";
   import { RenderCell } from "./render-cell";
   
-  export const TableWrapper = ({items, creator, columns}) => {
+  export const TableWrapper = ({items, creator, userSession, columns}) => {
     return (
       <div className=" w-full flex flex-col gap-4">
         <Table aria-label="Example table with custom cells">
@@ -29,7 +29,7 @@ import {
               <TableRow>
                 {(columnKey) => (
                   <TableCell>
-                    {RenderCell({ user: item, creator: creator, columnKey: columnKey })}
+                    {RenderCell({ user: item, creator: creator, userSession: userSession, columnKey: columnKey, })}
                   </TableCell>
                 )}
               </TableRow>
