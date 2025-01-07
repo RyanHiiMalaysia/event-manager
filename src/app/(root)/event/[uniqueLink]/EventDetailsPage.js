@@ -121,7 +121,7 @@ export default function EventDetailsPage({ params }) {
 
   const SetOrInviteOrEventPageButton = () => {
     if (isEventFull || isEventAllocated) {
-      const description = setIsEventAllocated ? "This event has reached maximum number of participants" : "This event is finalized"
+      const description = isEventAllocated ? "This event is allocated":"This event has reached maximum number of participants" 
 
       return (
         <div className="mt-6">
