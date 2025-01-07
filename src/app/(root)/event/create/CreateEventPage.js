@@ -126,7 +126,8 @@ export default function CreateEventPage() {
       setEventLink(`${path}/event/${uniqueLink}`);
       alert("Event created successfully!");
     } else {
-      alert("Error creating event.");
+      const result = await response.json();
+      alert(result.message || "Error creating event.");
     }
   };
 
