@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Tabs, Tab, Card, CardBody, CardFooter, Checkbox, useDisclosure, Button, Link } from "@nextui-org/react";
+import { Tabs, Tab, Card, CardBody, CardFooter, Checkbox, useDisclosure, Button, Link, Tooltip } from "@nextui-org/react";
 import EventModal from "../../../components/EventModal";
 import moment from "moment";
 import blue from "../../../../public/blue.svg";
@@ -21,6 +21,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dataFetched, setDataFetched] = useState(false);
+  const [userDetails, setUserDetails] = useState({ user_has_paid: true, user_events_created: 0 });
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
@@ -44,6 +45,13 @@ export default function Page() {
             }
             return result.eventData;
           };
+
+          const userResponse = await fetch(`/api/user?email=${session.user.email}`, headers);
+          const userResult = await userResponse.json();
+          if (!userResponse.ok) {
+            throw new Error(userResult.message || "Failed to fetch user details");
+          }
+          setUserDetails(userResult);
 
           const [scheduling, allocated, organising, past] = await Promise.all([
             fetchEvents("hasAllocated=false&isPast=false"),
@@ -78,8 +86,24 @@ export default function Page() {
   return (
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold">Events</h1>
-        <Button color="primary" className="mx-2 text-3xl p-7" as={Link} href="/event/create">
+        <h1 className="text-4xl font-bold">
+          Events {userDetails.user_has_paid ? "" : (
+            <span>
+              <Tooltip content="Purchase the Pro plan to create unlimited events">
+                <span className={userDetails.user_events_created >= 5 ? "text-red-500" : ""}>
+                  {`${userDetails.user_events_created}/5`}
+                </span>
+              </Tooltip>
+            </span>
+          )}
+        </h1>
+        <Button 
+          color="primary" 
+          className="mx-2 text-3xl p-7" 
+          as={Link} 
+          href="/event/create" 
+          isDisabled={!userDetails.user_has_paid && userDetails.user_events_created >= 5}
+        >
           +
         </Button>
       </div>

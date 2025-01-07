@@ -21,11 +21,12 @@ export const authOptions = {
     },
     async session({ session, token }) {
       const sql = neon(`${process.env.DATABASE_URL}`);
-      const result = await sql('SELECT user_has_paid, user_name FROM users WHERE user_email = $1', [token.email]);
+      const result = await sql('SELECT user_events_created, user_has_paid, user_name FROM users WHERE user_email = $1', [token.email]);
 
       if (result.length > 0) {
         session.user.user_has_paid = result[0].user_has_paid;
         session.user.chosenName = result[0].user_name; // Store user_name in session
+        session.user.user_events_created = result[0].user_events_created;
       }
 
       return session;

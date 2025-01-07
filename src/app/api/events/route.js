@@ -36,6 +36,16 @@ async function fetchEvent(link) {
   `;
 }
 
+async function fetchUserEventCount(userId) {
+  const sql = getDatabaseConnection();
+  const result = await sql`
+    SELECT user_events_created 
+    FROM users 
+    WHERE user_id = ${userId}
+  `;
+  return result[0]?.user_events_created || 0;
+}
+
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
@@ -53,6 +63,12 @@ export async function POST(req) {
       deadline,
       creator,
     } = await req.json();
+
+    const userEventCount = await fetchUserEventCount(creator);
+
+    if (userEventCount >= 5) {
+      return NextResponse.json({ message: "Free users can only create up to 5 events." }, { status: 403 });
+    }
 
     await sql`BEGIN`;
 
@@ -76,6 +92,12 @@ export async function POST(req) {
           ${creator}, ${eventID}, true
         )
       `;
+
+    await sql`
+      UPDATE users
+      SET user_events_created = user_events_created + 1
+      WHERE user_id = ${creator}
+    `;
 
     await sql`COMMIT`;
 
