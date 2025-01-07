@@ -66,7 +66,7 @@ export default function Page() {
   if (dataFetched && session) {
     return (
       <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-8">
-        <div className="flex self-end max-w-md">
+        {/* <div className="flex self-end max-w-md">
         {  isVisible ?
           <Alert
             type="success"
@@ -79,15 +79,27 @@ export default function Page() {
             closable
           /> : null
         }
-        </div>
-        <div className="flex justify-between items-center mb-4">
+        </div> */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
           <h1 className="text-4xl font-bold">Participants</h1>
-
-          <Tooltip content="Copy event link to clipboard">
-            <Button color="primary" className="mx-2 text-md p-4" onPress={copyLinktoClipboard}>
-              Invite
-            </Button>
-          </Tooltip>
+          <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mt-4 md:mt-0">
+          {  isVisible ?
+          <Alert
+            type="success"
+            fill="solid"
+            shadow="md"
+            color="success"
+            title="Link copied to clipboard"
+            description="You can now share the event link to invite more participants"
+            onClose={() => setIsVisible(false)}
+            closable
+          /> : <Tooltip content="Copy event link to clipboard">
+              <Button color="primary" className="mx-2 text-md p-5" onPress={copyLinktoClipboard}>
+                Invite
+              </Button>
+            </Tooltip>
+        }
+          </div>
         </div>
         <TableWrapper
           items={participants}
