@@ -51,7 +51,7 @@ export default function EventDetailsPage({ params }) {
 
   }
 
-  const handleCancel = async() => {
+  const handleCancel = async () => {
     try {
       await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&cancelEvent=true`);
     } catch (error) {
@@ -121,7 +121,23 @@ export default function EventDetailsPage({ params }) {
 
   const SetOrInviteOrEventPageButton = () => {
 
-    if (isUserIn) {
+    if (isEventAllocated) {
+      return (
+        <div className="mt-6">
+          <p>This event is allocated</p>
+          <Button
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+            href={`/event`}
+            as={Link}
+          >
+            Event Page
+          </Button>
+          <LeaveOrCancelEventButton />
+        </div>
+      );
+    }
+
+    else if (isUserIn) {
       return (
         <div className="flex justify-between w-3/4">
           <Button
@@ -135,12 +151,11 @@ export default function EventDetailsPage({ params }) {
         </div>
       );
     }
-    else if (isEventFull || isEventAllocated) {
-      const description = isEventAllocated ? "This event is allocated":"This event has reached maximum number of participants" 
-      
+    else if (isEventFull) {
+
       return (
         <div className="mt-6">
-          <p>{description}</p>
+          <p>This event has reached maximum number of participants</p>
           <Button
             className="px-4 py-2 bg-blue-500 text-white rounded"
             href={`/event`}
@@ -148,7 +163,7 @@ export default function EventDetailsPage({ params }) {
           >
             Event Page
           </Button>
-          <LeaveOrCancelEventButton/>
+          <LeaveOrCancelEventButton />
         </div>
       );
     }
@@ -181,12 +196,12 @@ export default function EventDetailsPage({ params }) {
 
     return (
       <div>
-      <p className="text-gray-600 mt-2">
-        Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
-      </p>
-      <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
+        <p className="text-gray-600 mt-2">
+          Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
+        </p>
+        <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
       </div>
-      
+
     );
   };
 
