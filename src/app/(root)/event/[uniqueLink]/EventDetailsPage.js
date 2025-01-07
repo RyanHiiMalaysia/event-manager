@@ -137,7 +137,7 @@ export default function EventDetailsPage({ params }) {
     }
     else if (isEventFull || isEventAllocated) {
       const description = isEventAllocated ? "This event is allocated":"This event has reached maximum number of participants" 
-
+      
       return (
         <div className="mt-6">
           <p>{description}</p>
@@ -148,6 +148,7 @@ export default function EventDetailsPage({ params }) {
           >
             Event Page
           </Button>
+          <LeaveOrCancelEventButton/>
         </div>
       );
     }
