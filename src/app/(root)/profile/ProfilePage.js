@@ -175,8 +175,9 @@ const Profile = () => {
                   Pricing
                 </Button>
               }
-              title="Purchase our Pro plan for unlimited access"
+              title={<b>Purchase our Pro plan for unlimited access</b>}
               variant="faded"
+              description={`${user.user_events_created}/5 events created`}
             />
           )}
         </CardFooter>
