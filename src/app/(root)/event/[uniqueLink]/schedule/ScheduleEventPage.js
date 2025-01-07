@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { ScheduleCalendar } from "@/components/Calendar";
 import { DatePicker } from "@nextui-org/date-picker";
 import { TimeInput } from "@nextui-org/date-input";
-import {Input} from "@nextui-org/input";
 import { useSession } from "next-auth/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
 import { parseDate, parseTime, parseAbsolute, toLocalTimeZone } from "@internationalized/date";
@@ -24,6 +23,8 @@ export default function Page() {
   const [dataFetched, setDataFetched] = useState(false);
   const [startDate, setStartDateRange] = useState();
   const [endDate, setEndDateRange] = useState();
+  const [open, setOpen] = useState();
+  const [close, setClose] = useState();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -48,10 +49,15 @@ export default function Page() {
         });
         const result = await response.json();
         const result_event_date = await response_event_date.json();
+
         const start = result_event_date.eventData[0].event_schedule_start.split("T")[0];
         setStartDateRange(parseDate(start));
         const end = result_event_date.eventData[0].event_schedule_end.split("T")[0];
         setEndDateRange(parseDate(end));
+
+        setOpen(result_event_date.eventData[0].event_opening_hour);
+        setClose(result_event_date.eventData[0].event_closing_hour);
+
 
         if (!response.ok || !response_event_date.ok) {
           setError(result.message);
@@ -92,6 +98,8 @@ export default function Page() {
       alert("Please fill all fields");
     } else if (endTime <= startTime) {
       alert("End time must be greater than start time");
+    } else if (!(checkStarting && checkClosing)) {
+      alert("Freetime should between opening hour and closing hour");
     } else {
       const startDateTime = new Date(`${selectedDate}T${startTime}`);
       const endDateTime = new Date(`${selectedDate}T${endTime}`);
@@ -112,6 +120,22 @@ export default function Page() {
       }
     }
   };
+
+  const checkStarting = () => {
+    const dummyDate = "2024-01-01"
+    const event_opening = new Date(`${dummyDate}T${open}`);
+    const user_opening = new Date(`${dummyDate}T${startTime}`);
+
+    return (event_opening <= user_opening);
+  }
+
+  const checkClosing = () => {
+    const dummyDate = "2024-01-01"
+    const event_closing = new Date(`${dummyDate}T${close}`);
+    const user_closing = new Date(`${dummyDate}T${endTime}`);
+
+    return (event_closing >= user_closing);
+  }
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -148,14 +172,47 @@ export default function Page() {
           label="Start Time"
           value={startTime}
           onChange={setStartTime}
+          isInvalid={startTime ? startTime.minute % 15 !== 0 ? true : !checkStarting() : false}
+          errorMessage={
+            () => {
+              if (!endTime) {
+                return "";
+              }
+              return endTime.minute % 15 !== 0 ?
+                "Please enter a valid time in 15-minute intervals" :
+                checkClosing() ?
+                  "" : `End time should before the closing hour(${close})`
+            }
+          }
         />
         <TimeInput
           className="max-w-[284px] border rounded p-2"
           label="End Time"
           value={endTime}
           onChange={setEndTime}
-          isInvalid={endTime && startTime ? endTime <= startTime : false}
-          errorMessage="End time must be greater than start time"
+          isInvalid={endTime ?
+            endTime && startTime ?
+              endTime <= startTime ?
+                true :
+                endTime.minute % 15 !== 0 ?
+                  true :
+                  !checkClosing() :
+              false :
+            false}
+
+          errorMessage={
+            () => {
+              if (!endTime) {
+                return "";
+              } else if (endTime <= startTime) {
+                return "End time must be greater than start time ";
+              }
+              return endTime.minute % 15 !== 0 ?
+                "Please enter a valid time in 15-minute intervals" :
+                checkClosing() ?
+                  "" : `End time should before the closing hour(${close})`
+            }
+          }
         />
       </>
     );
@@ -182,6 +239,8 @@ export default function Page() {
       alert("Please fill all fields");
     } else if (endTime <= startTime) {
       alert("End time must be greater than start time");
+    } else if (!(checkStarting && checkClosing)) {
+      alert("Freetime should between opening hour and closing hour");
     } else {
       const startDateTime = new Date(`${selectedDate}T${startTime}`);
       const endDateTime = new Date(`${selectedDate}T${endTime}`);
@@ -220,28 +279,6 @@ export default function Page() {
     }
   };
 
-  // const minuteOptions = [];
-  // for (let minute = 0; minute < 60; minute += 15) {
-  //   minuteOptions.push(`${String(minute).padStart(2, "0")}`);
-  // }
-
-  // const generateTimeOptions = (interval) => {
-  //   const times = [];
-  //   let current = new Date(`1970-01-01T00:00:00`);
-  //   const endTime = new Date(`1970-01-01T23:59:00`);
-  //   while (current <= endTime) {
-  //     times.push(
-  //       current
-  //         .toTimeString()
-  //         .slice(0, 5) // Format HH:mm
-  //     );
-  //     current = new Date(current.getTime() + interval * 60 * 1000); // Add interval
-  //   }
-  //   return times;
-  // };
-
-  // const minuteOptions = generateTimeOptions(15); // 15-minute intervals
-  
 
 
   return (
@@ -283,48 +320,68 @@ export default function Page() {
         </Modal>
       </div>
       <div className="date-time-container text-center overflow-x-auto">
-      <I18nProvider locale="en-MY">
-        <DatePicker
-          isRequired
-          minValue={startDate}
-          maxValue={endDate}
-          className="max-w-[284px] border rounded p-2"
-          label="Date"
-          value={selectedDate}
-          onChange={setSelectedDate}
-        />
+        <I18nProvider locale="en-MY">
+          <DatePicker
+            isRequired
+            minValue={startDate}
+            maxValue={endDate}
+            className="max-w-[284px] border rounded p-2"
+            label="Date"
+            value={selectedDate}
+            onChange={setSelectedDate}
+          />
         </I18nProvider>
         <div className="w-full">
-            <Input
-              className="max-w-[350px] border rounded p-2"
-              label="Start Time"
-              list="minute-options"
-              id="minutes"
-              name="minutes"
-              aria-label="Minutes"
-              type="time"
-              style={{ width: "100%", color: startTime ? "#000" : "#71717A" }}
-              onChange={(e) => setStartTime(e.target.value)}
-              validate={(time) =>
-                time.split(":")[1] % 15 === 0 ? null : "Please enter a valid time in 15-minute intervals"
-              }
-            />
-          </div>
-        <div className="w-full">
-            <Input
+          <TimeInput
             className="max-w-[350px] border rounded p-2"
-              label="End Time"
-              list="minute-options"
-              id="minutes"
-              name="minutes"
-              aria-label="Minutes"
-              type="time"
-              style={{ width: "100%", color: endTime ? "#000" : "#71717A" }}
-              onChange={(e) => setEndTime(e.target.value)}
-              validate={(time) =>
-                time.split(":")[1] % 15 === 0 ? null : "Please enter a valid time in 15-minute intervals"
+            label="Start Time"
+            onChange={setStartTime}
+            value={startTime}
+            isInvalid={startTime ? startTime.minute % 15 !== 0 ? true : !checkStarting() : false}
+            errorMessage={
+              () => {
+                if (!startTime) {
+                  return "";
+                }
+                return startTime.minute % 15 !== 0 ?
+                  "Please enter a valid time in 15-minute intervals" :
+                  checkClosing() ?
+                    "" : `Start time should after the opening hour(${open})`
               }
-            />
+            }
+          />
+        </div>
+        <div className="w-full">
+          <TimeInput
+            className="max-w-[350px] border rounded p-2"
+            label="End Time"
+            type="time"
+            value={endTime}
+            onChange={setEndTime}
+            isInvalid={endTime ?
+              endTime && startTime ?
+                endTime <= startTime ?
+                  true :
+                  endTime.minute % 15 !== 0 ?
+                    true :
+                    !checkClosing() :
+                false :
+              false}
+
+            errorMessage={
+              () => {
+                if (!endTime) {
+                  return "";
+                } else if (endTime <= startTime) {
+                  return "End time must be greater than start time ";
+                }
+                return endTime.minute % 15 !== 0 ?
+                  "Please enter a valid time in 15-minute intervals" :
+                  checkClosing() ?
+                    "" : `End time should before the closing hour(${close})`
+              }
+            }
+          />
         </div>
       </div>
       <div className="add-button-container text-center pt-1 pb-4 px-1 lg:px-0 md:pt-2">
