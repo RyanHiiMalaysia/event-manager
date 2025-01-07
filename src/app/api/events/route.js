@@ -36,6 +36,18 @@ async function fetchEvent(link) {
   `;
 }
 
+async function getEventCreator(link) {
+  const sql = getDatabaseConnection();
+  return await sql`
+    SELECT 
+      event_creator 
+    FROM 
+      events 
+    WHERE 
+      event_link = ${link}
+  `;
+}
+
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
@@ -107,6 +119,12 @@ export async function GET(req) {
   try {
     const url = new URL(req.url);
     const link = url.searchParams.get("link");
+    const creator = url.searchParams.get("creator");
+    if (creator) {
+      const eventData = await getEventCreator(link);
+      return new Response(JSON.stringify({ eventData }), { status: 200 });
+    }
+
     const eventData = await fetchEvent(link);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
   } catch (error) {
