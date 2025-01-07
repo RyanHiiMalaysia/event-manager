@@ -12,7 +12,8 @@ async function fetchToBeAllocatedEvents(sql) {
     const query = sql`
       SELECT 
         event_id, 
-        event_duration 
+        event_duration,
+        event_force_admin
       FROM 
         events 
       WHERE 
@@ -91,11 +92,11 @@ export async function GET(request) {
     const toBeAllocatedEvents = await fetchToBeAllocatedEvents(sql);
 
     for (const event of toBeAllocatedEvents) {
-        const { event_id, event_duration } = event;
+        const { event_id, event_duration, event_force_admin } = event;
         const userEvents = await fetchUserEvents(sql, event_id);
         const {hours, minutes} = event_duration;
         const duration = ((hours?? 0) * 60 + (minutes?? 0)) * 60 * 1000;
-        const eventObj = new Event(duration);
+        const eventObj = new Event(duration, event_force_admin);
 
         // For each user event of event, fetch freetimes and add to event object
         for (const userEvent of userEvents) {
