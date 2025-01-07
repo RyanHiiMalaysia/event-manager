@@ -77,6 +77,12 @@ export async function POST(req) {
         )
       `;
 
+    await sql`
+      UPDATE users
+      SET user_events_created = user_events_created + 1
+      WHERE user_id = ${creator}
+    `;
+
     await sql`COMMIT`;
 
     return NextResponse.json({ message: "Event created successfully." }, { status: 200 });
