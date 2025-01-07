@@ -52,11 +52,13 @@ export async function POST(req) {
       link,
       deadline,
       creator,
+      edit,
     } = await req.json();
 
     await sql`BEGIN`;
 
-    const [insertedEvent] = await sql`
+    if (!edit) {
+      const [insertedEvent] = await sql`
       INSERT INTO events (
         event_title, event_duration, event_schedule_start, event_schedule_end, event_deadline, 
         event_max_participants, event_location, event_opening_hour, event_closing_hour, event_description, 
@@ -67,15 +69,29 @@ export async function POST(req) {
       ) RETURNING event_id
     `;
 
-    const eventID = insertedEvent.event_id;
+      const eventID = insertedEvent.event_id;
 
-    await sql`
+      await sql`
         INSERT INTO userevent (
           user_id, event_id, ue_is_admin
         ) VALUES (
           ${creator}, ${eventID}, true
         )
       `;
+    } else {
+      await sql`
+        UPDATE events
+        SET
+          event_title = ${title},
+          event_duration = ${duration},
+          event_deadline = ${deadline},
+          event_max_participants = ${maxParticipants},
+          event_location = ${location},
+          event_description = ${description}
+        WHERE
+          event_link = ${link}
+      `;
+    }
 
     await sql`COMMIT`;
 
