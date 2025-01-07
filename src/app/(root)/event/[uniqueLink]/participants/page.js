@@ -82,7 +82,7 @@ export default function Page() {
               />
             ) : (
               <Tooltip content="Copy event link to clipboard">
-                <Button color="primary" className="text-md p-6" onPress={copyLinktoClipboard}>
+                <Button color="primary" className="text-xl p-6 md:text-lg" onPress={copyLinktoClipboard}>
                   Invite
                 </Button>
               </Tooltip>
