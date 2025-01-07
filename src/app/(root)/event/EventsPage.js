@@ -88,12 +88,22 @@ export default function Page() {
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-bold">
           Events {userDetails.user_has_paid ? "" : (
-            <Tooltip content="Purchase the Pro plan to create unlimited events">
-              {`${userDetails.user_events_created}/5`}
-            </Tooltip>
+            <span>
+              <Tooltip content="Purchase the Pro plan to create unlimited events">
+                <span className={userDetails.user_events_created >= 5 ? "text-red-500" : ""}>
+                  {`${userDetails.user_events_created}/5`}
+                </span>
+              </Tooltip>
+            </span>
           )}
         </h1>
-        <Button color="primary" className="mx-2 text-3xl p-7" as={Link} href="/event/create">
+        <Button 
+          color="primary" 
+          className="mx-2 text-3xl p-7" 
+          as={Link} 
+          href="/event/create" 
+          isDisabled={!userDetails.user_has_paid && userDetails.user_events_created >= 5}
+        >
           +
         </Button>
       </div>
