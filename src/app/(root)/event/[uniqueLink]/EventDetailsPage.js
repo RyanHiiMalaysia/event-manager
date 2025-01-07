@@ -170,7 +170,7 @@ export default function EventDetailsPage({ params }) {
 
     return (
       <div>
-        <h1>You've been invited you to {event.event_title}!</h1>
+        <h1>You've been invited to {event.event_title}!</h1>
         <div className="flex justify-between w-3/4">
 
           <Button color="success" size="auto" variant="flat" onPress={handleJoin}>
