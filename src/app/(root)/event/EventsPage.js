@@ -90,7 +90,7 @@ export default function Page() {
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {schedulingEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) : (
+                ) : 
                   schedulingEvents.map(
                     (
                       item,
@@ -117,7 +117,7 @@ export default function Page() {
                       </Card>
                     )
                   )
-                )}
+                }
               </div>
             </CardBody>
           </Card>
@@ -126,7 +126,10 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {allocatedEvents.map(
+                {allocatedEvents.length === 0 ? (
+                  <p>No events to display.</p>
+                ) : 
+                  allocatedEvents.map(
                   (
                     item,
                     index // if not working, try changing userEvents to eventData
@@ -165,7 +168,10 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {organisingEvents.map((item, index) => (
+                {organisingEvents.length === 0 ? (
+                  <p>No events to display.</p>
+                ) : 
+                  organisingEvents.map((item, index) => (
                   <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
                     <CardBody className="overflow-visible p-0">
                       <Image
@@ -191,7 +197,10 @@ export default function Page() {
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {pastEvents.map((item, index) => (
+                {pastEvents.length === 0 ? (
+                  <p>No events to display.</p>
+                ) : 
+                 pastEvents.map((item, index) => (
                   <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
                     <CardBody className="overflow-visible p-0">
                       <Image
