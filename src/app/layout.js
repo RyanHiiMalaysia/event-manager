@@ -17,11 +17,11 @@ const geistMono = Geist_Mono({
 // Metadata for the application
 export const metadata = {
   title: {
-    template: '%s - Event Manager',
-    default: 'Event Manager',
+    template: '%s - Allocato',
+    default: 'Allocato',
   },
-  description: "Event Manager is a simple event management application where you can schedule events with your friends and family using their free times.",
-  metadataBase: new URL('https://event-manager-opal.vercel.app/'),
+  description: "Allocato is a simple event management application where you can schedule events with your friends and family using their free times.",
+  metadataBase: new URL('https://www.allocato.net/'),
 };
 
 // Root layout component
