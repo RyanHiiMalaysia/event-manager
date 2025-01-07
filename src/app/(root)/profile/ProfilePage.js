@@ -168,9 +168,9 @@ const Profile = () => {
             <Alert color="success" title="Thank you for your purchase!" />
           ) : (
             <Alert
-              color="warning"
+              color={user.user_events_created >= 5 ? "danger" : "warning"}
               endContent={
-                <Button color="warning" size="sm" variant="flat" as={Link}
+                <Button color={user.user_events_created >= 5 ? "danger" : "warning"} size="sm" variant="flat" as={Link}
                   href="/pricing">
                   Pricing
                 </Button>
