@@ -13,14 +13,21 @@ async function getAllParticipants(event_link, isAdmin) {
   const adminQuery = boolToQuery(isAdmin, "AND ue_is_admin = TRUE", "AND ue_is_admin = FALSE");
   const query = `
       SELECT
-        user_name,
-        user_email,
-        ue_is_admin
+        user_id as id,
+        user_name as name,
+        user_email as email,
+        ue_is_admin as is_admin
       FROM
         users NATURAL JOIN userevent
       WHERE
         event_id = (SELECT event_id FROM events WHERE event_link = $1)
       ${adminQuery}
+      ORDER BY
+        CASE 
+          WHEN user_id = (SELECT event_creator FROM events WHERE event_link = $1) THEN 0
+          WHEN ue_is_admin = TRUE THEN 1
+          ELSE 2
+        END
     `;
   return await sql(query, [event_link]);
 }
