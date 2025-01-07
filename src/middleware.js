@@ -13,10 +13,10 @@ export async function middleware(req) {
 
   const pathname = req.nextUrl.pathname;
 
-  if (!userHasPaid && (pathname.startsWith('/calendar') || pathname.startsWith('/event'))) {
-    // Redirect to pricing page if user has not paid and is trying to access calendar or event pages
-    return NextResponse.redirect(new URL('/pricing', req.url));
-  }
+  // if (!userHasPaid && (pathname.startsWith('/calendar') || pathname.startsWith('/event'))) {
+  //   // Redirect to pricing page if user has not paid and is trying to access calendar or event pages
+  //   return NextResponse.redirect(new URL('/pricing', req.url));
+  // }
 
   return NextResponse.next();
 }
