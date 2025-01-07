@@ -120,7 +120,22 @@ export default function EventDetailsPage({ params }) {
   }
 
   const SetOrInviteOrEventPageButton = () => {
-    if (isEventFull || isEventAllocated) {
+
+    if (isUserIn) {
+      return (
+        <div className="flex justify-between w-3/4">
+          <Button
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+            href={`/event/${uniqueLink}/schedule`}
+            as={Link}
+          >
+            Set Your Availability
+          </Button>
+          <LeaveOrCancelEventButton />
+        </div>
+      );
+    }
+    else if (isEventFull || isEventAllocated) {
       const description = isEventAllocated ? "This event is allocated":"This event has reached maximum number of participants" 
 
       return (
@@ -133,19 +148,6 @@ export default function EventDetailsPage({ params }) {
           >
             Event Page
           </Button>
-        </div>
-      );
-    } else if (isUserIn) {
-      return (
-        <div className="flex justify-between w-3/4">
-          <Button
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-            href={`/event/${uniqueLink}/schedule`}
-            as={Link}
-          >
-            Set Your Availability
-          </Button>
-          <LeaveOrCancelEventButton />
         </div>
       );
     }
@@ -177,9 +179,13 @@ export default function EventDetailsPage({ params }) {
     }
 
     return (
+      <div>
       <p className="text-gray-600 mt-2">
         Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
       </p>
+      <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
+      </div>
+      
     );
   };
 
@@ -338,13 +344,11 @@ export default function EventDetailsPage({ params }) {
 
   return (
     <div className="relative flex flex-col gap-y-4">
-      {/* <InvitationPopup2 event={event}/> */}
       <div className="flex-grow p-20 max-w-xl mx-auto border border dark:border rounded-lg shadow-lg bg-white dark:bg-transparent" style={{ marginTop: "6%" }}>
         <h1 className="text-3xl font-bold">{event.event_title}</h1>
         <p className="text-gray-600 mt-2">Owner: {event.user_name}</p>
         <ScheduledOrAllocated />
         <p className="text-gray-600 mt-2">Duration: {convertTime(event.event_duration)}</p>
-        <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
         <Accordion variant="bordered" selectionMode="multiple">
           <AccordionItem key="1" aria-label="Location" title="Location">
             <div className="max-h-40 overflow-y-auto break-words">
@@ -359,7 +363,6 @@ export default function EventDetailsPage({ params }) {
           </AccordionItem>
         </Accordion>
         <div className="mt-6">
-          {/* <SetOrEventPageButton /> */}
           <SetOrInviteOrEventPageButton />
         </div>
       </div>
