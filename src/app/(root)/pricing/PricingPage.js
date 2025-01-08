@@ -10,7 +10,7 @@ export default function PricingPage() {
           <h2 className="text-3xl bold">Pricing</h2>
         </CardHeader>
         <CardBody className="flex flex-col items-center">
-          <p className="text-lg mx-4">Get lifetime access to our Event Manager for a one-time purchase of RM5.</p>
+          <p className="text-lg mx-4">Get lifetime access to Allocato for a one-time purchase of RM5.</p>
           <Image alt="TNG eWallet QR" src="tng.jpg" />
         </CardBody>
       </Card>

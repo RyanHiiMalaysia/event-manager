@@ -10,17 +10,32 @@ export default function Pricing() {
     const { data: session, status } = useSession();
     const plans = [
         {
-            name: "One-Time Purchase",
-            desc: "Make the best schedule for your events",
+            name: "Free Plan",
+            desc: "Get a taste by signing up",
+            price: 0,
+            isMostPop: false,
+            features: [
+                "Create up to 5 events",
+                "Join as many events as you want",
+                "Find the best time",
+            ],
+        },
+        {
+            name: "Pro Plan",
+            desc: "Optimise your event planning",
             price: 5,
             isMostPop: true,
             features: [
-                "Create your events",
-                "Invite your friends",
+                "Create unlimited events",
+                "Join as many events as you want",
                 "Find the best time",
             ],
         },
     ];
+
+    const filteredPlans = session?.user?.user_has_paid
+        ? plans.filter(plan => plan.isMostPop)
+        : plans;
 
     return (
         <motion.section
@@ -41,13 +56,12 @@ export default function Pricing() {
                     No subscriptions. A one-time payment is all you need.
                 </p>
             </div>
-            <div className="mt-16 gap-10 grid lg:grid-cols-1 place-content-center">
-                {plans.map((item, idx) => (
+            <div className={`mt-16 gap-10 grid ${session?.user?.user_has_paid ? "place-content-center" : "lg:grid-cols-2 place-content-center"}`}>
+                {filteredPlans.map((item, idx) => (
                     <div key={idx} className="relative flex flex-col items-center">
                         <Card
                             shadow="none"
-                            className={`relative rounded-[20px] p-[2px] will-change-transform ${item.isMostPop ? "sm:scale-110" : ""
-                                }`}
+                            className="relative rounded-[20px] p-[2px] will-change-transform sm:scale-110"
                         >
                             {item.isMostPop ? (
                                 <span className="absolute inset-[-1000%] animate-[spin_6s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#016FEE_70%,#C7DBFB_100%)]" />
@@ -80,7 +94,7 @@ export default function Pricing() {
                                     </div>
                                 </CardBody>
                                 <CardFooter className="p-0 flex items-center justify-center">
-                                    {session?.user?.user_has_paid && (
+                                    {item.isMostPop && session?.user?.user_has_paid && (
                                         <img src="dancingBear.gif" alt="Dancing Bear" className="h-16 mr-4" draggable="false"/>
                                     )}
                                     <Button
@@ -88,12 +102,29 @@ export default function Pricing() {
                                         variant="solid"
                                         color={item.isMostPop ? "primary" : "default"}
                                         as={Link}
-                                        href="/pricing"
-                                        isDisabled={session?.user?.user_has_paid}
+                                        href={
+                                            !session
+                                                ? "/signup"
+                                                : session.user.user_has_paid
+                                                ? "#"
+                                                : item.isMostPop
+                                                ? "/pricing"
+                                                : "/signup"
+                                        }
+                                        isDisabled={
+                                            session?.user?.user_has_paid ||
+                                            (!item.isMostPop && session && !session.user.user_has_paid)
+                                        }
                                     >
-                                        {session?.user?.user_has_paid ? "Thank you!" : "Get Started"}
+                                        {!session
+                                            ? "Sign Up"
+                                            : session.user.user_has_paid
+                                            ? "Thank you!"
+                                            : item.isMostPop
+                                            ? "Get Started"
+                                            : "Thank you!"}
                                     </Button>
-                                    {session?.user?.user_has_paid && (
+                                    {item.isMostPop && session?.user?.user_has_paid && (
                                         <img src="dancingBear.gif" alt="Dancing Bear" className="h-16 ml-4" draggable="false"/>
                                     )}
                                 </CardFooter>

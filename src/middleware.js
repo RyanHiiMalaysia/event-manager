@@ -5,16 +5,16 @@ export async function middleware(req) {
   const session = await auth();
 
   if (!session) {
-    // Redirect to pricing page if user is not authenticated
+    // Redirect to signup page if user is not authenticated
     return NextResponse.redirect(new URL('/signup', req.url));
   }
 
   const userHasPaid = session.user.user_has_paid;
-
+  const userEventsCreated = session.user.user_events_created;
   const pathname = req.nextUrl.pathname;
 
-  if (!userHasPaid && (pathname.startsWith('/calendar') || pathname.startsWith('/event'))) {
-    // Redirect to pricing page if user has not paid and is trying to access calendar or event pages
+  if (!userHasPaid && userEventsCreated >= 5 && pathname === '/event/create') {
+    // Redirect to pricing page if user has not paid and has created 5 or more events
     return NextResponse.redirect(new URL('/pricing', req.url));
   }
 

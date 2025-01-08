@@ -90,8 +90,8 @@ export default function CreateEventPage() {
     };
     const getDeadlineDateTime = (deadline) => new Date(deadline + "T00:00:00").toISOString();
     const getDuration = (hours, minutes) => `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-    const convertHourToMinute = (time) => { return (Number(time.hour)*60 + Number(time.minute))}
-   
+    const convertHourToMinute = (time) => { return (Number(time.hour) * 60 + Number(time.minute)) }
+
     // Get the form data and validate it
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
@@ -102,11 +102,11 @@ export default function CreateEventPage() {
     } else if (deadline >= startDate) {
       alert("Registration deadline must be before the event start date");
       return;
-    }else if(convertHourToMinute(endTime) - convertHourToMinute(startTime) < Number(hours)*60+Number(minutes)){
+    } else if (convertHourToMinute(endTime) - convertHourToMinute(startTime) < Number(hours) * 60 + Number(minutes)) {
       alert("The event duration must not exceed the time difference between the starting and ending times.");
       return;
     }
-    
+
     // Send the data to the server
     const uniqueLink = generateUniqueLink();
     const response = await fetch("/api/events", {
@@ -126,7 +126,8 @@ export default function CreateEventPage() {
       setEventLink(`${path}/event/${uniqueLink}`);
       alert("Event created successfully!");
     } else {
-      alert("Error creating event.");
+      const result = await response.json();
+      alert(result.message || "Error creating event.");
     }
   };
 
@@ -155,11 +156,12 @@ export default function CreateEventPage() {
             font_size
           />
           ) : null}
-          
+
         </div>
       );
     }
   };
+
 
   const validateInteger = (value) => (Number.isInteger(Number(value)) ? null : "Please enter an integer");
 
@@ -195,12 +197,12 @@ export default function CreateEventPage() {
             />
           </I18nProvider>
           <div className="flex gap-4">
-            <TimeInput 
-              label="Starting Time" 
-              onChange={setStartTime} 
-              description="What times will work?" 
+            <TimeInput
+              label="Starting Time"
+              onChange={setStartTime}
+              description="What times will work?"
               isRequired
-              />
+            />
             <TimeInput
               label="Ending Time"
               onChange={setEndTime}

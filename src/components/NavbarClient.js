@@ -87,14 +87,14 @@ const NavbarClient = ({ session }) => {
         <NavbarBrand className="mr-4">
           <Link href="/" color="foreground" className="flex items-center">
             <Image src="/schedule.png" width={512} height={512} alt="Schedule" className="h-8 w-8 mr-2" />
-            <p className="hidden sm:block font-bold text-inherit">EVENT MANAGER</p>
+            <p className="hidden sm:block font-bold text-inherit">Allocato</p>
           </Link>
         </NavbarBrand>
       </NavbarContent>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {renderNavbarItem('/', 'Home')}
         {(!session || (session.user && !session.user.user_has_paid)) && renderNavbarItem('/pricing', 'Pricing')}
-        {session && session.user && session.user.user_has_paid && (
+        {session && session.user && (
           <>
             {renderNavbarItem('/event', 'Events')}
             {renderNavbarItem('/calendar', 'Calendar')}
@@ -148,7 +148,7 @@ const NavbarClient = ({ session }) => {
       <NavbarMenu>
         {renderNavbarMenuItem('/', 'Home')}
         {(!session || (session.user && !session.user.user_has_paid)) && renderNavbarMenuItem('/pricing', 'Pricing')}
-        {session && session.user && session.user.user_has_paid && (
+        {session && session.user && (
           <>
             {renderNavbarMenuItem('/event', 'Events')}
             {renderNavbarMenuItem('/calendar', 'Calendar')}
