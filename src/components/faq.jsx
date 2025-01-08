@@ -5,18 +5,34 @@ import { motion } from "framer-motion";
 export default function Faq() {
   const accordionItems = [
     {
-      title: "Question 1",
+      title: "What do you mean by finding the \"best time\" for an event?",
       content: (
         <div className="text-muted-foreground">
-          Answer 1
+          We help you find the best date and time for your event that suits the availability of the most participants possible within your specified range.
         </div>
       ),
     },
     {
-      title: "Question 2",
+      title: "Can other people see my events?",
       content: (
         <div className="text-muted-foreground">
-          Answer 2
+          Only you and the people invited to the event can see it.
+        </div>
+      ),
+    },
+    {
+      title: "Can I edit my availability?",
+      content: (
+        <div className="text-muted-foreground">
+          Yes. You can edit/remove your availability for an event anytime before the event is allocated.
+        </div>
+      ),
+    },
+    {
+      title: "Who can see my availability for an event?",
+      content: (
+        <div className="text-muted-foreground">
+          Only you and the admins of the event can see your availability.
         </div>
       ),
     },

@@ -78,7 +78,7 @@ const NavbarClient = ({ session }) => {
       <NavbarContent className="sm:hidden pr-3" justify="center">
         <NavbarBrand>
           <Link href="/" color="foreground">
-          <Image src="/schedule.png" width={512} height={512} alt="Schedule" className="h-8 w-8" />
+          <Image src="/schedule.png" width={512} height={512} alt="Schedule" className="h-8 w-8" priority={true} />
           </Link>
         </NavbarBrand>
       </NavbarContent>
@@ -86,7 +86,7 @@ const NavbarClient = ({ session }) => {
       <NavbarContent className="hidden sm:flex gap-4" justify="start">
         <NavbarBrand className="mr-4">
           <Link href="/" color="foreground" className="flex items-center">
-            <Image src="/schedule.png" width={512} height={512} alt="Schedule" className="h-8 w-8 mr-2" />
+            <Image src="/schedule.png" width={512} height={512} alt="Schedule" className="h-8 w-8 mr-2" priority={true} />
             <p className="hidden sm:block font-bold text-inherit">Allocato</p>
           </Link>
         </NavbarBrand>
