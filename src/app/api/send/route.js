@@ -5,23 +5,25 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
   try {
-    // authenthication
-    
-    const { user_email, userFirstName } = await req.json();
-    
+    // Authentication (if needed)
+
+    const { user_email, userFirstName, subject } = await req.json();
+
     const { data, error } = await resend.emails.send({
-      from: 'Acme <onboarding@resend.dev>', // 'Acme <noreply@allocato.net>'
+      from: 'Do not reply to this email (via allocato.net) <noreply@allocato.net>', // 'Acme <noreply@allocato.net>'
       to: [user_email],
-      subject: 'Hello world',
+      subject: subject,
       react: EmailTemplate(userFirstName),
     });
-
+    
     if (error) {
-      return Response.json({ error }, { status: 500 });
+      console.log("this one")
+      return new Response(JSON.stringify({ error }), { status: 500 });
     }
 
-    return Response.json(data);
+    return new Response(JSON.stringify(data), { status: 200 });
   } catch (error) {
-    return Response.json({ error }, { status: 500 });
+    //console.error('Error sending email:', error);
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 }
