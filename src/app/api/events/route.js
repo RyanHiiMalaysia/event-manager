@@ -58,6 +58,19 @@ async function fetchUserEventCount(userId) {
   return result[0]?.user_events_created || 0;
 }
 
+async function checkIsEventPast(link){
+  const sql = getDatabaseConnection();
+  const result = await sql `
+    SELECT event_id 
+    FROM events
+    WHERE     event_link = ${link}
+          AND event_allocated_end IS NOT NULL
+          AND event_allocated_end < NOW()
+    `;
+
+    return result[0]?true:false;
+}
+
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
@@ -142,9 +155,14 @@ export async function GET(req) {
     const url = new URL(req.url);
     const link = url.searchParams.get("link");
     const creator = url.searchParams.get("creator");
+    const past = url.searchParams.get("past");
     if (creator) {
       const eventData = await getEventCreator(link);
       return new Response(JSON.stringify({ eventData }), { status: 200 });
+    }
+    if(past){
+      const result = await checkIsEventPast(link);
+      return new Response(JSON.stringify({ result:result }), { status: 200 });
     }
 
     const eventData = await fetchEvent(link);
