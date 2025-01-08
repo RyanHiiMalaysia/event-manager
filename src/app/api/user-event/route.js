@@ -17,7 +17,11 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin, isPast) {
     "AND event_allocated_start IS NULL"
   );
   const adminQuery = boolToQuery(isAdmin, "AND ue_is_admin = TRUE", "AND ue_is_admin = FALSE");
-  const pastQuery = boolToQuery(isPast, "AND event_allocated_end < NOW()", "AND (event_allocated_end >= NOW() OR event_allocated_end IS NULL)");
+  const pastQuery = boolToQuery(
+    isPast,
+    "AND event_allocated_end < NOW()",
+    "AND (event_allocated_end >= NOW() OR event_allocated_end IS NULL)"
+  );
 
   let query = `
   SELECT 
@@ -48,44 +52,26 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin, isPast) {
 }
 
 // Function to verify if user is already in event
-// async function verifyParticipation(sql, user_email, event_link) {
-//   const [user_id] = await sql`
-//     SELECT
-//       user_id
-//     FROM
-//       users NATURAL JOIN userevent
-//     WHERE
-//       user_email = ${user_email}
-//     AND
-//       event_id = (SELECT event_id FROM events WHERE event_link = ${event_link})
-//   `;
-//   return user_id ? true : false;
-// }
-
-
-async function verifyParticipation(sql, user_email, event_link, checkAdmin) {
+async function verifyParticipation(sql, user_email, event_link, isAdmin = null) {
   const boolToQuery = (bool, trueQuery, falseQuery) => (bool === null ? "" : bool ? trueQuery : falseQuery);
-  const admin = boolToQuery(checkAdmin, "AND ue_is_admin = TRUE", "");
-
-  let query = `
-      SELECT
-        user_id
-      FROM
-        users NATURAL JOIN userevent
-      WHERE
-        user_email = $1
-      AND
-        event_id = (SELECT event_id FROM events WHERE event_link = $2)
-      ${admin}
-    `
+  const adminQuery = boolToQuery(isAdmin, "AND ue_is_admin = TRUE", "AND ue_is_admin = FALSE");
+  const query = `
+    SELECT
+      user_id
+    FROM
+      users NATURAL JOIN userevent
+    WHERE
+      user_email = $1
+    AND
+      event_id = (SELECT event_id FROM events WHERE event_link = $2)
+    ${adminQuery}
+  `;
   const [user_id] = await sql(query, [user_email, event_link]);
   return user_id ? true : false;
-
 }
 
-//Function to check the event has reached maximum participants 
+//Function to check the event has reached maximum participants
 async function findNumberOfParticipants(sql, event_link) {
-
   const currentNumberOfParticipants = await sql`
     SELECT
       COUNT(user_id)
@@ -208,10 +194,19 @@ export async function GET(req) {
     const isAdmin = strToBool(url.searchParams.get("isAdmin"));
     const isPast = strToBool(url.searchParams.get("isPast"));
     const numberOfParticipants = strToBool(url.searchParams.get("findNumberOfParticipants"));
-    const link = url.searchParams.get("link")
-    const findIsUserInOrAdmin = strToBool(url.searchParams.get("findIsUserInOrAdmin"));
+    const link = url.searchParams.get("link");
+    const findIsUserIn = strToBool(url.searchParams.get("findIsUserIn"));
     const leaveEvent = strToBool(url.searchParams.get("leaveEvent"));
     const cancelEvent = strToBool(url.searchParams.get("cancelEvent"));
+
+    if (numberOfParticipants) {
+      const result = await findNumberOfParticipants(sql, link);
+
+      return new Response(JSON.stringify({ result: result }), { status: 200 });
+    }
+    if (findIsUserIn) {
+      const isUserIn = await verifyParticipation(sql, email, link, isAdmin);
+      return new Response(JSON.stringify({ result: isUserIn }), { status: 200 });
 
     if (cancelEvent) {
       await deleteAllFreetimesForSpecfciEvent(sql, link);
@@ -223,14 +218,6 @@ export async function GET(req) {
       await deleteFreetimesForSpecfciUserEvent(sql, email, link);
       await deleteUserEventForSpecificUser(sql, email, link);
       return new Response(JSON.stringify({ message: "Leave event successfully!" }), { status: 200 });
-    }
-    if (numberOfParticipants) {
-      const result = await findNumberOfParticipants(sql, link);
-      return new Response(JSON.stringify({ result: result }), { status: 200 });
-    }
-    if (findIsUserInOrAdmin) {
-      const isUserInOrAdmin = await verifyParticipation(sql, email, link, isAdmin);
-      return new Response(JSON.stringify({ result: isUserInOrAdmin }), { status: 200 });
     }
     const eventData = await fetchUserEvents(email, hasAllocated, isAdmin, isPast);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
