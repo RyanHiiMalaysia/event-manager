@@ -47,15 +47,18 @@ async function getEventCreator(link) {
       event_link = ${link}
   `;
 }
-  
-async function fetchUserEventCount(userId) {
+
+async function fetchUserEventAndPaymentDetails(userId) {
   const sql = getDatabaseConnection();
   const result = await sql`
-    SELECT user_events_created 
+    SELECT user_events_created, user_has_paid 
     FROM users 
     WHERE user_id = ${userId}
   `;
-  return result[0]?.user_events_created || 0;
+  return {
+    userEventsCreated: result[0]?.user_events_created || 0,
+    userHasPaid: result[0]?.user_has_paid || false,
+  };
 }
 
 async function checkIsEventPast(link){
@@ -90,9 +93,9 @@ export async function POST(req) {
       edit,
     } = await req.json();
 
-    const userEventCount = await fetchUserEventCount(creator);
+    const { userEventsCreated, userHasPaid } = await fetchUserEventAndPaymentDetails(creator);
 
-    if (userEventCount >= 5) {
+    if (!userHasPaid && userEventsCreated >= 5) {
       return NextResponse.json({ message: "Free users can only create up to 5 events." }, { status: 403 });
     }
 
