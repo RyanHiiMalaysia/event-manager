@@ -1,14 +1,28 @@
 "use client";
-import { useRouter, redirect } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { Accordion, AccordionItem, Link, Button, Avatar, Card, CardHeader, useDisclosure, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react";
+import { useRouter, redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import {
+  Accordion,
+  AccordionItem,
+  Link,
+  Button,
+  Avatar,
+  Card,
+  CardHeader,
+  useDisclosure,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@nextui-org/react";
 
 export default function EventDetailsPage({ params }) {
   const router = useRouter();
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [uniqueLink, setUniqueLink] = useState('');
+  const [uniqueLink, setUniqueLink] = useState("");
   const [path, setPath] = useState("");
   const [isUserIn, setIsUserIn] = useState(false);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
@@ -21,16 +35,15 @@ export default function EventDetailsPage({ params }) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const handleJoin = async () => {
-
     const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}`, {
       method: "POST",
       body: JSON.stringify({
         user_email: session.user.email,
-        event_link: uniqueLink
+        event_link: uniqueLink,
       }),
-    })
+    });
 
-    if (!response_add_user) throw new Error('Failed to add user to this event');
+    if (!response_add_user) throw new Error("Failed to add user to this event");
     else {
       setIsUserIn(true);
       onOpenChange(false); // Close the modal
@@ -38,7 +51,7 @@ export default function EventDetailsPage({ params }) {
   };
 
   const handleDecline = () => {
-    redirect('/event');
+    redirect("/event");
   };
 
   const handleLeave = async () => {
@@ -48,8 +61,7 @@ export default function EventDetailsPage({ params }) {
     } catch (error) {
       throw new Error(error);
     }
-
-  }
+  };
 
   const handleCancel = async () => {
     try {
@@ -57,22 +69,18 @@ export default function EventDetailsPage({ params }) {
     } catch (error) {
       throw new Error(error);
     }
-    redirect('/event');
-  }
+    redirect("/event");
+  };
 
   const InvitationPopup2 = ({ event }) => {
     if (!isUserIn && !(isEventFull || isEventAllocated)) {
       return (
-        <Modal
-          isOpen={isOpen}
-          onOpenChange={true}
-          isDismissable={false}
-          isKeyboardDismissDisabled={true}>
+        <Modal isOpen={isOpen} onOpenChange={true} isDismissable={false} isKeyboardDismissDisabled={true}>
           <ModalContent>
             <ModalBody>
-
               <div className="flex flex-col items-center w-full max-w-md p-8 space-y-6">
-                <Avatar referrerPolicy={'no-referrer'}
+                <Avatar
+                  referrerPolicy={"no-referrer"}
                   className="w-20 h-20 text-large"
                   src={session.user.image}
                   showFallback
@@ -86,9 +94,7 @@ export default function EventDetailsPage({ params }) {
                     Decline
                   </Button>
                 </div>
-
               </div>
-
             </ModalBody>
           </ModalContent>
         </Modal>
@@ -97,70 +103,48 @@ export default function EventDetailsPage({ params }) {
     return null;
   };
 
-
   const LeaveOrCancelEventButton = () => {
     if (isUserAdmin) {
-      return (<Button
-        color="danger"
-        onPress={handleCancel}
-      >
-        Cancel Event
-      </Button>)
+      return (
+        <Button color="danger" onPress={handleCancel}>
+          Cancel Event
+        </Button>
+      );
     }
     if (isUserIn) {
       return (
-        <Button
-          color="danger"
-          onPress={handleLeave}
-        >
+        <Button color="danger" onPress={handleLeave}>
           Leave Event
         </Button>
-      )
+      );
     }
-  }
+  };
 
   const SetOrInviteOrEventPageButton = () => {
-
     if (isEventAllocated) {
       return (
         <div className="mt-6">
           <p>This event is allocated</p>
-          <Button
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-            href={`/event`}
-            as={Link}
-          >
+          <Button className="px-4 py-2 bg-blue-500 text-white rounded" href={`/event`} as={Link}>
             Event Page
           </Button>
           <LeaveOrCancelEventButton />
         </div>
       );
-    }
-
-    else if (isUserIn) {
+    } else if (isUserIn) {
       return (
         <div className="flex justify-between w-3/4">
-          <Button
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-            href={`/event/${uniqueLink}/schedule`}
-            as={Link}
-          >
+          <Button className="px-4 py-2 bg-blue-500 text-white rounded" href={`/event/${uniqueLink}/schedule`} as={Link}>
             Set Your Availability
           </Button>
           <LeaveOrCancelEventButton />
         </div>
       );
-    }
-    else if (isEventFull) {
-
+    } else if (isEventFull) {
       return (
         <div className="mt-6">
           <p>This event has reached maximum number of participants</p>
-          <Button
-            className="px-4 py-2 bg-blue-500 text-white rounded"
-            href={`/event`}
-            as={Link}
-          >
+          <Button className="px-4 py-2 bg-blue-500 text-white rounded" href={`/event`} as={Link}>
             Event Page
           </Button>
           <LeaveOrCancelEventButton />
@@ -172,7 +156,6 @@ export default function EventDetailsPage({ params }) {
       <div>
         <h1>You've been invited to {event.event_title}!</h1>
         <div className="flex justify-between w-3/4">
-
           <Button color="success" size="auto" variant="flat" onPress={handleJoin}>
             Join
           </Button>
@@ -181,8 +164,7 @@ export default function EventDetailsPage({ params }) {
           </Button>
         </div>
       </div>
-
-    )
+    );
   };
 
   const ScheduledOrAllocated = () => {
@@ -197,11 +179,11 @@ export default function EventDetailsPage({ params }) {
     return (
       <div>
         <p className="text-gray-600 mt-2">
-          Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
+          Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} -{" "}
+          {convertDateTimeToDate(event.event_schedule_end)}
         </p>
         <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
       </div>
-
     );
   };
 
@@ -221,15 +203,13 @@ export default function EventDetailsPage({ params }) {
     fetchParams();
   }, [params]);
 
-
   function convertDateTimeToDate(dateTime) {
     let date = new Date(dateTime);
 
     // Format the date
-    let formattedDate = date.toLocaleString('en-MY').split(",")[0];
+    let formattedDate = date.toLocaleString("en-MY").split(",")[0];
     return formattedDate;
   }
-
 
   function convertTime(time) {
     return `${time.hours ? time.hours : "0"} hours ${time.minutes ? time.minutes : "0"} minutes`;
@@ -238,17 +218,15 @@ export default function EventDetailsPage({ params }) {
   function timeRange(open, close) {
     if (!open && !close) return "unknown";
 
-    const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+    const options = { hour: "2-digit", minute: "2-digit", hour12: true };
     const openingTime = open
-      ? new Intl.DateTimeFormat('en-US', options).format(
-        new Date(Date.UTC(2025, 0, 4, ...open.split(":").map(Number)))
-      )
+      ? new Intl.DateTimeFormat("en-US", options).format(new Date(Date.UTC(2025, 0, 4, ...open.split(":").map(Number))))
       : "unknown";
 
     const closingTime = close
-      ? new Intl.DateTimeFormat('en-US', options).format(
-        new Date(Date.UTC(2025, 0, 4, ...close.split(":").map(Number)))
-      )
+      ? new Intl.DateTimeFormat("en-US", options).format(
+          new Date(Date.UTC(2025, 0, 4, ...close.split(":").map(Number)))
+        )
       : "unknown";
 
     return `${openingTime} - ${closingTime}`;
@@ -262,15 +240,18 @@ export default function EventDetailsPage({ params }) {
     let date = new Date(unformattedDate);
 
     // Format the date
-    let formattedDate = date.toLocaleString('en-MY', {
-      weekday: 'long',   // Optional: Add weekday name
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true // Ensure the time is in 12-hour format
-    }).replace(/,/, '').replace(/:/g, '.');
+    let formattedDate = date
+      .toLocaleString("en-MY", {
+        weekday: "long", // Optional: Add weekday name
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true, // Ensure the time is in 12-hour format
+      })
+      .replace(/,/, "")
+      .replace(/:/g, ".");
     return formattedDate;
   }
 
@@ -280,29 +261,29 @@ export default function EventDetailsPage({ params }) {
       onOpenChange(true);
       setHasModalBeenShown(true); // Set the modal as shown
     }
-    if (!uniqueLink || status !== 'authenticated' || !session?.user?.email) return;
+    if (!uniqueLink || status !== "authenticated" || !session?.user?.email) return;
 
     const fetchUser = async () => {
       if (hasFetchedUser) return; // Prevent duplicate calls
 
       setHasFetchedUser(true);
       try {
-
-        const response_isUserAdmin = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserInOrAdmin=true&isAdmin=true`);
+        const response_isUserAdmin = await fetch(
+          `/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true&isAdmin=true`
+        );
         const data_isUserAdmin = await response_isUserAdmin.json();
         setIsUserAdmin(data_isUserAdmin.result);
 
         // If the user is the admin of this event, he/she is of couse in this event
         if (data_isUserAdmin.result) {
           setIsUserIn(true);
-        }
-        else {
-          const response_isUserIn = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserInOrAdmin=true`);
+        } else {
+          const response_isUserIn = await fetch(
+            `/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true`
+          );
           const data_response = await response_isUserIn.json();
           setIsUserIn(data_response.result);
         }
-
-
       } catch (error) {
         throw new Error(error);
       }
@@ -311,43 +292,41 @@ export default function EventDetailsPage({ params }) {
     const fetchEvent = async () => {
       try {
         const response_event = await fetch(`${path}/api/events?link=${uniqueLink}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
         });
 
-        if (!response_event.ok) throw new Error('Failed to fetch event details');
+        if (!response_event.ok) throw new Error("Failed to fetch event details");
 
         const data_events = await response_event.json();
-        if (data_events.eventData.length === 0) throw new Error('Failed to fetch event details');
+        if (data_events.eventData.length === 0) throw new Error("Failed to fetch event details");
         const matchedEvent = data_events.eventData[0];
         setEvent(matchedEvent || null); // Set null if no event matches
         setIsEventAllocated(matchedEvent.event_allocated_start !== null);
 
         //Check is the event full
-        const response_numberOfParticipants = await fetch(`/api/user-event?link=${uniqueLink}&findNumberOfParticipants=true`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
+        const response_numberOfParticipants = await fetch(
+          `/api/user-event?link=${uniqueLink}&findNumberOfParticipants=true`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
 
-        if (!response_numberOfParticipants.ok) throw new Error('Failed to fetch number of participants');
+        if (!response_numberOfParticipants.ok) throw new Error("Failed to fetch number of participants");
         const data_numberOfParticipants = await response_numberOfParticipants.json();
         const numberOfParticipants = data_numberOfParticipants.result;
-        setIsEventFull(numberOfParticipants[0].count === (matchedEvent.event_max_participants.toString()));
-
-
+        setIsEventFull(numberOfParticipants[0].count === matchedEvent.event_max_participants.toString());
       } catch (error) {
-        console.error('Error fetching event:', error.message);
+        console.error("Error fetching event:", error.message);
         setEvent(null); // Handle not found
       } finally {
         setLoading(false); // End loading state
       }
     };
 
-
-
     fetchEvent();
     fetchUser();
-
   }, [uniqueLink, status, session]);
 
   if (loading) {
@@ -360,7 +339,10 @@ export default function EventDetailsPage({ params }) {
 
   return (
     <div className="relative flex flex-col gap-y-4">
-      <div className="flex-grow p-20 max-w-xl mx-auto border border dark:border rounded-lg shadow-lg bg-white dark:bg-transparent" style={{ marginTop: "6%" }}>
+      <div
+        className="flex-grow p-20 max-w-xl mx-auto border border dark:border rounded-lg shadow-lg bg-white dark:bg-transparent"
+        style={{ marginTop: "6%" }}
+      >
         <h1 className="text-3xl font-bold">{event.event_title}</h1>
         <p className="text-gray-600 mt-2">Owner: {event.user_name}</p>
         <ScheduledOrAllocated />
