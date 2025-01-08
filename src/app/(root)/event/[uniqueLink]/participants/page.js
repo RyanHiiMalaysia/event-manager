@@ -76,7 +76,7 @@ export default function Page() {
                 shadow="md"
                 color="success"
                 title="Link copied to clipboard"
-                description="You can now share the event link to invite more participants"
+                description="Share this link to invite participants"
                 onClose={() => setIsVisible(false)}
                 closable
               />
