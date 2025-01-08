@@ -46,6 +46,7 @@ async function getEventCreator(link) {
     WHERE 
       event_link = ${link}
   `;
+}
   
 async function fetchUserEventCount(userId) {
   const sql = getDatabaseConnection();

@@ -207,6 +207,7 @@ export async function GET(req) {
     if (findIsUserIn) {
       const isUserIn = await verifyParticipation(sql, email, link, isAdmin);
       return new Response(JSON.stringify({ result: isUserIn }), { status: 200 });
+    }
 
     if (cancelEvent) {
       await deleteAllFreetimesForSpecfciEvent(sql, link);
