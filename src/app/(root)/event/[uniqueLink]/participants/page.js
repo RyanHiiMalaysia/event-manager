@@ -68,8 +68,46 @@ export default function Page() {
     const adminAction = ({ name, is_admin }) =>
       is_admin ? `remove ${name} from the admin list` : `make ${name} an admin`;
     const getDescription = (user) => `Are you sure you want to ${adminAction(user)}?`;
-    const handleOnAddPress = () => console.log("Adding admin");
-    const handleOnRemovePress = () => console.log("Removing admin");
+    const handleOnAddPress = async () => {
+      const response = await fetch("/api/user-event", {
+        method: "POST",
+        body: JSON.stringify({ user_email: selectedParticipant.email, event_link: eventLink, makeAdmin: true }),
+      });
+      setIsEditOpen(false);
+
+      if (response.ok) {
+        setParticipants(
+          participants.map((participant) =>
+            participant.email === selectedParticipant.email ? { ...participant, is_admin: true } : participant
+          )
+        );
+        setSelectedParticipant(null);
+        alert(`Successfully made ${selectedParticipant.name} an admin`);
+      } else {
+        const result = await response.json();
+        alert(result.message || "Error adding admin");
+      }
+    };
+    const handleOnRemovePress = async () => {
+      const response = await fetch("/api/user-event", {
+        method: "POST",
+        body: JSON.stringify({ user_email: selectedParticipant.email, event_link: eventLink, makeAdmin: false }),
+      });
+      onOpenChange();
+
+      if (response.ok) {
+        setParticipants(
+          participants.map((participant) =>
+            participant.email === selectedParticipant.email ? { ...participant, is_admin: false } : participant
+          )
+        );
+        setSelectedParticipant(null);
+        alert(`Successfully removed ${selectedParticipant.name} from the admin list`);
+      } else {
+        const result = await response.json();
+        alert(result.message || "Error removing admin");
+      }
+    };
     return (
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>

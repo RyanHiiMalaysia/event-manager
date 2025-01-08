@@ -181,6 +181,24 @@ async function removeEvent(sql, event_link) {
   await sql`COMMIT`;
 }
 
+async function setAdmin(sql, user_email, event_link, makeAdmin) {
+  await sql`BEGIN`;
+
+  await sql`
+    UPDATE 
+        userevent
+      SET 
+        ue_is_admin = ${makeAdmin}
+      WHERE 
+        event_id = (SELECT event_id FROM events WHERE event_link = ${event_link})
+        AND 
+        user_id = (SELECT user_id FROM users WHERE user_email = ${user_email})
+  `;
+
+  await sql`COMMIT`;
+  return NextResponse.json({ message: "Successfully updated admin status" }, { status: 200 });
+}
+
 async function handleLeaveEvent(sql, user_email, event_link) {
   await removeFreetimes(sql, user_email, event_link);
   await removeUserEvent(sql, user_email, event_link);
@@ -237,11 +255,13 @@ export async function GET(req) {
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
-    const { user_email, event_link, leave, cancel } = await req.json();
+    const { user_email, event_link, leave, cancel, makeAdmin } = await req.json();
     if (leave) {
       return handleLeaveEvent(sql, user_email, event_link);
     } else if (cancel) {
       return handleCancelEvent(sql, event_link);
+    } else if (makeAdmin !== undefined) {
+      return setAdmin(sql, user_email, event_link, makeAdmin);
     } else {
       return handleAddUserToEvent(sql, user_email, event_link);
     }
