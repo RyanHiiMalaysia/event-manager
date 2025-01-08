@@ -56,7 +56,10 @@ export default function EventDetailsPage({ params }) {
 
   const handleLeave = async () => {
     try {
-      await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&leaveEvent=true`);
+      await fetch("/api/user-event", {
+        method: "POST",
+        body: JSON.stringify({ user_email: session.user.email, event_link: uniqueLink, leave: true }),
+      });
       setIsUserIn(false);
     } catch (error) {
       throw new Error(error);
@@ -65,7 +68,10 @@ export default function EventDetailsPage({ params }) {
 
   const handleCancel = async () => {
     try {
-      await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&cancelEvent=true`);
+      await fetch("/api/user-event", {
+        method: "POST",
+        body: JSON.stringify({ event_link: uniqueLink, cancel: true }),
+      });
     } catch (error) {
       throw new Error(error);
     }

@@ -181,7 +181,28 @@ async function deleteEvent(sql, event_link) {
   await sql`COMMIT`;
 }
 
+async function handleLeaveEvent(sql, user_email, event_link) {
+  await deleteFreetimesForSpecfciUserEvent(sql, user_email, event_link);
+  await deleteUserEventForSpecificUser(sql, user_email, event_link);
+  return NextResponse.json({ message: "Successfully left event" }, { status: 200 });
+}
 
+async function handleCancelEvent(sql, event_link) {
+  await deleteAllFreetimesForSpecfciEvent(sql, event_link);
+  await deleteAllUserEventsForSpecifciEvent(sql, event_link);
+  await deleteEvent(sql, event_link);
+  return NextResponse.json({ message: "Successfully deleted event" }, { status: 200 });
+}
+
+async function handleAddUserToEvent(sql, user_email, event_link) {
+  const inEvent = await verifyParticipation(sql, user_email, event_link);
+  if (!inEvent) {
+    await addUserToEvent(sql, user_email, event_link);
+    return NextResponse.json({ message: "Successfully added into event" }, { status: 200 });
+  } else {
+    return NextResponse.json({ message: "User already in event" }, { status: 500 });
+  }
+}
 
 // Function to handle the GET request to fetch user events
 export async function GET(req) {
@@ -196,29 +217,14 @@ export async function GET(req) {
     const numberOfParticipants = strToBool(url.searchParams.get("findNumberOfParticipants"));
     const link = url.searchParams.get("link");
     const findIsUserIn = strToBool(url.searchParams.get("findIsUserIn"));
-    const leaveEvent = strToBool(url.searchParams.get("leaveEvent"));
-    const cancelEvent = strToBool(url.searchParams.get("cancelEvent"));
 
     if (numberOfParticipants) {
       const result = await findNumberOfParticipants(sql, link);
-
       return new Response(JSON.stringify({ result: result }), { status: 200 });
     }
     if (findIsUserIn) {
       const isUserIn = await verifyParticipation(sql, email, link, isAdmin);
       return new Response(JSON.stringify({ result: isUserIn }), { status: 200 });
-    }
-
-    if (cancelEvent) {
-      await deleteAllFreetimesForSpecfciEvent(sql, link);
-      await deleteAllUserEventsForSpecifciEvent(sql, link);
-      await deleteEvent(sql, link);
-      return new Response(JSON.stringify({ message: "Delete event successfully!" }), { status: 200 });
-    }
-    if (leaveEvent) {
-      await deleteFreetimesForSpecfciUserEvent(sql, email, link);
-      await deleteUserEventForSpecificUser(sql, email, link);
-      return new Response(JSON.stringify({ message: "Leave event successfully!" }), { status: 200 });
     }
     const eventData = await fetchUserEvents(email, hasAllocated, isAdmin, isPast);
     return new Response(JSON.stringify({ eventData }), { status: 200 });
@@ -231,14 +237,13 @@ export async function GET(req) {
 export async function POST(req) {
   const sql = getDatabaseConnection();
   try {
-    const { user_email, event_link } = await req.json();
-    const inEvent = await verifyParticipation(sql, user_email, event_link, false);
-
-    if (!inEvent) {
-      await addUserToEvent(sql, user_email, event_link);
-      return NextResponse.json({ message: "Successfully added into event" }, { status: 200 });
+    const { user_email, event_link, leave, cancel } = await req.json();
+    if (leave) {
+      return handleLeaveEvent(sql, user_email, event_link);
+    } else if (cancel) {
+      return handleCancelEvent(sql, event_link);
     } else {
-      return NextResponse.json({ message: "User already in event" }, { status: 500 });
+      return handleAddUserToEvent(sql, user_email, event_link);
     }
   } catch (error) {
     console.log(error);
