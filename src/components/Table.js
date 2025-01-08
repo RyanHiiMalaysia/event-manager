@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from 
 import React from "react";
 import { RenderCell } from "./render-cell";
 
-export const TableWrapper = ({ items, creator, userSession, columns, onDelete }) => {
+export const TableWrapper = ({ items, creator, userSession, columns, onDelete, onEdit, isAdmin }) => {
   return (
     <div className=" w-full flex flex-col gap-4">
       <Table aria-label="Example table with custom cells">
@@ -22,7 +22,7 @@ export const TableWrapper = ({ items, creator, userSession, columns, onDelete })
             <TableRow>
               {(columnKey) => (
                 <TableCell>
-                  {RenderCell({ user: item, creator, userSession, columnKey, onDelete })}
+                  {RenderCell({ user: item, creator, userSession, columnKey, onDelete, onEdit, isAdmin })}
                 </TableCell>
               )}
             </TableRow>

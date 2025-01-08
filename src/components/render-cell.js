@@ -12,7 +12,7 @@ function getUserPictureUrl(name, email, userSesion) {
   return `https://ui-avatars.com/api/?name=${formattedName}&background=random`;
 }
 
-export const RenderCell = ({ user, creator, userSession, columnKey, onDelete }) => {
+export const RenderCell = ({ user, creator, userSession, columnKey, onDelete, onEdit, isAdmin }) => {
   const cellValue = user[columnKey];
   switch (columnKey) {
     case "name":
@@ -55,7 +55,7 @@ export const RenderCell = ({ user, creator, userSession, columnKey, onDelete }) 
     //   );
 
     case "actions":
-      if (user.id !== creator) {
+      if (user.id !== creator && isAdmin) {
         return (
           <div className="flex items-center gap-4 ">
             {/* <div>
@@ -64,14 +64,14 @@ export const RenderCell = ({ user, creator, userSession, columnKey, onDelete }) 
                 <EyeIcon size={20} fill="#979797" />
               </button>
             </Tooltip>
-          </div>
+          </div> */}
           <div>
             <Tooltip content="Edit user" color="secondary">
-              <button onClick={() => console.log("Edit user", user.id)}>
+              <button onClick={() => onEdit(user)}>
                 <EditIcon size={20} fill="#979797" />
               </button>
             </Tooltip>
-          </div> */}
+          </div>
             <div>
               <Tooltip content="Remove Participant" color="danger">
                 <button onClick={() => onDelete(user)}>
