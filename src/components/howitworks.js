@@ -43,7 +43,7 @@ export default function HowItWorks() {
                     Follow these simple steps to get started with our platform.
                 </p>
             </div>
-            <div className="mt-8 flex flex-col items-center">
+            <div className="mt-4 flex flex-col items-center">
                 {steps.map((step, idx) => (
                     <motion.div
                         key={idx}
@@ -61,7 +61,7 @@ export default function HowItWorks() {
                                 <CardBody className="w-full flex items-start gap-3">
                                     <div className="flex flex-col w-full">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 flex items-center justify-center" style={{ backgroundColor: '#006FEE', color: 'white', borderRadius: '50%' }}>
+                                            <div className="w-6 h-6 flex items-center justify-center" style={{ backgroundColor: '#006FEE', color: 'white', borderRadius: '50%' }}>
                                                 {idx + 1}
                                             </div>
                                             <h4 className="text-xl font-light">{step.title}</h4>
