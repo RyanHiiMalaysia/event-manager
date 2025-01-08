@@ -12,7 +12,7 @@ function getUserPictureUrl(name, email, userSesion) {
   return `https://ui-avatars.com/api/?name=${formattedName}&background=random`;
 }
 
-export const RenderCell = ({ user, creator, userSession, columnKey }) => {
+export const RenderCell = ({ user, creator, userSession, columnKey, onDelete }) => {
   const cellValue = user[columnKey];
   switch (columnKey) {
     case "name":
@@ -74,7 +74,7 @@ export const RenderCell = ({ user, creator, userSession, columnKey }) => {
           </div> */}
             <div>
               <Tooltip content="Remove Participant" color="danger">
-                <button onClick={() => console.log("Remove Participant", user.id)}>
+                <button onClick={() => onDelete(user)}>
                   <DeleteIcon size={20} fill="#FF0080" />
                 </button>
               </Tooltip>
