@@ -13,6 +13,29 @@ const generateUniqueLink = () => {
   return `${timestamp}-${randomString}`;
 };
 
+const sendEmail = async (email, eventLink) => {
+  try {
+    const response = await fetch("/api/send-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        to: email,
+        subject: "Event Created Successfully",
+        //text: `Your event has been created successfully. You can share this link with participants: ${eventLink}`,
+      }),
+    });
+
+    if (!response.ok) {
+      console.log(response)
+      throw new Error("Failed to send email");
+    }
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
+
 export default function CreateEventPage() {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -123,8 +146,10 @@ export default function CreateEventPage() {
     });
 
     if (response.ok) {
-      setEventLink(`${path}/event/${uniqueLink}`);
+      const eventLink = `${path}/event/${uniqueLink}`;
+      setEventLink(eventLink);
       alert("Event created successfully!");
+      await sendEmail(session.user.email, eventLink);
     } else {
       alert("Error creating event.");
     }
@@ -160,7 +185,6 @@ export default function CreateEventPage() {
       );
     }
   };
-
 
   const validateInteger = (value) => (Number.isInteger(Number(value)) ? null : "Please enter an integer");
 
