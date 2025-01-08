@@ -98,6 +98,159 @@ export default function EventDetailsPage({ params }) {
   };
 
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setPath(window.location.origin);
+    }
+  }, []);
+
+  // Await the params when the component mounts
+  useEffect(() => {
+    const fetchParams = async () => {
+      const uniqueLinkFromParams = (await params).uniqueLink;
+      setUniqueLink(uniqueLinkFromParams);
+    };
+
+    fetchParams();
+  }, [params]);
+
+
+  function convertDateTimeToDate(dateTime) {
+    let date = new Date(dateTime);
+
+    // Format the date
+    let formattedDate = date.toLocaleString('en-MY').split(",")[0];
+    return formattedDate;
+  }
+
+
+  function convertTime(time) {
+    return `${time.hours ? time.hours : "0"} hours ${time.minutes ? time.minutes : "0"} minutes`;
+  }
+
+  function timeRange(open, close) {
+    if (!open && !close) return "unknown";
+
+    const options = { hour: '2-digit', minute: '2-digit', hour12: true };
+    const openingTime = open
+      ? new Intl.DateTimeFormat('en-US', options).format(
+        new Date(Date.UTC(2025, 0, 4, ...open.split(":").map(Number)))
+      )
+      : "unknown";
+
+    const closingTime = close
+      ? new Intl.DateTimeFormat('en-US', options).format(
+        new Date(Date.UTC(2025, 0, 4, ...close.split(":").map(Number)))
+      )
+      : "unknown";
+
+    return `${openingTime} - ${closingTime}`;
+  }
+
+  function condition(value) {
+    return value || "--";
+  }
+
+  function convertDate(unformattedDate) {
+    let date = new Date(unformattedDate);
+
+    // Format the date
+    let formattedDate = date.toLocaleString('en-MY', {
+      weekday: 'long',   // Optional: Add weekday name
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true // Ensure the time is in 12-hour format
+    }).replace(/,/, '').replace(/:/g, '.');
+    return formattedDate;
+  }
+
+  useEffect(() => {
+    if (!isUserIn && !hasModalBeenShown) {
+      onOpen(); // Open the modal
+      onOpenChange(true);
+      setHasModalBeenShown(true); // Set the modal as shown
+    }
+    if (!uniqueLink || status !== 'authenticated' || !session?.user?.email) return;
+
+    const fetchUser = async () => {
+      if (hasFetchedUser) return; // Prevent duplicate calls
+
+      setHasFetchedUser(true);
+      try {
+
+        const response_isUserAdmin = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true&isAdmin=true`);
+        const data_isUserAdmin = await response_isUserAdmin.json();
+        setIsUserAdmin(data_isUserAdmin.result);
+
+        // If the user is the admin of this event, he/she is of couse in this event
+        if (data_isUserAdmin.result) {
+          setIsUserIn(true);
+        }
+        else {
+          const response_isUserIn = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true`);
+          const data_response = await response_isUserIn.json();
+          setIsUserIn(data_response.result);
+        }
+
+
+      } catch (error) {
+        throw new Error(error);
+      }
+    };
+
+    const fetchEvent = async () => {
+      try {
+        const response_event = await fetch(`${path}/api/events?link=${uniqueLink}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response_event.ok) throw new Error('Failed to fetch event details');
+
+        const data_events = await response_event.json();
+        if (data_events.eventData.length === 0) throw new Error('Failed to fetch event details');
+        const matchedEvent = data_events.eventData[0];
+        setEvent(matchedEvent || null); // Set null if no event matches
+        setIsEventAllocated(matchedEvent.event_allocated_start !== null);
+
+        //Check is the event full
+        const response_numberOfParticipants = await fetch(`/api/user-event?link=${uniqueLink}&findNumberOfParticipants=true`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!response_numberOfParticipants.ok) throw new Error('Failed to fetch number of participants');
+        const data_numberOfParticipants = await response_numberOfParticipants.json();
+        const numberOfParticipants = data_numberOfParticipants.result;
+        setIsEventFull(numberOfParticipants[0].count === (matchedEvent.event_max_participants.toString()));
+
+
+      } catch (error) {
+        console.error('Error fetching event:', error.message);
+        setEvent(null); // Handle not found
+      } finally {
+        setLoading(false); // End loading state
+      }
+    };
+
+
+
+    fetchEvent();
+    fetchUser();
+
+  }, [uniqueLink, status, session]);
+
+  if (loading) {
+    return <p className="p-6 text-center">Loading event details...</p>;
+  }
+
+  if (!event) {
+    return <p className="p-6 text-center">Event not found.</p>;
+  }
+
   const LeaveOrCancelEventButton = () => {
     if (isUserAdmin) {
       return (<Button
@@ -204,159 +357,6 @@ export default function EventDetailsPage({ params }) {
 
     );
   };
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setPath(window.location.origin);
-    }
-  }, []);
-
-  // Await the params when the component mounts
-  useEffect(() => {
-    const fetchParams = async () => {
-      const uniqueLinkFromParams = (await params).uniqueLink;
-      setUniqueLink(uniqueLinkFromParams);
-    };
-
-    fetchParams();
-  }, [params]);
-
-
-  function convertDateTimeToDate(dateTime) {
-    let date = new Date(dateTime);
-
-    // Format the date
-    let formattedDate = date.toLocaleString('en-MY').split(",")[0];
-    return formattedDate;
-  }
-
-
-  function convertTime(time) {
-    return `${time.hours ? time.hours : "0"} hours ${time.minutes ? time.minutes : "0"} minutes`;
-  }
-
-  function timeRange(open, close) {
-    if (!open && !close) return "unknown";
-
-    const options = { hour: '2-digit', minute: '2-digit', hour12: true };
-    const openingTime = open
-      ? new Intl.DateTimeFormat('en-US', options).format(
-        new Date(Date.UTC(2025, 0, 4, ...open.split(":").map(Number)))
-      )
-      : "unknown";
-
-    const closingTime = close
-      ? new Intl.DateTimeFormat('en-US', options).format(
-        new Date(Date.UTC(2025, 0, 4, ...close.split(":").map(Number)))
-      )
-      : "unknown";
-
-    return `${openingTime} - ${closingTime}`;
-  }
-
-  function condition(value) {
-    return value || "--";
-  }
-
-  function convertDate(unformattedDate) {
-    let date = new Date(unformattedDate);
-
-    // Format the date
-    let formattedDate = date.toLocaleString('en-MY', {
-      weekday: 'long',   // Optional: Add weekday name
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true // Ensure the time is in 12-hour format
-    }).replace(/,/, '').replace(/:/g, '.');
-    return formattedDate;
-  }
-
-  useEffect(() => {
-    if (!isUserIn && !hasModalBeenShown) {
-      onOpen(); // Open the modal
-      onOpenChange(true);
-      setHasModalBeenShown(true); // Set the modal as shown
-    }
-    if (!uniqueLink || status !== 'authenticated' || !session?.user?.email) return;
-
-    const fetchUser = async () => {
-      if (hasFetchedUser) return; // Prevent duplicate calls
-
-      setHasFetchedUser(true);
-      try {
-
-        const response_isUserAdmin = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserInOrAdmin=true&isAdmin=true`);
-        const data_isUserAdmin = await response_isUserAdmin.json();
-        setIsUserAdmin(data_isUserAdmin.result);
-
-        // If the user is the admin of this event, he/she is of couse in this event
-        if (data_isUserAdmin.result) {
-          setIsUserIn(true);
-        }
-        else {
-          const response_isUserIn = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserInOrAdmin=true`);
-          const data_response = await response_isUserIn.json();
-          setIsUserIn(data_response.result);
-        }
-
-
-      } catch (error) {
-        throw new Error(error);
-      }
-    };
-
-    const fetchEvent = async () => {
-      try {
-        const response_event = await fetch(`${path}/api/events?link=${uniqueLink}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (!response_event.ok) throw new Error('Failed to fetch event details');
-
-        const data_events = await response_event.json();
-        if (data_events.eventData.length === 0) throw new Error('Failed to fetch event details');
-        const matchedEvent = data_events.eventData[0];
-        setEvent(matchedEvent || null); // Set null if no event matches
-        setIsEventAllocated(matchedEvent.event_allocated_start !== null);
-
-        //Check is the event full
-        const response_numberOfParticipants = await fetch(`/api/user-event?link=${uniqueLink}&findNumberOfParticipants=true`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (!response_numberOfParticipants.ok) throw new Error('Failed to fetch number of participants');
-        const data_numberOfParticipants = await response_numberOfParticipants.json();
-        const numberOfParticipants = data_numberOfParticipants.result;
-        setIsEventFull(numberOfParticipants[0].count === (matchedEvent.event_max_participants.toString()));
-
-
-      } catch (error) {
-        console.error('Error fetching event:', error.message);
-        setEvent(null); // Handle not found
-      } finally {
-        setLoading(false); // End loading state
-      }
-    };
-
-
-
-    fetchEvent();
-    fetchUser();
-
-  }, [uniqueLink, status, session]);
-
-  if (loading) {
-    return <p className="p-6 text-center">Loading event details...</p>;
-  }
-
-  if (!event) {
-    return <p className="p-6 text-center">Event not found.</p>;
-  }
 
   return (
     <div className="relative flex flex-col gap-y-4">
