@@ -7,19 +7,19 @@ import { Divider } from "@nextui-org/divider";
 const steps = [
     {
         title: "Sign Up",
-        description: "Create an account to get started.",
+        description: "Register your email to create an account and get started.",
     },
     {
         title: "Create Events",
-        description: "Easily create and manage your events.",
+        description: "Easily create and manage your events with our interface.",
     },
     {
-        title: "Invite Friends",
-        description: "Invite friends and colleagues to join your events.",
+        title: "Invite Participants",
+        description: "Invite participants to join your events and set their availability.",
     },
     {
-        title: "Enjoy",
-        description: "Enjoy seamless event management.",
+        title: "Find the Best Time",
+        description: "Automatically find the best time for your event based on participants' availability.",
     },
 ];
 
@@ -43,9 +43,16 @@ export default function HowItWorks() {
                     Follow these simple steps to get started with our platform.
                 </p>
             </div>
-            <div className="mt-16 gap-5 flex flex-col items-center">
+            <div className="mt-8 flex flex-col items-center">
                 {steps.map((step, idx) => (
-                    <div key={idx} className="relative flex flex-col items-center w-full">
+                    <motion.div
+                        key={idx}
+                        initial={{ y: 20, opacity: 0 }}
+                        whileInView={{ y: 0, opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: idx * 0.3, type: "spring", bounce: 0 }}
+                        className="relative flex flex-col items-center w-full"
+                    >
                         <Card
                             shadow="none"
                             className="relative rounded-[20px] p-[2px] will-change-transform sm:scale-110 w-full"
@@ -67,7 +74,7 @@ export default function HowItWorks() {
                                 <Divider />
                             </div>
                         </Card>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
         </motion.section>
