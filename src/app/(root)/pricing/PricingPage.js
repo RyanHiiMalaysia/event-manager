@@ -11,7 +11,7 @@ export default function PricingPage() {
         </CardHeader>
         <CardBody className="flex flex-col items-center">
           <p className="text-lg mx-4">Get lifetime access to Allocato for a one-time purchase of RM5.</p>
-          <Image alt="TNG eWallet QR" src="tng.jpg" />
+          <Image alt="TNG eWallet QR" src="tng.jpg" priority />
         </CardBody>
       </Card>
     </div>
