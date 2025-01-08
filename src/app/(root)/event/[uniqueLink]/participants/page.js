@@ -1,9 +1,18 @@
 "use client";
 import { TableWrapper } from "@/components/Table";
-import RemoveModal from "@/components/RemoveModal";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Button, Tooltip, Alert, useDisclosure } from "@nextui-org/react";
+import {
+  Button,
+  Tooltip,
+  Alert,
+  useDisclosure,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from "@nextui-org/react";
 
 export default function Page() {
   const [error, setError] = useState(null);
@@ -16,6 +25,60 @@ export default function Page() {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
+  function RemoveModal({ isOpen, onOpenChange, selectedParticipant }) {
+    const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
+    const handleOnPress = () => console.log("Remove participant");
+    return (
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {() => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">Remove {selectedParticipant.name}</ModalHeader>
+              <ModalBody>{getDescription(selectedParticipant.name)}</ModalBody>
+              <ModalFooter>
+                <Button color="danger" onPress={handleOnPress}>
+                  Remove
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    );
+  }
+
+  function EditModal({ isOpen, onOpenChange, selectedParticipant }) {
+    const adminAction = ({ name, is_admin }) =>
+      is_admin ? `remove ${name} from the admin list` : `make ${name} an admin`;
+    const getDescription = (user) => `Are you sure you want to ${adminAction(user)}?`;
+    const handleOnAddPress = () => console.log("Adding admin");
+    const handleOnRemovePress = () => console.log("Removing admin");
+    return (
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {() => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">Edit {selectedParticipant.name}'s Role</ModalHeader>
+              <ModalBody>{getDescription(selectedParticipant)}</ModalBody>
+              <ModalFooter>
+                {!selectedParticipant.is_admin ? (
+                  <Button color="primary" onPress={handleOnAddPress}>
+                    Make Admin
+                  </Button>
+                ) : (
+                  <Button color="danger" onPress={handleOnRemovePress}>
+                    Remove Admin
+                  </Button>
+                )}
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    );
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -71,7 +134,10 @@ export default function Page() {
     onOpen();
   };
 
-  const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
+  const handleEditIconPress = (user) => {
+    setSelectedParticipant(user);
+    setIsEditOpen(true);
+  };
 
   if (dataFetched && session) {
     return (
@@ -103,8 +169,10 @@ export default function Page() {
           <TableWrapper
             items={participants}
             creator={creator}
+            isAdmin={isAdmin}
             userSession={session.user}
             onDelete={handleDeleteIconPress}
+            onEdit={handleEditIconPress}
             columns={[
               { uid: "name", name: "Name" },
               { uid: "email", name: "Email" },
@@ -113,13 +181,8 @@ export default function Page() {
             ]}
           />
         </div>
-        <RemoveModal
-          isOpen={isOpen}
-          onOpenChange={onOpenChange}
-          selectedParticipant={selectedParticipant}
-          handleOnPress={() => console.log("Remove participant")}
-          getDescription={getDescription}
-        />
+        <RemoveModal isOpen={isOpen} onOpenChange={onOpenChange} selectedParticipant={selectedParticipant} />
+        <EditModal isOpen={isEditOpen} onOpenChange={setIsEditOpen} selectedParticipant={selectedParticipant} />
       </div>
     );
   }
