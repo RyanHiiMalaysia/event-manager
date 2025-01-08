@@ -29,7 +29,22 @@ export default function Page() {
 
   function RemoveModal({ isOpen, onOpenChange, selectedParticipant }) {
     const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
-    const handleOnPress = () => console.log("Remove participant");
+    const handleOnPress = async () => {
+      const response = await fetch("/api/user-event", {
+        method: "POST",
+        body: JSON.stringify({ user_email: selectedParticipant.email, event_link: eventLink, leave: true }),
+      });
+      onOpenChange();
+
+      if (response.ok) {
+        setParticipants(participants.filter((participant) => participant.email !== selectedParticipant.email));
+        setSelectedParticipant(null);
+        alert(`Successfully removed ${selectedParticipant.name} from the event`);
+      } else {
+        const result = await response.json();
+        alert(result.message || "Error removing participant");
+      }
+    };
     return (
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
@@ -109,7 +124,7 @@ export default function Page() {
         const [participantsData, eventData, adminData] = await Promise.all([
           fetchData(`/api/user-event/participants?link=${eventLink}`),
           fetchData(`/api/events?creator=true&link=${eventLink}`),
-          fetchData(`/api/user-event?findIsUserIn=true&link=${eventLink}&email=${session.user.email}`),
+          fetchData(`/api/user-event?findIsUserIn=true&link=${eventLink}&email=${session.user.email}&isAdmin=true`),
         ]);
         setParticipants(participantsData.participants);
         setCreator(eventData.eventData[0].event_creator);
