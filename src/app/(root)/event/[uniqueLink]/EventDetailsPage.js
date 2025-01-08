@@ -343,6 +343,113 @@ export default function EventDetailsPage({ params }) {
     return <p className="p-6 text-center">Event not found.</p>;
   }
 
+  const LeaveOrCancelEventButton = () => {
+    if (isUserAdmin) {
+      return (<Button
+        color="danger"
+        onPress={handleCancel}
+      >
+        Cancel Event
+      </Button>)
+    }
+    if (isUserIn) {
+      return (
+        <Button
+          color="danger"
+          onPress={handleLeave}
+        >
+          Leave Event
+        </Button>
+      )
+    }
+  }
+
+  const SetOrInviteOrEventPageButton = () => {
+
+    if (isEventAllocated) {
+      return (
+        <div className="mt-6">
+          <p>This event is allocated</p>
+          <Button
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+            href={`/event`}
+            as={Link}
+          >
+            Event Page
+          </Button>
+          <LeaveOrCancelEventButton />
+        </div>
+      );
+    }
+
+    else if (isUserIn) {
+      return (
+        <div className="flex justify-between w-3/4">
+          <Button
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+            href={`/event/${uniqueLink}/schedule`}
+            as={Link}
+          >
+            Set Your Availability
+          </Button>
+          <LeaveOrCancelEventButton />
+        </div>
+      );
+    }
+    else if (isEventFull) {
+
+      return (
+        <div className="mt-6">
+          <p>This event has reached maximum number of participants</p>
+          <Button
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+            href={`/event`}
+            as={Link}
+          >
+            Event Page
+          </Button>
+          <LeaveOrCancelEventButton />
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <h1>You've been invited to {event.event_title}!</h1>
+        <div className="flex justify-between w-3/4">
+
+          <Button color="success" size="auto" variant="flat" onPress={handleJoin}>
+            Join
+          </Button>
+          <Button color="danger" size="auto" variant="flat" onPress={handleDecline}>
+            Decline
+          </Button>
+        </div>
+      </div>
+
+    )
+  };
+
+  const ScheduledOrAllocated = () => {
+    if (isEventAllocated) {
+      return (
+        <p className="text-gray-600 mt-2">
+          Allocated DateTime: {convertDate(event.event_allocated_start)} - {convertDate(event.event_allocated_end)}
+        </p>
+      );
+    }
+
+    return (
+      <div>
+        <p className="text-gray-600 mt-2">
+          Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} - {convertDateTimeToDate(event.event_schedule_end)}
+        </p>
+        <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
+      </div>
+
+    );
+  };
+
   return (
     <div className="relative flex flex-col gap-y-4">
       <div
