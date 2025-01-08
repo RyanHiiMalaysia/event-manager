@@ -6,9 +6,10 @@ import { DatePicker } from "@nextui-org/date-picker";
 import { TimeInput } from "@nextui-org/date-input";
 import { useSession } from "next-auth/react";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
-import { parseDate, parseTime, parseAbsolute, toLocalTimeZone } from "@internationalized/date";
+import { parseDate, parseTime, parseAbsolute, toLocalTimeZone, Time } from "@internationalized/date";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
 import moment from "moment";
+import { NONE } from "react-big-calendar/lib/utils/Resources";
 
 export default function Page() {
   const [selectedDate, setSelectedDate] = useState();
@@ -25,6 +26,26 @@ export default function Page() {
   const [endDate, setEndDateRange] = useState();
   const [open, setOpen] = useState();
   const [close, setClose] = useState();
+
+  function convertDate(unformattedDate) {
+    let date = new Date(unformattedDate);
+
+    let localYear = date.getFullYear();
+    let localMonth = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    let localDay = String(date.getDate()).padStart(2, '0');
+
+    return `${localYear}-${localMonth}-${localDay}`;
+  }
+
+  function convertTime(time) {
+    const options = { hour: '2-digit', minute: '2-digit', hour12: false };
+    const convertedTime = time
+      ? new Intl.DateTimeFormat('en-US', options).format(
+        new Date(Date.UTC(2025, 0, 4, ...time.split(":").map(Number)))
+      )
+      : "unknown";
+    return convertedTime
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -50,13 +71,16 @@ export default function Page() {
         const result = await response.json();
         const result_event_date = await response_event_date.json();
 
-        const start = result_event_date.eventData[0].event_schedule_start.split("T")[0];
+        //const start = result_event_date.eventData[0].event_schedule_start.split("T")[0];
+        const start = convertDate(result_event_date.eventData[0].event_schedule_start)
         setStartDateRange(parseDate(start));
-        const end = result_event_date.eventData[0].event_schedule_end.split("T")[0];
-        setEndDateRange(parseDate(end));
+        // const end = result_event_date.eventData[0].event_schedule_end.split("T")[0];
+        const end = convertDate(result_event_date.eventData[0].event_schedule_end)
+        setEndDateRange(parseDate(end))
 
-        setOpen(result_event_date.eventData[0].event_opening_hour);
-        setClose(result_event_date.eventData[0].event_closing_hour);
+        setOpen(convertTime(result_event_date.eventData[0].event_opening_hour));
+        setClose(convertTime(result_event_date.eventData[0].event_closing_hour));
+
 
 
         if (!response.ok || !response_event_date.ok) {
@@ -124,17 +148,19 @@ export default function Page() {
   const checkStarting = () => {
     const dummyDate = "2024-01-01"
     const event_opening = new Date(`${dummyDate}T${open}`);
+    const event_closing = new Date(`${dummyDate}T${close}`);
     const user_opening = new Date(`${dummyDate}T${startTime}`);
 
-    return (event_opening <= user_opening);
+    return (event_opening <= user_opening && user_opening <= event_closing);
   }
 
   const checkClosing = () => {
     const dummyDate = "2024-01-01"
     const event_closing = new Date(`${dummyDate}T${close}`);
+    const event_opening = new Date(`${dummyDate}T${open}`);
     const user_closing = new Date(`${dummyDate}T${endTime}`);
 
-    return (event_closing >= user_closing);
+    return (event_closing >= user_closing && user_closing >= event_opening);
   }
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -280,7 +306,6 @@ export default function Page() {
   };
 
 
-
   return (
     <div className="mt-6 md:mt-4 min-h-screen" ref={useOverflowHandler(730)}>
       <div className="max-w-4xl mx-auto rounded-lg">
@@ -337,7 +362,10 @@ export default function Page() {
             label="Start Time"
             onChange={setStartTime}
             value={startTime}
+            // minValue={open? new Time(Number(open.split(":")[0]), Number(open.split(":")[1])):NONE}
+            // maxValue={close? new Time(Number(close.split(":")[0]), Number(close.split(":")[1])):NONE}
             isInvalid={startTime ? startTime.minute % 15 !== 0 ? true : !checkStarting() : false}
+
             errorMessage={
               () => {
                 if (!startTime) {
@@ -346,7 +374,7 @@ export default function Page() {
                 return startTime.minute % 15 !== 0 ?
                   "Please enter a valid time in 15-minute intervals" :
                   checkClosing() ?
-                    "" : `Start time should after the opening hour(${open})`
+                    "" : `Start time should after the opening hour(${open}) and before closing hour(${close})`
               }
             }
           />
@@ -358,6 +386,8 @@ export default function Page() {
             type="time"
             value={endTime}
             onChange={setEndTime}
+            minValue={open ? new Time(Number(open.split(":")[0]), Number(open.split(":")[1])) : NONE}
+            maxValue={open ? new Time(Number(close.split(":")[0]), Number(close.split(":")[1])) : NONE}
             isInvalid={endTime ?
               endTime && startTime ?
                 endTime <= startTime ?
@@ -375,10 +405,11 @@ export default function Page() {
                 } else if (endTime <= startTime) {
                   return "End time must be greater than start time ";
                 }
+
                 return endTime.minute % 15 !== 0 ?
                   "Please enter a valid time in 15-minute intervals" :
                   checkClosing() ?
-                    "" : `End time should before the closing hour(${close})`
+                    "" : `End time should before the closing hour(${close}) and after opening hour(${open})`
               }
             }
           />
