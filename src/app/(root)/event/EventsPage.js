@@ -135,7 +135,7 @@ export default function Page() {
                         <CardFooter className="text-small justify-between">
                           <b>{item.event_title}</b>
                           <p>
-                            <Checkbox isSelected={item.scheduled} disableAnimation></Checkbox>
+                            <Checkbox isSelected={item.ue_has_scheduled} disableAnimation></Checkbox>
                           </p>
                         </CardFooter>
                       </Card>

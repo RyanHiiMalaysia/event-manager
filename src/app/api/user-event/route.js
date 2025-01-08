@@ -32,7 +32,8 @@ async function fetchUserEvents(user_email, hasAllocated, isAdmin, isPast) {
     event_allocated_start,
     event_allocated_end,
     event_link,
-    ue_is_admin
+    ue_is_admin,
+    ue_has_scheduled
   FROM 
     userevent 
   NATURAL JOIN 

@@ -28,6 +28,7 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
       event_location,
       event_description,
       event_deadline,
+      ue_has_scheduled,
     } = event;
     const getTime = () => {
       if (event_allocated_start === null) {
@@ -43,7 +44,7 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
             <Card shadow="sm" className="border-default-200">
               <CardFooter className="justify-between">
                 <p>Scheduled</p>
-                <Checkbox isSelected={event_allocated_start === null} disableAnimation className="mx-1"></Checkbox>
+                <Checkbox isSelected={ue_has_scheduled} disableAnimation className="mx-1"></Checkbox>
               </CardFooter>
             </Card>
           </>

@@ -21,7 +21,7 @@ async function getUsereventID(sql, email, link) {
   return ue_id;
 }
 
-async function fetchFreetimes(event_link){
+async function fetchFreetimes(event_link) {
   const sql = getDatabaseConnection();
   const query = sql`
     SELECT
@@ -35,8 +35,6 @@ async function fetchFreetimes(event_link){
     `;
   return await query;
 }
-
-
 
 // Function to get the freetimes of a user for a specific event
 async function fetchUserFreetimes(user_email, event_link) {
@@ -69,6 +67,8 @@ async function updateFreetimes(sql, ue_id, freetimes) {
       VALUES (${ue_id}, ${freetime.start}, ${freetime.end})
     `;
   });
+
+  await sql`UPDATE userevent SET ue_has_scheduled = ${freetimes.length > 0} WHERE ue_id = ${ue_id}`;
 
   await sql`COMMIT`;
 }
