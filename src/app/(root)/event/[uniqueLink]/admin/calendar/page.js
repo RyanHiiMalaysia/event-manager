@@ -17,6 +17,7 @@ export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
+  const [eventData, setEventData] = useState({});
 
   const handleSelectEvent = (event) => {
     setSelectedEvent(event);
@@ -77,6 +78,16 @@ export default function Page() {
               end: new Date(ft.end),
             }))
           );
+          const eventResponse = await fetch(`/api/events?link=${eventLink}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          });
+          const eventResult = await eventResponse.json();
+          if (!eventResponse.ok) {
+            setError(eventResult.message);
+            return;
+          }
+          setEventData(eventResult.eventData[0]);
         }
       } catch (error) {
         setError(error);
@@ -99,6 +110,8 @@ export default function Page() {
       );
     } else if (!isAdmin) {
       return <Error statusCode={403} title="You do not have permission to view this page" />;
+    } else if (eventData.event_allocated_start !== null) {
+      return <Error statusCode={400} title="The registration deadline has passed" />;
     } else {
       return (
         <div className="max-w-4xl mx-auto rounded-lg">
