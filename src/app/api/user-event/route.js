@@ -100,7 +100,7 @@ async function addUserToEvent(sql, user_email, event_link) {
   await sql`COMMIT`;
 }
 
-async function deleteFreetimesForSpecfciUserEvent(sql, user_email, event_link) {
+async function removeFreetimes(sql, user_email, event_link) {
   await sql`BEGIN`;
 
   await sql`
@@ -121,7 +121,7 @@ async function deleteFreetimesForSpecfciUserEvent(sql, user_email, event_link) {
   await sql`COMMIT`;
 }
 
-async function deleteAllFreetimesForSpecfciEvent(sql, event_link) {
+async function removeAllFreetimes(sql, event_link) {
   await sql`BEGIN`;
 
   await sql`
@@ -139,7 +139,7 @@ async function deleteAllFreetimesForSpecfciEvent(sql, event_link) {
   await sql`COMMIT`;
 }
 
-async function deleteUserEventForSpecificUser(sql, user_email, event_link) {
+async function removeUserEvent(sql, user_email, event_link) {
   await sql`BEGIN`;
 
   await sql`
@@ -155,7 +155,7 @@ async function deleteUserEventForSpecificUser(sql, user_email, event_link) {
   await sql`COMMIT`;
 }
 
-async function deleteAllUserEventsForSpecifciEvent(sql, event_link) {
+async function removeAllUserEvents(sql, event_link) {
   await sql`BEGIN`;
 
   await sql`
@@ -168,7 +168,7 @@ async function deleteAllUserEventsForSpecifciEvent(sql, event_link) {
   await sql`COMMIT`;
 }
 
-async function deleteEvent(sql, event_link) {
+async function removeEvent(sql, event_link) {
   await sql`BEGIN`;
 
   await sql`
@@ -182,15 +182,15 @@ async function deleteEvent(sql, event_link) {
 }
 
 async function handleLeaveEvent(sql, user_email, event_link) {
-  await deleteFreetimesForSpecfciUserEvent(sql, user_email, event_link);
-  await deleteUserEventForSpecificUser(sql, user_email, event_link);
+  await removeFreetimes(sql, user_email, event_link);
+  await removeUserEvent(sql, user_email, event_link);
   return NextResponse.json({ message: "Successfully left event" }, { status: 200 });
 }
 
 async function handleCancelEvent(sql, event_link) {
-  await deleteAllFreetimesForSpecfciEvent(sql, event_link);
-  await deleteAllUserEventsForSpecifciEvent(sql, event_link);
-  await deleteEvent(sql, event_link);
+  await removeAllFreetimes(sql, event_link);
+  await removeAllUserEvents(sql, event_link);
+  await removeEvent(sql, event_link);
   return NextResponse.json({ message: "Successfully deleted event" }, { status: 200 });
 }
 
