@@ -7,10 +7,8 @@ function getDatabaseConnection() {
 }
 
 // Function to fetch all participants in an event
-async function getAllParticipants(event_link, isAdmin) {
+async function getAllParticipants(event_link) {
   const sql = getDatabaseConnection();
-  const boolToQuery = (bool, trueQuery, falseQuery) => (bool === null ? "" : bool ? trueQuery : falseQuery);
-  const adminQuery = boolToQuery(isAdmin, "AND ue_is_admin = TRUE", "AND ue_is_admin = FALSE");
   const query = `
       SELECT
         user_id as id,
@@ -20,8 +18,7 @@ async function getAllParticipants(event_link, isAdmin) {
       FROM
         users NATURAL JOIN userevent
       WHERE
-        event_id = (SELECT event_id FROM events WHERE event_link = $1)
-      ${adminQuery}
+        event_id = (SELECT event_id FROM events WHERE event_link = ${event_link})
       ORDER BY
         CASE 
           WHEN user_id = (SELECT event_creator FROM events WHERE event_link = $1) THEN 0
@@ -29,17 +26,15 @@ async function getAllParticipants(event_link, isAdmin) {
           ELSE 2
         END
     `;
-  return await sql(query, [event_link]);
+  return await sql(query);
 }
 
 // Function to handle GET request to fetch all participants in an event
 export async function GET(req) {
   try {
-    const strToBool = (str) => (str === null ? null : str === "true");
     const url = new URL(req.url);
     const link = url.searchParams.get("link");
-    const isAdmin = strToBool(url.searchParams.get("isAdmin"));
-    const participants = await getAllParticipants(link, isAdmin);
+    const participants = await getAllParticipants(link);
     return NextResponse.json({ participants: participants }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
