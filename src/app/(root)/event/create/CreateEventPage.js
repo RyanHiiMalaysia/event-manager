@@ -13,22 +13,17 @@ const generateUniqueLink = () => {
   return `${timestamp}-${randomString}`;
 };
 
-const sendEmail = async (email, eventLink) => {
+const sendEmail = async (email, name, subject) => {
   try {
-    const response = await fetch("/api/send-email", {
+    const response = await fetch(`/api/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        to: email,
-        subject: "Event Created Successfully",
-        //text: `Your event has been created successfully. You can share this link with participants: ${eventLink}`,
-      }),
+      body: JSON.stringify({ user_email: email, userFirstName: name , subject: subject }),
     });
 
     if (!response.ok) {
-      console.log(response)
       throw new Error("Failed to send email");
     }
   } catch (error) {
@@ -149,7 +144,7 @@ export default function CreateEventPage() {
       const eventLink = `${path}/event/${uniqueLink}`;
       setEventLink(eventLink);
       alert("Event created successfully!");
-      await sendEmail(session.user.email, eventLink);
+      await sendEmail(session.user.email, session.user.chosenName, "Event Created Successfully!");
     } else {
       alert("Error creating event.");
     }
