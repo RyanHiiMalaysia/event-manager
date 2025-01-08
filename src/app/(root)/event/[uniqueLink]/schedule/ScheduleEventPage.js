@@ -122,8 +122,8 @@ export default function Page() {
       alert("Please fill all fields");
     } else if (endTime <= startTime) {
       alert("End time must be greater than start time");
-    } else if (!(checkStarting && checkClosing)) {
-      alert("Freetime should between opening hour and closing hour");
+    } else if (!(checkStarting() && checkClosing())) {
+      alert(`Freetime should between opening hour and closing hour(${open}-${close})`);
     } else {
       const startDateTime = new Date(`${selectedDate}T${startTime}`);
       const endDateTime = new Date(`${selectedDate}T${endTime}`);
@@ -150,7 +150,7 @@ export default function Page() {
     const event_opening = new Date(`${dummyDate}T${open}`);
     const event_closing = new Date(`${dummyDate}T${close}`);
     const user_opening = new Date(`${dummyDate}T${startTime}`);
-
+    
     return (event_opening <= user_opening && user_opening <= event_closing);
   }
 
@@ -207,7 +207,7 @@ export default function Page() {
               return endTime.minute % 15 !== 0 ?
                 "Please enter a valid time in 15-minute intervals" :
                 checkClosing() ?
-                  "" : `End time should before the closing hour(${close})`
+                  "" : `Freetime should between opening hour and closing hour(${open}-${close})`
             }
           }
         />
@@ -236,7 +236,7 @@ export default function Page() {
               return endTime.minute % 15 !== 0 ?
                 "Please enter a valid time in 15-minute intervals" :
                 checkClosing() ?
-                  "" : `End time should before the closing hour(${close})`
+                  "" : `Freetime should between opening hour and closing hour(${open}-${close})`
             }
           }
         />
@@ -265,8 +265,8 @@ export default function Page() {
       alert("Please fill all fields");
     } else if (endTime <= startTime) {
       alert("End time must be greater than start time");
-    } else if (!(checkStarting && checkClosing)) {
-      alert("Freetime should between opening hour and closing hour");
+    } else if (!(checkStarting() && checkClosing())) {
+      alert(`Freetime should between opening hour and closing hour(${open}-${close})`);
     } else {
       const startDateTime = new Date(`${selectedDate}T${startTime}`);
       const endDateTime = new Date(`${selectedDate}T${endTime}`);
@@ -362,8 +362,6 @@ export default function Page() {
             label="Start Time"
             onChange={setStartTime}
             value={startTime}
-            // minValue={open? new Time(Number(open.split(":")[0]), Number(open.split(":")[1])):NONE}
-            // maxValue={close? new Time(Number(close.split(":")[0]), Number(close.split(":")[1])):NONE}
             isInvalid={startTime ? startTime.minute % 15 !== 0 ? true : !checkStarting() : false}
 
             errorMessage={
@@ -374,7 +372,7 @@ export default function Page() {
                 return startTime.minute % 15 !== 0 ?
                   "Please enter a valid time in 15-minute intervals" :
                   checkClosing() ?
-                    "" : `Start time should after the opening hour(${open}) and before closing hour(${close})`
+                    "" : `Freetime should between opening hour and closing hour(${open}-${close})`
               }
             }
           />
@@ -386,8 +384,8 @@ export default function Page() {
             type="time"
             value={endTime}
             onChange={setEndTime}
-            minValue={open ? new Time(Number(open.split(":")[0]), Number(open.split(":")[1])) : NONE}
-            maxValue={open ? new Time(Number(close.split(":")[0]), Number(close.split(":")[1])) : NONE}
+            // minValue={open ? new Time(Number(open.split(":")[0]), Number(open.split(":")[1])) : NONE}
+            // maxValue={open ? new Time(Number(close.split(":")[0]), Number(close.split(":")[1])) : NONE}
             isInvalid={endTime ?
               endTime && startTime ?
                 endTime <= startTime ?
@@ -409,7 +407,7 @@ export default function Page() {
                 return endTime.minute % 15 !== 0 ?
                   "Please enter a valid time in 15-minute intervals" :
                   checkClosing() ?
-                    "" : `End time should before the closing hour(${close}) and after opening hour(${open})`
+                    "" : `Freetime should between opening hour and closing hour(${open}-${close})`
               }
             }
           />
