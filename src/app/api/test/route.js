@@ -63,6 +63,26 @@ async function updateEventAllocation(sql, event_id, start, end) {
     `;
 }
 
+async function addAllocateTime(sql, event_id, start, end, participants) {
+    await sql`
+      INSERT INTO 
+        allocatetimes 
+        (event_id, start, end, participants)
+      VALUES 
+        (${event_id}, ${start}, ${end}, ${participants})
+    `;
+}
+
+async function deleteAllocateTimes(sql) {
+    await sql`
+      DELETE FROM 
+        allocatetimes NATURAL JOIN events
+      WHERE 
+        event_allocated_start < NOW()
+    `;
+}
+
+
 // Function to delete all free times associated with a specific event
 async function deleteFreetimesForEvent(sql, event_id) {
     await sql`
@@ -88,6 +108,9 @@ export async function GET(request) {
     console.log("Cron Job Ran at ", new Date());
 
     const sql = getDatabaseConnection();
+    // Delete all allocate times whose start time has passed
+    await deleteAllocateTimes(sql);
+    
     // Find events whose deadline has passed
     const toBeAllocatedEvents = await fetchToBeAllocatedEvents(sql);
 
@@ -113,10 +136,13 @@ export async function GET(request) {
 
         eventObj.setEventRange();
 
-        // Update the event with the allocated start and end times
+        // Update the event with the allocated start and end times and add the allocated times
         if (eventObj.eventRange) {
             const { start, end } = eventObj.eventRange;
             await updateEventAllocation(sql, event_id, start.toISOString(), end.toISOString());
+            eventObj.eventRanges.forEach(({ start, end, users }) => {
+                addAllocateTime(sql, event_id, start.toISOString(), end.toISOString(), users.length);
+            });
             // Delete all free times associated with the event
             await deleteFreetimesForEvent(sql, event_id);
         }
