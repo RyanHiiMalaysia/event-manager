@@ -1,6 +1,12 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Tabs, Tab, Card, CardBody, CardFooter, Checkbox, useDisclosure, Button, Link, Tooltip } from "@nextui-org/react";
+import {
+  Tabs, Tab, Card, CardBody, CardFooter, Checkbox, useDisclosure, Button, Link, Tooltip, Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter
+} from "@nextui-org/react";
 import EventModal from "../../../components/EventModal";
 import moment from "moment";
 import blue from "../../../../public/blue.svg";
@@ -97,11 +103,11 @@ export default function Page() {
             </span>
           )}
         </h1>
-        <Button 
-          color="primary" 
-          className="mx-2 text-3xl p-7" 
-          as={Link} 
-          href="/event/create" 
+        <Button
+          color="primary"
+          className="mx-2 text-3xl p-7"
+          as={Link}
+          href="/event/create"
           isDisabled={!userDetails.user_has_paid && userDetails.user_events_created >= 5}
         >
           +
@@ -114,7 +120,7 @@ export default function Page() {
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {schedulingEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) : 
+                ) :
                   schedulingEvents.map(
                     (
                       item,
@@ -152,38 +158,38 @@ export default function Page() {
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {allocatedEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) : 
+                ) :
                   allocatedEvents.map(
-                  (
-                    item,
-                    index // if not working, try changing userEvents to eventData
-                  ) => (
-                    <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
-                      <CardBody className="overflow-visible p-0">
-                        <Image
-                          alt={item.event_title}
-                          className="w-full object-cover h-[140px]"
-                          radius="lg"
-                          shadow="sm"
-                          src={green}
-                          width="100%"
-                          priority={true}
-                        />
-                      </CardBody>
-                      <CardFooter className="text-small justify-between">
-                        <b>{item.event_title}</b>
-                        <p className="text-default-500">
-                          <span className="block sm:inline">
-                            {moment(item.event_allocated_start).format("MMMM Do YYYY")}
-                          </span>
-                          <span className="block sm:inline">
-                            {moment(item.event_allocated_start).format(" h:mm a")}
-                          </span>
-                        </p>
-                      </CardFooter>
-                    </Card>
-                  )
-                )}
+                    (
+                      item,
+                      index // if not working, try changing userEvents to eventData
+                    ) => (
+                      <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
+                        <CardBody className="overflow-visible p-0">
+                          <Image
+                            alt={item.event_title}
+                            className="w-full object-cover h-[140px]"
+                            radius="lg"
+                            shadow="sm"
+                            src={green}
+                            width="100%"
+                            priority={true}
+                          />
+                        </CardBody>
+                        <CardFooter className="text-small justify-between">
+                          <b>{item.event_title}</b>
+                          <p className="text-default-500">
+                            <span className="block sm:inline">
+                              {moment(item.event_allocated_start).format("MMMM Do YYYY")}
+                            </span>
+                            <span className="block sm:inline">
+                              {moment(item.event_allocated_start).format(" h:mm a")}
+                            </span>
+                          </p>
+                        </CardFooter>
+                      </Card>
+                    )
+                  )}
               </div>
             </CardBody>
           </Card>
@@ -194,25 +200,25 @@ export default function Page() {
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {organisingEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) : 
+                ) :
                   organisingEvents.map((item, index) => (
-                  <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
-                    <CardBody className="overflow-visible p-0">
-                      <Image
-                        alt={item.event_title}
-                        className="w-full object-cover h-[140px]"
-                        radius="lg"
-                        shadow="sm"
-                        src={yellow}
-                        width="100%"
-                        priority={true}
-                      />
-                    </CardBody>
-                    <CardFooter className="text-small justify-between">
-                      <b>{item.event_title}</b>
-                    </CardFooter>
-                  </Card>
-                ))}
+                    <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
+                      <CardBody className="overflow-visible p-0">
+                        <Image
+                          alt={item.event_title}
+                          className="w-full object-cover h-[140px]"
+                          radius="lg"
+                          shadow="sm"
+                          src={yellow}
+                          width="100%"
+                          priority={true}
+                        />
+                      </CardBody>
+                      <CardFooter className="text-small justify-between">
+                        <b>{item.event_title}</b>
+                      </CardFooter>
+                    </Card>
+                  ))}
               </div>
             </CardBody>
           </Card>
@@ -223,25 +229,25 @@ export default function Page() {
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {pastEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) : 
-                 pastEvents.map((item, index) => (
-                  <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
-                    <CardBody className="overflow-visible p-0">
-                      <Image
-                        alt={item.event_title}
-                        className="w-full object-cover h-[140px]"
-                        radius="lg"
-                        shadow="sm"
-                        src={grey}
-                        width="100%"
-                        priority={true}
-                      />
-                    </CardBody>
-                    <CardFooter className="text-small justify-between">
-                      <b>{item.event_title}</b>
-                    </CardFooter>
-                  </Card>
-                ))}
+                ) :
+                  pastEvents.map((item, index) => (
+                    <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
+                      <CardBody className="overflow-visible p-0">
+                        <Image
+                          alt={item.event_title}
+                          className="w-full object-cover h-[140px]"
+                          radius="lg"
+                          shadow="sm"
+                          src={grey}
+                          width="100%"
+                          priority={true}
+                        />
+                      </CardBody>
+                      <CardFooter className="text-small justify-between">
+                        <b>{item.event_title}</b>
+                      </CardFooter>
+                    </Card>
+                  ))}
               </div>
             </CardBody>
           </Card>
