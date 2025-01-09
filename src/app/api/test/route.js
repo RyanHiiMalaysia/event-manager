@@ -105,7 +105,7 @@ export async function GET(request) {
 
             const user = new User(user_id);
             freetimes.forEach(({ start, end }) => {
-                user.addVacantRange(new Date(start), new Date(end));
+                user.addFreeTime(new Date(start), new Date(end));
             });
 
             eventObj.addUser(user);
