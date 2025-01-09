@@ -89,12 +89,12 @@ export default function Page() {
           return;
         }
         let freeTimeCounter = 1;
-        result.freeTimes.forEach((freeTime) => {
+        result.freeTimes.map((freeTime) => {
           freeTime.start = new Date(freeTime.start);
           freeTime.end = new Date(freeTime.end);
           freeTime.title = `Free Time ${freeTimeCounter++}`;
-          setFreeTimes((prevFreeTimes) => [...prevFreeTimes, freeTime]);
         });
+        setFreeTimes(result.freeTimes);
       } catch (error) {
         setError(error);
       } finally {
