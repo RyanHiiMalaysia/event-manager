@@ -43,7 +43,7 @@ export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
             </Card>
             <Card shadow="sm" className="border-default-200">
               <CardFooter className="justify-between">
-                <p>Scheduled</p>
+                <p>Set availability</p>
                 <Checkbox isSelected={ue_has_scheduled} disableAnimation className="mx-1"></Checkbox>
               </CardFooter>
             </Card>
