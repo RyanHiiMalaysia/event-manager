@@ -115,8 +115,7 @@ async function checkEventDeadline(sql) {
 }
 
 
-const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link, request_url) => {
-  const sendURL = new URL(`/api/send`, request_url);
+const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link) => {
   try {
     const response = await fetch(sendURL, {
       method: "POST",
@@ -140,10 +139,9 @@ const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link
 };
 
 
-const sendAllocateEmail = async (email, subject, eventName, allocate, event_link, request_url) => {
-  const sendURL = new URL(`/api/send`, request_url);
+const sendAllocateEmail = async (email, subject, eventName, allocate, event_link) => {
   try {
-    const response = await fetch(sendURL, {
+    const response = await fetch(`/api/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -215,11 +213,10 @@ export async function GET(request) {
             });
             // Delete all free times associated with the event
             await deleteFreetimesForEvent(sql, event_id);
-            const participantsUrl = new URL(`/api/user-event/participants?link=${event_link}`, request.url);
-            const participants = await fetch(participantsUrl);
+            const participants = await fetch(`/api/user-event/participants?link=${event_link}`);
             const data_participants = await participants.json();
             const emails = data_participants.participants.map((x) => x.email);
-            await sendAllocateEmail(emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link, request.url);
+            await sendAllocateEmail(emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link);
         }
 
     }
@@ -227,11 +224,10 @@ export async function GET(request) {
      const events = await checkEventDeadline(sql);
      for(const event of events){
        const { event_title, event_deadline, event_link } = event;
-       const participantsUrl = new URL(`/api/user-event/participants?link=${event_link}`, request.url);
-       const participants = await fetch(participantsUrl);
+       const participants = await fetch(`/api/user-event/participants?link=${event_link}`);
        const data_participants = await participants.json();
        const emails = data_participants.participants.map((x) => x.email);
-       await sendDeadlineEmail(emails, "Deadline of the event", event_title, event_deadline, event_link, request.url);
+       await sendDeadlineEmail(emails, "Deadline of the event", event_title, event_deadline, event_link);
      }
 
     return NextResponse.json({
