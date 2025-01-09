@@ -6,6 +6,24 @@ import { signIn } from "next-auth/react";
 import { Form, Input, Button, Link } from "@nextui-org/react";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
 
+const sendEmail = async (email, subject, user) => {
+  try {
+    const response = await fetch(`/api/send`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ user_email: email, layout_choice: 'SignUp' , subject: subject, userName: user}),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to send email");
+    }
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
+
 export default function SignUp() {
   const router = useRouter();
   const [error, setError] = useState(null);
@@ -14,6 +32,7 @@ export default function SignUp() {
     event.preventDefault();
     const formData = new FormData(event.target);
     const { name, email } = Object.fromEntries(formData);
+
 
     try {
       const response = await fetch("/api/signup", {
@@ -32,6 +51,7 @@ export default function SignUp() {
 
       // Automatically sign in the user with Google after successful sign-up
       await signIn("google", { callbackUrl: "/" });
+      await sendEmail(email, "Welcome to Allocato!", name)
     } catch (error) {
       setError("An unexpected error occurred.");
     }

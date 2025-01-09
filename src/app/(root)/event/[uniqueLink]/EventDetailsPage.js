@@ -35,6 +35,32 @@ export default function EventDetailsPage({ params }) {
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
+  const sendEmail = async (email, subject, eventName, eventOwnerName, schedule, allocate, type) => {
+    try {
+      const response = await fetch(`/api/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_email: email,
+          layout_choice: 'CancelEvent',
+          subject: subject,
+          eventName: eventName,
+          eventOwnerName: eventOwnerName,
+          time: allocate !== null ? allocate : schedule,
+          timeType: type
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
+  };
+
   const handleJoin = async () => {
     const response_add_user = await fetch(`/api/user-event?email=${session.user.email}&link=${uniqueLink}`, {
       method: "POST",
@@ -69,10 +95,22 @@ export default function EventDetailsPage({ params }) {
 
   const handleCancel = async () => {
     try {
+
+      const participants = await fetch(`/api/user-event/participants?link=${uniqueLink}`);
+      const data_participants = await participants.json();
+      const emails = data_participants.participants.map((x) => x.email);
+
       await fetch("/api/user-event", {
         method: "POST",
         body: JSON.stringify({ event_link: uniqueLink, cancel: true }),
       });
+
+      const allocate = event.event_allocated_start !== null ?
+        `${convertDate(event.event_allocated_start)} - ${convertDate(event.event_allocated_end)}` : null;
+      const schedule = `${convertDateTimeToDate(event.event_schedule_start)} -${convertDateTimeToDate(event.event_schedule_end)}`;
+      const type = allocate !== null ? "Allocating time" : "Schedule Range"
+
+      await sendEmail(emails, "Event is cancelled", event.event_title, event.user_name, schedule, allocate, type);
     } catch (error) {
       throw new Error(error);
     }
@@ -99,6 +137,14 @@ export default function EventDetailsPage({ params }) {
     }
   };
 
+  const ShowAdmin = () => {
+    if (isUserAdmin) {
+      return (
+        <Button className="flex px-4 py-2 text-black rounded" href={`/event/${uniqueLink}/admin`} as={Link}><strong>Admin</strong></Button>
+      )
+    }
+  }
+
   const SetOrInviteOrEventPageButton = () => {
 
     if (isEventAllocated || isEventPast || isEventFull) {
@@ -108,7 +154,7 @@ export default function EventDetailsPage({ params }) {
           isEventAllocated ?
             "This event is allocated" :
             "This event is full"
-            
+
       return (
         <div className="mt-6">
           <p>{description}</p>
@@ -126,7 +172,7 @@ export default function EventDetailsPage({ params }) {
           <Button className="flex px-4 py-2 bg-blue-500 text-white rounded" href={`/event/${uniqueLink}/schedule`} as={Link}>
             Set Your Availability
           </Button>
-          <LeaveOrCancelEventButton/>
+          <LeaveOrCancelEventButton />
         </div>
       );
     }
@@ -149,7 +195,7 @@ export default function EventDetailsPage({ params }) {
     if (isEventAllocated) {
       return (
         <p className="text-gray-600 mt-2">
-          DateTime: {convertDate(event.event_allocated_start)} - {convertDate(event.event_allocated_end)}
+          <strong>DateTime</strong>: {convertDate(event.event_allocated_start)} - {convertDate(event.event_allocated_end)}
         </p>
       );
     }
@@ -157,10 +203,10 @@ export default function EventDetailsPage({ params }) {
     return (
       <div>
         <p className="text-gray-600 mt-2">
-          Schedule Range: {convertDateTimeToDate(event.event_schedule_start)} -{" "}
+          <strong>Schedule Range</strong>: {convertDateTimeToDate(event.event_schedule_start)} -{" "}
           {convertDateTimeToDate(event.event_schedule_end)}
         </p>
-        <p>Opening Hours: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
+        <p>Opening Hour: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
       </div>
     );
   };
@@ -328,9 +374,9 @@ export default function EventDetailsPage({ params }) {
         style={{ marginTop: "40px" }}
       >
         <h1 className="text-3xl font-bold">{event.event_title}</h1>
-        <p className="text-gray-600 mt-2 font-bold">Owner: {event.user_name}</p>
+        <p className="text-gray-600 mt-2"><strong>Owner</strong>: {event.user_name}</p>
         <ScheduledOrAllocated />
-        <p className="text-gray-600 mt-2">Duration: {convertTime(event.event_duration)}</p>
+        <p className="text-gray-600 mt-2"><strong>Duration</strong>: {convertTime(event.event_duration)}</p>
         <Accordion variant="bordered" selectionMode="multiple">
           <AccordionItem key="1" aria-label="Location" title="Location">
             <div className="max-h-40 overflow-y-auto break-words">
@@ -344,6 +390,16 @@ export default function EventDetailsPage({ params }) {
             <div className="max-h-40 overflow-y-auto break-words">{condition(convertDate(event.event_deadline))}</div>
           </AccordionItem>
         </Accordion>
+        <br></br>
+        <div className="relative flex flex-col justify-between gap-x-2">
+          <Button
+            className="flex px-4 py-2 text-blue rounded"
+            href={`/event/${uniqueLink}/participants`}
+            as={Link}><strong>Participants</strong>
+          </Button>
+          <br></br>
+          <ShowAdmin />
+        </div>
         <div className="mt-6">
           <SetOrInviteOrEventPageButton />
         </div>
