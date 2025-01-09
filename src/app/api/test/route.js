@@ -114,9 +114,10 @@ async function checkEventDeadline(sql) {
 }
 
 
-const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link) => {
+const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link, request_url) => {
+  const sendURL = new URL(`/api/send`, request_url);
   try {
-    const response = await fetch(`/api/send`, {
+    const response = await fetch(sendURL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -138,9 +139,10 @@ const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link
 };
 
 
-const sendAllocateEmail = async (email, subject, eventName, allocate, event_link) => {
+const sendAllocateEmail = async (email, subject, eventName, allocate, event_link, request_url) => {
+  const sendURL = new URL(`/api/send`, request_url);
   try {
-    const response = await fetch(`/api/send`, {
+    const response = await fetch(sendURL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -165,12 +167,12 @@ const sendAllocateEmail = async (email, subject, eventName, allocate, event_link
 
 
 export async function GET(request) {
-    const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-        return new Response('Unauthorized', {
-            status: 401,
-        });
-    }
+    // const authHeader = request.headers.get('authorization');
+    // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    //     return new Response('Unauthorized', {
+    //         status: 401,
+    //     });
+    // }
 
     console.log("Cron Job Ran at ", new Date());
 
@@ -213,10 +215,11 @@ export async function GET(request) {
             // Delete all free times associated with the event
             await deleteFreetimesForEvent(sql, event_id);
 
-            const participants = await fetch(`/api/user-event/participants?link=${event_link}`);
+            const participantsUrl = new URL(`/api/user-event/participants?link=${event_link}`, request.url);
+            const participants = await fetch(participantsUrl);
             const data_participants = await participants.json();
             const emails = data_participants.participants.map((x) => x.email);
-            await sendAllocateEmail(emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link)
+            await sendAllocateEmail(emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link, request.url);
         }
 
     }
@@ -224,10 +227,11 @@ export async function GET(request) {
      const events = await checkEventDeadline(sql);
      for(const event of events){
        const { event_title, event_deadline, event_link } = event;
-       const participants = await fetch(`/api/user-event/participants?link=${event_link}`);
+       const participantsUrl = new URL(`/api/user-event/participants?link=${event_link}`, request.url);
+       const participants = await fetch(participantsUrl);
        const data_participants = await participants.json();
        const emails = data_participants.participants.map((x) => x.email);
-       await sendDeadlineEmail(emails, "Deadline of the event", event_title, event_deadline, event_link);
+       await sendDeadlineEmail(emails, "Deadline of the event", event_title, event_deadline, event_link, request.url);
      }
 
     return NextResponse.json({
