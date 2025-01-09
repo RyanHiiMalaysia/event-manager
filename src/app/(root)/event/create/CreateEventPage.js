@@ -6,7 +6,6 @@ import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import { Alert } from "@nextui-org/react";
 import { I18nProvider } from "@react-aria/i18n";
-import ReactDOMServer from 'react-dom/server';
 
 const generateUniqueLink = () => {
   const timestamp = Date.now();
@@ -14,16 +13,14 @@ const generateUniqueLink = () => {
   return `${timestamp}-${randomString}`;
 };
 
-const sendEmail = async (email, layout, subject) => {
+const sendEmail = async (email, subject, user, eventLink) => {
   try {
-    const htmlContent = ReactDOMServer.renderToString(layout);
-
     const response = await fetch(`/api/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_email: email, layout: htmlContent , subject: subject }),
+      body: JSON.stringify({ user_email: email, layout_choice: 'CreateEvent' , subject: subject, userName: user, event_link: eventLink }),
     });
 
     if (!response.ok) {
@@ -33,12 +30,7 @@ const sendEmail = async (email, layout, subject) => {
     console.error("Error sending email:", error);
   }
 };
-const EmailTemplate = ( firstName, eventLink ) => (
-  <div>
-    <h1>You have successfully created an event, {firstName}!</h1>
-    <p>Here is your event link: {eventLink}</p>
-  </div>
-);
+
 export default function CreateEventPage() {
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -152,7 +144,7 @@ export default function CreateEventPage() {
       const eventLink = `${path}/event/${uniqueLink}`;
       setEventLink(eventLink);
       alert("Event created successfully!");
-      await sendEmail(session.user.email, EmailTemplate(session.user.chosenName, eventLink) , "Event Created Successfully!");
+      await sendEmail(session.user.email , "Event Created Successfully!", session.user.chosenName, eventLink);
     } else {
       const result = await response.json();
       alert(result.message || "Error creating event.");
