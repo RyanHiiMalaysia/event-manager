@@ -15,9 +15,11 @@ import yellow from "../../../../public/yellow.svg";
 import grey from "../../../../public/grey.svg";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { InfoIcon } from "@/components/icons/eventDetails/info-icon";
 
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen: isInfoModalOpen, onOpen: onInfoModalOpen, onOpenChange: onInfoModalOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [schedulingEvents, setSchedulingEvents] = useState([]);
   const [allocatedEvents, setAllocatedEvents] = useState([]);
@@ -102,6 +104,9 @@ export default function Page() {
               </Tooltip>
             </span>
           )}
+          <Button isIconOnly onPress={onInfoModalOpen} color='FFFFFF' auto size="sm">
+            < InfoIcon />
+          </Button>
         </h1>
         <Button
           color="primary"
@@ -255,6 +260,18 @@ export default function Page() {
       </Tabs>
 
       <EventModal isOpen={isOpen} onOpenChange={onOpenChange} selectedEvent={selectedEvent} />
+
+      <Modal isOpen={isInfoModalOpen} onOpenChange={onInfoModalOpenChange}>
+        <ModalContent>
+          <ModalHeader>Information</ModalHeader>
+          <ModalBody>
+            <p>Here is some information about the events.</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button onPress={onInfoModalOpenChange}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
