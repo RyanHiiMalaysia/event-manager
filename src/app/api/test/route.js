@@ -117,7 +117,7 @@ async function checkEventDeadline(sql) {
 
 const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link) => {
   try {
-    const response = await fetch(sendURL, {
+    const response = await fetch(`/api/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -166,6 +166,7 @@ const sendAllocateEmail = async (email, subject, eventName, allocate, event_link
 
 
 export async function GET(request) {
+  console.log(new URL(`/api/user-event`, request.url))
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return new Response('Unauthorized', {
