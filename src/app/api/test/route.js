@@ -12,6 +12,7 @@ async function fetchToBeAllocatedEvents(sql) {
     const query = sql`
       SELECT 
         event_id, 
+        event_title,
         event_duration,
         event_force_admin,
         event_link
@@ -184,7 +185,7 @@ export async function GET(request) {
     const toBeAllocatedEvents = await fetchToBeAllocatedEvents(sql);
 
     for (const event of toBeAllocatedEvents) {
-        const { event_id, event_duration, event_force_admin, event_link } = event;
+        const { event_id, event_duration, event_force_admin, event_link, event_title } = event;
         const userEvents = await fetchUserEvents(sql, event_id);
         const {hours, minutes} = event_duration;
         const duration = ((hours?? 0) * 60 + (minutes?? 0)) * 60 * 1000;
