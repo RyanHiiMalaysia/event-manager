@@ -69,7 +69,7 @@ async function addAllocateTime(sql, event_id, start, end, participants) {
     await sql`
       INSERT INTO 
         allocatetimes 
-        (event_id, start, end, participants)
+        (event_id, at_start, at_end, at_participants)
       VALUES 
         (${event_id}, ${start}, ${end}, ${participants})
     `;
@@ -215,7 +215,7 @@ export async function GET(request) {
             });
             // Delete all free times associated with the event
             await deleteFreetimesForEvent(sql, event_id);
-
+            console.log(eventObj.eventRanges);
             const participantsUrl = new URL(`/api/user-event/participants?link=${event_link}`, request.url);
             const participants = await fetch(participantsUrl);
             const data_participants = await participants.json();
