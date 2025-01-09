@@ -44,12 +44,12 @@ export default function EventDetailsPage({ params }) {
         },
         body: JSON.stringify({
           user_email: email,
-          layout_choice: 'CancelEvent',
+          layout_choice: "CancelEvent",
           subject: subject,
           eventName: eventName,
           eventOwnerName: eventOwnerName,
           time: allocate !== null ? allocate : schedule,
-          timeType: type
+          timeType: type,
         }),
       });
 
@@ -95,7 +95,6 @@ export default function EventDetailsPage({ params }) {
 
   const handleCancel = async () => {
     try {
-
       const participants = await fetch(`/api/user-event/participants?link=${uniqueLink}`);
       const data_participants = await participants.json();
       const emails = data_participants.participants.map((x) => x.email);
@@ -105,10 +104,14 @@ export default function EventDetailsPage({ params }) {
         body: JSON.stringify({ event_link: uniqueLink, cancel: true }),
       });
 
-      const allocate = event.event_allocated_start !== null ?
-        `${convertDate(event.event_allocated_start)} - ${convertDate(event.event_allocated_end)}` : null;
-      const schedule = `${convertDateTimeToDate(event.event_schedule_start)} -${convertDateTimeToDate(event.event_schedule_end)}`;
-      const type = allocate !== null ? "Allocating time" : "Schedule Range"
+      const allocate =
+        event.event_allocated_start !== null
+          ? `${convertDate(event.event_allocated_start)} - ${convertDate(event.event_allocated_end)}`
+          : null;
+      const schedule = `${convertDateTimeToDate(event.event_schedule_start)} -${convertDateTimeToDate(
+        event.event_schedule_end
+      )}`;
+      const type = allocate !== null ? "Allocating time" : "Schedule Range";
 
       await sendEmail(emails, "Event is cancelled", event.event_title, event.user_name, schedule, allocate, type);
     } catch (error) {
@@ -123,14 +126,14 @@ export default function EventDetailsPage({ params }) {
     }
     if (isUserAdmin) {
       return (
-        <Button color="danger" onPress={handleCancel} className="flex px-4 py-2 text-white rounded" >
+        <Button color="danger" onPress={handleCancel} className="flex px-4 py-2 text-white rounded">
           Cancel Event
         </Button>
       );
     }
     if (isUserIn) {
       return (
-        <Button color="danger" onPress={handleLeave} className="flex px-4 py-2 text-white rounded" >
+        <Button color="danger" onPress={handleLeave} className="flex px-4 py-2 text-white rounded">
           Leave Event
         </Button>
       );
@@ -140,20 +143,20 @@ export default function EventDetailsPage({ params }) {
   const ShowAdmin = () => {
     if (isUserAdmin) {
       return (
-        <Button className="flex px-4 py-2 text-black rounded" href={`/event/${uniqueLink}/admin`} as={Link}><strong>Admin</strong></Button>
-      )
+        <Button className="flex px-4 py-2 text-black rounded" href={`/event/${uniqueLink}/admin`} as={Link}>
+          <strong>Admin</strong>
+        </Button>
+      );
     }
-  }
+  };
 
   const SetOrInviteOrEventPageButton = () => {
-
     if (isEventAllocated || isEventPast || isEventFull) {
-      const description =
-        isEventPast ?
-          "This event is finished" :
-          isEventAllocated ?
-            "This event is allocated" :
-            "This event is full"
+      const description = isEventPast
+        ? "This event is finished"
+        : isEventAllocated
+        ? "This event is allocated"
+        : "This event is full";
 
       return (
         <div className="mt-6">
@@ -169,7 +172,11 @@ export default function EventDetailsPage({ params }) {
     } else if (isUserIn) {
       return (
         <div className="relative flex flex-row justify-between gap-x-2">
-          <Button className="flex px-4 py-2 bg-blue-500 text-white rounded" href={`/event/${uniqueLink}/schedule`} as={Link}>
+          <Button
+            className="flex px-4 py-2 bg-blue-500 text-white rounded"
+            href={`/event/${uniqueLink}/schedule`}
+            as={Link}
+          >
             Set Your Availability
           </Button>
           <LeaveOrCancelEventButton />
@@ -195,7 +202,8 @@ export default function EventDetailsPage({ params }) {
     if (isEventAllocated) {
       return (
         <p className="text-gray-600 mt-2">
-          <strong>DateTime</strong>: {convertDate(event.event_allocated_start)} - {convertDate(event.event_allocated_end)}
+          <strong>DateTime</strong>: {convertDate(event.event_allocated_start)} -{" "}
+          {convertDate(event.event_allocated_end)}
         </p>
       );
     }
@@ -203,10 +211,12 @@ export default function EventDetailsPage({ params }) {
     return (
       <div>
         <p className="text-gray-600 mt-2">
-          <strong>Schedule Range</strong>: {convertDateTimeToDate(event.event_schedule_start)} -{" "}
+          <strong>Possible Dates</strong>: {convertDateTimeToDate(event.event_schedule_start)} -{" "}
           {convertDateTimeToDate(event.event_schedule_end)}
         </p>
-        <p>Opening Hour: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}</p>
+        <p className="text-gray-600 mt-2">
+          <strong>Possible Times</strong>: {condition(timeRange(event.event_opening_hour, event.event_closing_hour))}
+        </p>
       </div>
     );
   };
@@ -249,8 +259,8 @@ export default function EventDetailsPage({ params }) {
 
     const closingTime = close
       ? new Intl.DateTimeFormat("en-US", options).format(
-        new Date(Date.UTC(2025, 0, 4, ...close.split(":").map(Number)))
-      )
+          new Date(Date.UTC(2025, 0, 4, ...close.split(":").map(Number)))
+        )
       : "unknown";
 
     return `${openingTime} - ${closingTime}`;
@@ -346,7 +356,6 @@ export default function EventDetailsPage({ params }) {
         if (!response_past.ok) throw new Error("Failed to fetch event");
         const data_past = await response_past.json();
         setIsEventPast(data_past.result);
-
       } catch (error) {
         console.error("Error fetching event:", error.message);
         setEvent(null); // Handle not found
@@ -374,9 +383,13 @@ export default function EventDetailsPage({ params }) {
         style={{ marginTop: "40px" }}
       >
         <h1 className="text-3xl font-bold">{event.event_title}</h1>
-        <p className="text-gray-600 mt-2"><strong>Owner</strong>: {event.user_name}</p>
+        <p className="text-gray-600 mt-2">
+          <strong>Owner</strong>: {event.user_name}
+        </p>
         <ScheduledOrAllocated />
-        <p className="text-gray-600 mt-2"><strong>Duration</strong>: {convertTime(event.event_duration)}</p>
+        <p className="text-gray-600 mt-2">
+          <strong>Duration</strong>: {convertTime(event.event_duration)}
+        </p>
         <Accordion variant="bordered" selectionMode="multiple">
           <AccordionItem key="1" aria-label="Location" title="Location">
             <div className="max-h-40 overflow-y-auto break-words">
@@ -392,10 +405,8 @@ export default function EventDetailsPage({ params }) {
         </Accordion>
         <br></br>
         <div className="relative flex flex-col justify-between gap-x-2">
-          <Button
-            className="flex px-4 py-2 text-blue rounded"
-            href={`/event/${uniqueLink}/participants`}
-            as={Link}><strong>Participants</strong>
+          <Button className="flex px-4 py-2 text-blue rounded" href={`/event/${uniqueLink}/participants`} as={Link}>
+            <strong>Participants</strong>
           </Button>
           <br></br>
           <ShowAdmin />
