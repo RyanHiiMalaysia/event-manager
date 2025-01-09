@@ -77,9 +77,9 @@ async function addAllocateTime(sql, event_id, start, end, participants) {
 async function deleteAllocateTimes(sql) {
     await sql`
       DELETE FROM 
-        allocatetimes NATURAL JOIN events
+        allocatetimes
       WHERE 
-        event_allocated_start < NOW()
+        event_id IN (SELECT event_id FROM events WHERE event_allocated_start < NOW());
     `;
 }
 
