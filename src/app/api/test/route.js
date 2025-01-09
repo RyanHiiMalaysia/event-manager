@@ -110,7 +110,7 @@ async function checkEventDeadline(sql) {
                           NOW() + INTERVAL '1 DAY' >= event_deadline
                       AND event_deadline > NOW()
                   `;//So stupid, the now is local time but event_deadline is UTC
-  return result || [];
+  return result;
 }
 
 
@@ -216,12 +216,12 @@ export async function GET(request) {
             const participants = await fetch(`/api/user-event/participants?link=${event_link}`);
             const data_participants = await participants.json();
             const emails = data_participants.participants.map((x) => x.email);
-            await sendAllocateEmail(emails, "Allocate time of the event", event_title, `${start.toLocalString()}-${end.toLocaleString()}`, event_link)
+            await sendAllocateEmail(emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link)
         }
 
     }
      //Deadline reminding
-     const events = checkEventDeadline(sql);
+     const events = await checkEventDeadline(sql);
      for(const event of events){
        const { event_title, event_deadline, event_link } = event;
        const participants = await fetch(`/api/user-event/participants?link=${event_link}`);
