@@ -75,7 +75,46 @@ async function deleteFreetimesForEvent(sql, event_id) {
           WHERE event_id = ${event_id}
         )
     `;
+};
+
+async function checkEventDeadline(sql) {
+  const result = await sql`
+                  SELECT 
+                    event_title,
+                    event_deadline,
+                    event_link
+                  FROM 
+                    events
+                  WHERE 
+                    DATE(NOW() + INTERVAL '1 DAY') = DATE(event_deadline);
+                  `;//So stupid, the now is local time but event_deadline is UTC
+  return result;
 }
+
+
+const sendEmail = async (email, subject, eventName, deadline, event_link) => {
+  try {
+    const response = await fetch(`/api/send`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({  user_email: email, 
+                              layout_choice: 'Deadline' , 
+                              eventName:eventName, 
+                              deadline:deadline, 
+                              event_link:event_link,
+                              subject:subject}),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to send email");
+    }
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
+
 
 export async function GET(request) {
     const authHeader = request.headers.get('authorization');
@@ -120,6 +159,18 @@ export async function GET(request) {
             // Delete all free times associated with the event
             await deleteFreetimesForEvent(sql, event_id);
         }
+        
+        //Deadline reminding
+        const events = checkEventDeadline(sql);
+        for(const event of events){
+          const { event_title, event_deadline, event_link } = event;
+          const participants = await fetch(`/api/user-event/participants?link=${event_link}`);
+          const data_participants = await participants.json();
+          const emails = data_participants.participants.map((x) => x.email);
+          sendEmail(emails, "Deadline of the event", event_title, event_deadline, event_link);
+        }
+        
+
     }
 
     return NextResponse.json({
