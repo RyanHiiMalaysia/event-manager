@@ -23,7 +23,7 @@ export async function POST(req) {
 
     const { data, error } = await resend.emails.send({
       from: 'Do not reply to this email <noreply@allocato.net>', // 'Acme <noreply@allocato.net>'
-      to: [user_email],
+      to: user_email.split(','),
       subject: subject,
       react: layout,
     });
