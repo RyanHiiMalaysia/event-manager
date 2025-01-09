@@ -59,6 +59,26 @@ class Event {
       eventRange.users = freeTimes.filter(inRange).map(({ user }) => user);
     };
 
+    // Helper function to sort event ranges
+    const sortEventRanges = (a, b) => {
+      const getMinuteOrder = (date) => {
+        const minuteOrder = {
+          0: 0,
+          30: 1,
+          15: 2,
+          45: 3,
+        };
+        return minuteOrder[date.getMinutes()] ?? 4;
+      };
+
+      // First, sort by the number of participants (descending)
+      if (a.users.length !== b.users.length) {
+        return b.users.length - a.users.length;
+      }
+      // If the number of participants is the same, sort by the specified minute order
+      return getMinuteOrder(a.start) - getMinuteOrder(b.start);
+    };
+
     // Get all free times and priority free times, where priority free times are free times of admin users
     const freeTimes = this.users.flatMap((user) => user.freeTimes);
     const priorityTimes = this.users
@@ -81,14 +101,9 @@ class Event {
       this.eventRanges.forEach(allocateEventRange(freeTimes));
     }
 
-    // Find the earliest event range with the maximum number of users
-    // If there are multiple event ranges with the same number of users, the earliest one will be selecte due to reduce
-    // taking from left to right in an increasing sorted array
-    // If there are no event ranges, it will be undefined and the event will not be allocated
-    this.eventRange = this.eventRanges.reduce(
-      (max, range) => (range.users.length > max.users.length ? range : max),
-      this.eventRanges[0]
-    );
+    this.eventRanges.sort(sortEventRanges);
+    this.eventRanges = this.eventRanges.slice(0, 5);
+    this.eventRange = this.eventRanges[0];
   }
 }
 
