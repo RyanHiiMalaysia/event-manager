@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { CreateEvent, SignUpAccount, CancelEvent, DeadlineRemind } from '@/components/email/CreateEvent';
+import { CreateEvent, SignUpAccount, CancelEvent, DeadlineRemind, AllocateRemind } from '@/components/email/CreateEvent';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -32,6 +32,9 @@ export async function POST(req) {
         break;
       case 'Deadline':
         layout = DeadlineRemind(eventName, deadline, event_link);
+        break;
+      case 'Allocate':
+        layout = AllocateRemind(eventName, time, event_link);
         break;
       default:
         console.log('This should not be printed out')
