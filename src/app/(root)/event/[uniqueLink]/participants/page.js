@@ -1,6 +1,6 @@
 "use client";
 import { TableWrapper } from "@/components/Table";
-import { useState, useEffect } from "react";
+import React,{ useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
   Button,
@@ -12,6 +12,8 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Textarea,
+  Form,
 } from "@nextui-org/react";
 
 export default function Page() {
@@ -26,6 +28,7 @@ export default function Page() {
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
 
   function RemoveModal({ isOpen, onOpenChange, selectedParticipant }) {
     const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
@@ -192,6 +195,49 @@ export default function Page() {
     setIsEditOpen(true);
   };
 
+  const closeInvite = () => {
+    setIsInviteOpen(false);
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    const data = Object.fromEntries(new FormData(e.currentTarget));
+  };
+  const invitePage = (isInviteOpen, setIsInviteOpen, closeInvite) => {
+    return (
+      <div>
+        <Button color="primary" className="text-xl p-6 md:text-lg" onPress={()=>{ setIsInviteOpen(true); }}>
+              Invite Using Email
+            </Button>
+        <Modal isOpen={isInviteOpen} onOpenChange={setIsInviteOpen} onClose={closeInvite}>
+            <ModalContent>
+              <ModalBody>
+                <Form
+                onSubmit = {onSubmit}
+                validationBehavior="native">
+                  <div className="flex flex-col items-center w-full max-w-md p-8 space-y-6">
+                  <Textarea
+                label="Emails"
+                labelPlacement="outside"
+                name="description"
+                placeholder="Enter the emails of the participants you want to invite seperated by commas (,)"
+                />
+                <Button type="submit" color="primary" className="self-end">
+                  Submit
+                </Button>
+                </div>
+                </Form>
+                
+              
+              </ModalBody>
+            </ModalContent>
+          </Modal>
+      </div>
+          
+        );
+  };
+
   if (dataFetched && session) {
     return (
       <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-8">
@@ -212,10 +258,11 @@ export default function Page() {
             ) : (
               <Tooltip content="Copy event link to clipboard">
                 <Button color="primary" className="text-xl p-6 md:text-lg" onPress={copyLinktoClipboard}>
-                  Invite
+                  Invite Link
                 </Button>
               </Tooltip>
             )}
+            {invitePage(isInviteOpen, setIsInviteOpen, closeInvite)}
           </div>
         </div>
         <div>
