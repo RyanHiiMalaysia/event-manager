@@ -263,9 +263,12 @@ export default function Page() {
 
       <Modal isOpen={isInfoModalOpen} onOpenChange={onInfoModalOpenChange}>
         <ModalContent>
-          <ModalHeader>Information</ModalHeader>
+          <ModalHeader>Info</ModalHeader>
           <ModalBody>
-            <p>Here is some information about the events.</p>
+            <p><b>Scheduling:</b> Events that are currently being scheduled and are not yet allocated. The checkbox indicates whether you have set your availability for the event.</p>
+            <p><b>Allocated:</b> Events that have been allocated to a date and time that suits the most participants as possible.</p>
+            <p><b>Organising:</b> Events that you created or have been made an admin of.</p>
+            <p><b>Past:</b> Events whose allocated ending time has passed.</p>
           </ModalBody>
           <ModalFooter>
             <Button onPress={onInfoModalOpenChange}>Close</Button>
