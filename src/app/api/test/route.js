@@ -110,7 +110,7 @@ async function checkEventDeadline(sql) {
                           NOW() + INTERVAL '1 DAY' >= event_deadline
                       AND event_deadline > NOW()
                   `;//So stupid, the now is local time but event_deadline is UTC
-  return result;
+  return result || [];
 }
 
 
