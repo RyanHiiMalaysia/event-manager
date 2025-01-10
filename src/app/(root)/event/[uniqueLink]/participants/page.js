@@ -30,7 +30,8 @@ export default function Page() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [emailsInvalidity, setEmailsInvalidity] = useState(false);
-  const [wordCount, setWordCount] = useState(0)
+  const [wordCount, setWordCount] = useState(0);
+  const [eventTitle, setEventTitle] = useState(null);
 
   function RemoveModal({ isOpen, onOpenChange, selectedParticipant }) {
     const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
@@ -164,13 +165,15 @@ export default function Page() {
           return result;
         };
 
-        const [participantsData, eventData, adminData] = await Promise.all([
+        const [participantsData, eventData, adminData, event] = await Promise.all([
           fetchData(`/api/user-event/participants?link=${eventLink}`),
           fetchData(`/api/events?creator=true&link=${eventLink}`),
           fetchData(`/api/user-event?findIsUserIn=true&link=${eventLink}&email=${session.user.email}&isAdmin=true`),
+          fetchData(`/api/events?link=${eventLink}`),
         ]);
         setParticipants(participantsData.participants);
         setCreator(eventData.eventData[0].event_creator);
+        setEventTitle(event.eventData[0].event_title)
         setIsAdmin(adminData.result);
       } catch (error) {
         setError(error);
@@ -220,6 +223,24 @@ export default function Page() {
     return initialCount == finalCount ? emails : null
   }
 
+  const sendEmail = async (emails, subject, userName) => {
+    try {
+      const response = await fetch(`/api/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_email: emails, layout_choice: 'Invited' , subject: subject, userName: userName, event_link: eventLink }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
+  }
+
   const onSubmit = async (e) => {
     e.preventDefault();
 
@@ -227,52 +248,48 @@ export default function Page() {
     const emails = stringToEmails(data)
     setEmailsInvalidity(false);
     if (emails){
-      console.log("awd")
       setEmailsInvalidity(false);
-      // do something
+      await sendEmail(emails, `Invitation to ${session.user.chosenName}'s ${eventTitle}!`, session.user.chosenName)
     }
     else{
       setEmailsInvalidity(true);
     }
-    console.log(stringToEmails(data))
   };
   const invitePage = (isInviteOpen, setIsInviteOpen, closeInvite) => {
     return (
       <div>
-        <Button color="primary" className="text-xl p-6 md:text-lg" onPress={()=>{ setIsInviteOpen(true); }}>
-              Invite Using Email
-            </Button>
-        <Modal isOpen={isInviteOpen} onOpenChange={setIsInviteOpen} onClose={closeInvite}>
-            <ModalContent>
-              <ModalBody>
-                <Form
-                onSubmit = {onSubmit}
-                validationBehavior="native">
-                  <div className="flex flex-col items-center w-full max-w-md p-8 space-y-6">
-                  <Textarea
-                  label = "Emails (seperated by commas)"
-                  labelPlacement = "outside"
-                  color = {emailsInvalidity ? (wordCount == 0 ? "default" : "danger") : "default"}
-                  errorMessage = "One of the emails is invalid"
-                  name = "description"
-                  placeholder = "Enter the emails of the participants you want to invite seperated by commas (,)"
-                  />
-                  <p>
-                    {emailsInvalidity ? "One of the emails is invalid" : null}
-                  </p>
-                <Button type="submit" color="primary" className="self-end">
-                  Submit
-                </Button>
-                </div>
-                </Form>
-                
-              
-              </ModalBody>
-            </ModalContent>
-          </Modal>
+      <Button color="primary" className="text-xl p-6 md:text-lg" onPress={() => { setIsInviteOpen(true); }}>
+        Invite Using Email
+      </Button>
+      <Modal isOpen={isInviteOpen} onOpenChange={setIsInviteOpen} onClose={closeInvite}>
+        <ModalContent>
+          <ModalHeader>
+            Invite your friends to this event!
+          </ModalHeader>
+          <ModalBody>
+            <Form onSubmit={onSubmit} validationBehavior="native">
+            <div className="flex flex-col items-center w-full max-w-md  space-y-3">
+              <Textarea
+              label="Emails (if more than one separate it by commas)"
+              labelPlacement="outside"
+              color={emailsInvalidity ? (wordCount == 0 ? "default" : "danger") : "default"}
+              errorMessage="One of the emails is invalid"
+              name="description"
+              placeholder="Enter the emails of the participants you want to invite separated by commas (,)"
+              />
+              <div style={{ color: "#F31260" }}>
+              {emailsInvalidity ? (wordCount == 0 ? "" : "One of the emails is invalid") : ""}
+              </div>
+              <Button type="submit" color="primary" className="self-end">
+              Submit
+              </Button>
+            </div>
+            </Form>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
       </div>
-          
-        );
+    );
   };
 
   if (dataFetched && session) {
