@@ -31,7 +31,7 @@ export default function PricingPage() {
             </li>
             <li className="flex items-start">
               <span className="mr-2">5.</span>
-              <span>Your account will be registered with the Pro plan within 12 hours with email confirmation.</span>
+              <span>Your account will be registered with the Pro plan within 12 hours.</span>
             </li>
           </ol>
         </CardBody>
