@@ -114,7 +114,7 @@ export default function Page() {
         alert(`Successfully made ${selectedParticipant.name} an admin`);
 
         //Send email
-        await sendAdminEmail(selectedParticipant.email, "Became an Admin", true, eventTitle);
+        await sendAdminEmail(selectedParticipant.email, "Added to admin list", true, eventTitle);
 
       } else {
         const result = await response.json();
@@ -138,7 +138,7 @@ export default function Page() {
         alert(`Successfully removed ${selectedParticipant.name} from the admin list`);
 
         //Send email
-        await sendAdminEmail(selectedParticipant.email, "Became a normal participant", false, eventTitle);
+        await sendAdminEmail(selectedParticipant.email, "Removed from admin list", false, eventTitle);
       } else {
         const result = await response.json();
         alert(result.message || "Error removing admin");

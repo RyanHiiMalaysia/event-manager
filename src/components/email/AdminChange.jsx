@@ -1,8 +1,8 @@
 export const AdminChange = (becomeAdmin, eventName, eventLink) => (
 
-    <div>
-      <h1>{becomeAdmin ? 'You became an Admin' : 'You have been removed as an admin'}</h1>
-      <p>You {becomeAdmin ? " became an admin for " : " have been removed as an admin in "}{eventName}.</p>
-      <p>Here is the link :{eventLink}</p>
-    </div>
-    );
+  <div>
+    <h1>{becomeAdmin ? 'You have been made an Admin' : 'You have been removed as an Admin'}</h1>
+    <p>You {becomeAdmin ? " have been made an admin of the event: " : " have been removed as an admin from the event: "}<strong>{eventName}</strong>.</p>
+    <p>Here is the link : {eventLink}</p>
+  </div>
+);
