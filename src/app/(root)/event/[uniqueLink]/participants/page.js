@@ -70,7 +70,7 @@ export default function Page() {
     );
   }
 
-  const sendAdminEmail = async (email, subject, becomeAdmin, eventLink) => {
+  const sendAdminEmail = async (email, subject, becomeAdmin, eventName, eventLink) => {
     try {
       const response = await fetch(`/api/send`, {
         method: "POST",
@@ -81,6 +81,7 @@ export default function Page() {
                               layout_choice: 'Admin' , 
                               subject: subject, 
                               event_link: eventLink,
+                              eventName: eventName,
                               becomeAdmin: becomeAdmin}),
       });
       if (!response.ok) {
@@ -112,7 +113,7 @@ export default function Page() {
         alert(`Successfully made ${selectedParticipant.name} an admin`);
 
         //Send email
-        await sendAdminEmail(selectedParticipant.email, "Became an Admin", true, eventLink);
+        await sendAdminEmail(selectedParticipant.email, "Became an Admin", true, eventTitle, eventLink);
 
       } else {
         const result = await response.json();
@@ -136,7 +137,7 @@ export default function Page() {
         alert(`Successfully removed ${selectedParticipant.name} from the admin list`);
 
         //Send email
-        await sendAdminEmail(selectedParticipant.email, "Became a normal participant", false, eventLink);
+        await sendAdminEmail(selectedParticipant.email, "Became a normal participant", false, eventTitle, eventLink);
       } else {
         const result = await response.json();
         alert(result.message || "Error removing admin");
