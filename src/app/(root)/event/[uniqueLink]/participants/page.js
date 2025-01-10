@@ -70,7 +70,7 @@ export default function Page() {
     );
   }
 
-  const sendEmail = async (email, subject, becomeAdmin, eventLink) => {
+  const sendAdminEmail = async (email, subject, becomeAdmin, eventLink) => {
     try {
       const response = await fetch(`/api/send`, {
         method: "POST",
@@ -112,7 +112,7 @@ export default function Page() {
         alert(`Successfully made ${selectedParticipant.name} an admin`);
 
         //Send email
-        await sendEmail(selectedParticipant.email, "Became an Admin", true, eventLink);
+        await sendAdminEmail(selectedParticipant.email, "Became an Admin", true, eventLink);
 
       } else {
         const result = await response.json();
@@ -136,7 +136,7 @@ export default function Page() {
         alert(`Successfully removed ${selectedParticipant.name} from the admin list`);
 
         //Send email
-        await sendEmail(selectedParticipant.email, "Became a normal participant", false, eventLink);
+        await sendAdminEmail(selectedParticipant.email, "Became a normal participant", false, eventLink);
       } else {
         const result = await response.json();
         alert(result.message || "Error removing admin");
@@ -251,7 +251,7 @@ export default function Page() {
     return initialCount == finalCount ? emails : null
   }
 
-  const sendEmail = async (emails, subject, userName) => {
+  const sendInvitationEmail = async (emails, subject, userName) => {
     try {
       const response = await fetch(`/api/send`, {
         method: "POST",
@@ -277,7 +277,7 @@ export default function Page() {
     setEmailsInvalidity(false);
     if (emails){
       setEmailsInvalidity(false);
-      await sendEmail(emails, `Invitation to ${session.user.chosenName}'s ${eventTitle}!`, session.user.chosenName)
+      await sendInvitationEmail(emails, `Invitation to ${session.user.chosenName}'s ${eventTitle}!`, session.user.chosenName)
     }
     else{
       setEmailsInvalidity(true);
