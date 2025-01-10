@@ -25,6 +25,7 @@ export default function Page() {
   const { data: session, status } = useSession();
   const [dataFetched, setDataFetched] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isSubmited, setIsSubmited] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -358,14 +359,25 @@ export default function Page() {
                         </Button>
                       </Tooltip>
                     )}
-
-                    <Button
-                      type="submit"
-                      color="primary"
-                      className="flex"
-                    >
-                      Submit
-                    </Button>
+                    {isSubmited ? (
+                      <Button
+                        type="submit"
+                        color="primary"
+                        className="flex"
+                        onPress={() => setIsSubmited(false)}>
+                          Submitted
+                        </Button>
+                    ) : (
+                      <Button
+                        type="submit"
+                        color="primary"
+                        className="flex"
+                        onPress={() => setIsSubmited(true)}
+                      >
+                        Submit
+                      </Button>
+                    )}
+                    
                   </div>
 
                 </div>
