@@ -240,7 +240,7 @@ export async function GET(request) {
       const data_participants = await participants.json();
 
       const emails = data_participants.participants.map((x) => x.email);
-      await sendAllocateEmail(emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link, request.url);
+      await sendAllocateEmail(emails, "Event time allocated", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link, request.url);
     }
 
   }
@@ -254,7 +254,7 @@ export async function GET(request) {
     const data_participants = await participants.json();
 
     const emails = data_participants.participants.map((x) => x.email);
-    await sendDeadlineEmail(emails, "Deadline of the event", event_title, event_deadline, event_link, request.url);
+    await sendDeadlineEmail(emails, "Event deadline approaching", event_title, event_deadline, event_link, request.url);
 
 
   }
