@@ -69,6 +69,27 @@ export default function Page() {
     );
   }
 
+  const sendEmail = async (email, subject, becomeAdmin, eventLink) => {
+    try {
+      const response = await fetch(`/api/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_email: email, 
+                              layout_choice: 'Admin' , 
+                              subject: subject, 
+                              event_link: eventLink,
+                              becomeAdmin: becomeAdmin}),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
+  };
+
   function EditModal({ isOpen, onOpenChange, selectedParticipant }) {
     const adminAction = ({ name, is_admin }) =>
       is_admin ? `remove ${name} from the admin list` : `make ${name} an admin`;
@@ -88,6 +109,10 @@ export default function Page() {
         );
         setSelectedParticipant(null);
         alert(`Successfully made ${selectedParticipant.name} an admin`);
+
+        //Send email
+        await sendEmail(selectedParticipant.email, "Became an Admin", true, eventLink);
+
       } else {
         const result = await response.json();
         alert(result.message || "Error adding admin");
@@ -108,6 +133,9 @@ export default function Page() {
         );
         setSelectedParticipant(null);
         alert(`Successfully removed ${selectedParticipant.name} from the admin list`);
+
+        //Send email
+        await sendEmail(selectedParticipant.email, "Became a normal participant", false, eventLink);
       } else {
         const result = await response.json();
         alert(result.message || "Error removing admin");
