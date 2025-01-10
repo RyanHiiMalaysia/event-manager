@@ -115,9 +115,10 @@ async function checkEventDeadline(sql) {
 }
 
 
-const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link) => {
+const sendDeadlineEmail = async (baseURL, email, subject, eventName, deadline, event_link) => {
+  //https://allocato.net/api/send
   try {
-    const response = await fetch(`https://allocato.net/api/send`, {
+    const response = await fetch(`${baseURL}/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -139,9 +140,10 @@ const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link
 };
 
 
-const sendAllocateEmail = async (email, subject, eventName, allocate, event_link) => {
+const sendAllocateEmail = async (baseURL, email, subject, eventName, allocate, event_link) => {
+  //https://allocato.net/api/send
   try {
-    const response = await fetch(`https://allocato.net/api/send`, {
+    const response = await fetch(`${baseURL}/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -172,7 +174,8 @@ export async function GET(request) {
             status: 401,
         });
     }
-
+    const baseURL = request.url.split("api")[0]+"api"
+    
     console.log("Cron Job Ran at ", new Date());
 
     const sql = getDatabaseConnection();
@@ -213,10 +216,12 @@ export async function GET(request) {
             });
             // Delete all free times associated with the event
             await deleteFreetimesForEvent(sql, event_id);
-            const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
+
+            //const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
+            const participants = await fetch(`${baseURL}/user-event/participants?link=${event_link}`);
             const data_participants = await participants.json();
             const emails = data_participants.participants.map((x) => x.email);
-            await sendAllocateEmail(emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link, request.url);
+            await sendAllocateEmail(baseURL, emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link, request.url);
         }
 
     }
@@ -224,10 +229,11 @@ export async function GET(request) {
      const events = await checkEventDeadline(sql);
      for(const event of events){
        const { event_title, event_deadline, event_link } = event;
-       const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
+       //const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
+       const participants = await fetch(`${baseURL}/user-event/participants?link=${event_link}`);
        const data_participants = await participants.json();
        const emails = data_participants.participants.map((x) => x.email);
-       await sendDeadlineEmail(emails, "Deadline of the event", event_title, event_deadline, event_link, request.url);
+       await sendDeadlineEmail(baseURL, emails, "Deadline of the event", event_title, event_deadline, event_link, request.url);
      }
 
     return NextResponse.json({
