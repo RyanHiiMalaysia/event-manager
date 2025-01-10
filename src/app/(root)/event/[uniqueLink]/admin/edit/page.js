@@ -132,8 +132,8 @@ export default function Page() {
     return null;
   } else if (!isAdmin) {
     return <Error statusCode={403} title="You do not have permission to view this page" />;
-  } else if (eventData.event_allocated_end < new Date()) {
-    return <Error statusCode={400} title="The registration deadline has passed" />;
+  } else if (eventData.event_allocated_end !== null && eventData.event_allocated_end < new Date()) {
+    return <Error statusCode={400} title="The event has already ended" />;
   } else {
     return (
       <div>
