@@ -13,14 +13,14 @@ const generateUniqueLink = () => {
   return `${timestamp}-${randomString}`;
 };
 
-const sendEmail = async (email, subject, user, eventLink) => {
+const sendEmail = async (email, subject, user, eventLink, eventTitle) => {
   try {
     const response = await fetch(`/api/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_email: email, layout_choice: 'CreateEvent' , subject: subject, userName: user, event_link: eventLink }),
+      body: JSON.stringify({ user_email: email, layout_choice: 'CreateEvent' , subject: subject, userName: user, event_link: eventLink, eventName: eventTitle }),
     });
 
     if (!response.ok) {
@@ -144,7 +144,7 @@ export default function CreateEventPage() {
       const eventLink = `${path}/event/${uniqueLink}`;
       setEventLink(eventLink);
       alert("Event created successfully!");
-      await sendEmail(session.user.email , "Event Created Successfully!", session.user.chosenName, eventLink);
+      await sendEmail(session.user.email , "Event Created Successfully!", session.user.chosenName, eventLink, data.title);
     } else {
       const result = await response.json();
       alert(result.message || "Error creating event.");

@@ -30,7 +30,7 @@ export async function POST(req) {
     let layout;
     switch (layout_choice) {
       case 'CreateEvent':
-        layout = CreateEvent(userName, event_link);
+        layout = CreateEvent(userName, event_link, eventName);
         break;
       case 'SignUp':
         layout = SignUpAccount(userName);
