@@ -208,13 +208,21 @@ export default function Page() {
             <div className="flex flex-col gap-2">
               <Select
                 variant="flat"
-                placeholder="Deadline has not been passed"
+                placeholder={
+                  allocatedStart === null
+                    ? "Deadline has not passed"
+                    : new Date(allocatedStart) < new Date()
+                    ? "Event has already ended"
+                    : "Select allocated time"
+                }
                 items={allocateTimes}
-                defaultSelectedKeys={[String(allocateTimes.findIndex((time) => time.at_start === allocatedStart))]}
                 disallowEmptySelection
-                disabled={allocatedStart === null}
+                isDisabled={new Date(allocatedStart) < new Date()}
                 aria-label="Select allocated time"
                 onChange={(selected) => updateAllocatedTime(allocateTimes[selected.target.value])}
+                {...(allocateTimes.findIndex((time) => time.at_start === allocatedStart) !== -1 && {
+                  defaultSelectedKeys: [String(allocateTimes.findIndex((time) => time.at_start === allocatedStart))],
+                })}
                 // renderValue={(items) => {
                 //   return items.map((item) => (
                 //     <SelectItem key={item.key}>
