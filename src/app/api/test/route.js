@@ -234,6 +234,8 @@ export async function GET(request) {
        const { event_title, event_deadline, event_link } = event;
        //const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
        const participants = await fetch(`${baseURL}/user-event/participants?link=${event_link}`);
+       console.log(`${baseURL}/user-event/participants?link=${event_link}`);
+       console.log(participants)
        console.log("Deadline status",participants.status)
        try{
         const data_participants = await participants.json();
