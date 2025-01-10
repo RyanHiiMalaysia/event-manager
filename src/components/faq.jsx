@@ -36,6 +36,14 @@ export default function Faq() {
         </div>
       ),
     },
+    {
+      title: "What could be the maximum duration of my event?",
+      content: (
+        <div className="text-muted-foreground">
+          The maximum duration of the event is 1 day.
+        </div>
+      ),
+    }
   ];
 
   return (
