@@ -47,7 +47,7 @@ export default function EventDetailsPage({ params }) {
           layout_choice: "CancelEvent",
           subject: subject,
           eventName: eventName,
-          eventOwnerName: eventOwnerName,
+          userName: eventOwnerName,
           time: allocate !== null ? allocate : schedule,
           timeType: type,
         }),

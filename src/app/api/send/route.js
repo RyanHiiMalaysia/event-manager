@@ -4,6 +4,7 @@ import { SignUpAccount } from '@/components/email/SignUpAccount';
 import { CancelEvent } from '@/components/email/CancelEvent';
 import { DeadlineRemind } from '@/components/email/DeadlineRemind';
 import { AllocateRemind } from '@/components/email/AllocateRemind';
+import { InvitedToEvent } from '@/components/email/InvitedToEvent';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -18,7 +19,6 @@ export async function POST(req) {
             userName, 
             event_link, 
             eventName, 
-            eventOwnerName, 
             time, 
             timeType,
             deadline } = await req.json();
@@ -32,13 +32,16 @@ export async function POST(req) {
         layout = SignUpAccount(userName);
         break;
       case 'CancelEvent':
-        layout = CancelEvent(eventName, eventOwnerName, time, timeType);
+        layout = CancelEvent(eventName, userName, time, timeType);
         break;
       case 'Deadline':
         layout = DeadlineRemind(eventName, deadline, event_link);
         break;
       case 'Allocate':
         layout = AllocateRemind(eventName, time, event_link);
+        break;
+      case 'Invited':
+        layout = InvitedToEvent(userName, event_link);
         break;
       default:
         console.log('This should not be printed out')
