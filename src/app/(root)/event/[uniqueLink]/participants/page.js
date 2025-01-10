@@ -29,6 +29,8 @@ export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [emailsInvalidity, setEmailsInvalidity] = useState(false);
+  const [wordCount, setWordCount] = useState(0)
 
   function RemoveModal({ isOpen, onOpenChange, selectedParticipant }) {
     const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
@@ -199,10 +201,40 @@ export default function Page() {
     setIsInviteOpen(false);
   };
 
+  /**
+   * Validates a string it was a proper email
+   * @param {string} email a single email
+   * @returns email if it is valid, null otherwise
+   */
+  const validateEmail = (email) => {
+    return email.match(
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    );
+  };
+
+  const stringToEmails = (string) => {
+    setWordCount(string ? string.length : 0)
+    const initialCount = string.split(',').length
+    const emails = string.split(',').map(o => o.trim()).filter(validateEmail)
+    const finalCount = emails.length
+    return initialCount == finalCount ? emails : null
+  }
+
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    const data = Object.fromEntries(new FormData(e.currentTarget));
+    const {description: data} = Object.fromEntries(new FormData(e.currentTarget));
+    const emails = stringToEmails(data)
+    setEmailsInvalidity(false);
+    if (emails){
+      console.log("awd")
+      setEmailsInvalidity(false);
+      // do something
+    }
+    else{
+      setEmailsInvalidity(true);
+    }
+    console.log(stringToEmails(data))
   };
   const invitePage = (isInviteOpen, setIsInviteOpen, closeInvite) => {
     return (
@@ -218,11 +250,16 @@ export default function Page() {
                 validationBehavior="native">
                   <div className="flex flex-col items-center w-full max-w-md p-8 space-y-6">
                   <Textarea
-                label="Emails"
-                labelPlacement="outside"
-                name="description"
-                placeholder="Enter the emails of the participants you want to invite seperated by commas (,)"
-                />
+                  label = "Emails (seperated by commas)"
+                  labelPlacement = "outside"
+                  color = {emailsInvalidity ? (wordCount == 0 ? "default" : "danger") : "default"}
+                  errorMessage = "One of the emails is invalid"
+                  name = "description"
+                  placeholder = "Enter the emails of the participants you want to invite seperated by commas (,)"
+                  />
+                  <p>
+                    {emailsInvalidity ? "One of the emails is invalid" : null}
+                  </p>
                 <Button type="submit" color="primary" className="self-end">
                   Submit
                 </Button>
