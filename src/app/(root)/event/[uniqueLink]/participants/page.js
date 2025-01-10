@@ -32,6 +32,7 @@ export default function Page() {
   const [emailsInvalidity, setEmailsInvalidity] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [eventTitle, setEventTitle] = useState(null);
+  const [fullEventLink, setFullEventLink] = useState(null);
 
   function RemoveModal({ isOpen, onOpenChange, selectedParticipant }) {
     const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
@@ -70,7 +71,7 @@ export default function Page() {
     );
   }
 
-  const sendAdminEmail = async (email, subject, becomeAdmin, eventName, eventLink) => {
+  const sendAdminEmail = async (email, subject, becomeAdmin, eventName) => {
     try {
       const response = await fetch(`/api/send`, {
         method: "POST",
@@ -80,7 +81,7 @@ export default function Page() {
         body: JSON.stringify({ user_email: email, 
                               layout_choice: 'Admin' , 
                               subject: subject, 
-                              event_link: eventLink,
+                              event_link: fullEventLink,
                               eventName: eventName,
                               becomeAdmin: becomeAdmin}),
       });
@@ -113,7 +114,7 @@ export default function Page() {
         alert(`Successfully made ${selectedParticipant.name} an admin`);
 
         //Send email
-        await sendAdminEmail(selectedParticipant.email, "Became an Admin", true, eventTitle, eventLink);
+        await sendAdminEmail(selectedParticipant.email, "Became an Admin", true, eventTitle);
 
       } else {
         const result = await response.json();
@@ -137,7 +138,7 @@ export default function Page() {
         alert(`Successfully removed ${selectedParticipant.name} from the admin list`);
 
         //Send email
-        await sendAdminEmail(selectedParticipant.email, "Became a normal participant", false, eventTitle, eventLink);
+        await sendAdminEmail(selectedParticipant.email, "Became a normal participant", false, eventTitle);
       } else {
         const result = await response.json();
         alert(result.message || "Error removing admin");
@@ -174,6 +175,7 @@ export default function Page() {
       const segments = currentPath.split("/");
       const eventLink = segments[segments.length - 2];
       setEventLink(eventLink);
+      setFullEventLink(window.location.href.replace("/participants",""));
     }
   }, []);
 
@@ -259,7 +261,7 @@ export default function Page() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user_email: emails, layout_choice: 'Invited' , subject: subject, userName: userName, event_link: eventLink }),
+        body: JSON.stringify({ user_email: emails, layout_choice: 'Invited' , subject: subject, userName: userName, event_link: fullEventLink }),
       });
   
       if (!response.ok) {
