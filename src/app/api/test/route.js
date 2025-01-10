@@ -182,23 +182,38 @@ const sendAllocateEmail = async (email, subject, eventName, allocate, event_link
 };
 
 function convertDate(date) {
-  //let date = new Date(unformattedDate);
+  const options = {
+    weekday: "long",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kuala_Lumpur", // Specify Malaysia Time Zone
+  };
 
-  // Format the date
-  let formattedDate = date
-    .toLocaleString("en-MY", {
-      weekday: "long", // Optional: Add weekday name
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true, // Ensure the time is in 12-hour format
-    })
+  return new Intl.DateTimeFormat("en-MY", options)
+    .format(date)
     .replace(/,/, "")
     .replace(/:/g, ".");
-  return formattedDate;
-}
+};
+
+// function convertDate(date) {
+//   const options = { hour: "2-digit", 
+//                     minute: "2-digit", 
+//                     hour12: true ,
+//                     weekday: "long", // Optional: Add weekday name
+//                     year: "numeric",
+//                     month: "2-digit",
+//                     day: "2-digit"};
+//   const openingTime = open
+//     ? new Intl.DateTimeFormat("en-US", options).format(new Date(Date.UTC(2025, 0, 4, ...open.split(":").map(Number))))
+//     : "unknown";
+
+//   return `${openingTime} - ${closingTime}`;
+// }
+
 
 
 export async function GET(request) {
