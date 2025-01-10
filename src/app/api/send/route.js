@@ -54,7 +54,7 @@ export async function POST(req) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'Do not reply to this email <noreply@allocato.net>',
+      from: 'Allocato <noreply@allocato.net>',
       to: Array.isArray(user_email) ? user_email : [user_email],
       subject: subject,
       react: layout,
