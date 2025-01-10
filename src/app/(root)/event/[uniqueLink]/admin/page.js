@@ -138,7 +138,6 @@ export default function Page() {
   } else if (!isAdmin) {
     return <Error statusCode={403} title="You do not have permission to view this page" />;
   } else {
-    console.log(isAdmin)
     return (
       <div className="flex flex-col space-y-4 justify-between items-center py-2 lg:px-16 sm:px-8 px-4 py-4">
         <h1 className="text-2xl font-bold">Admin Page</h1>
