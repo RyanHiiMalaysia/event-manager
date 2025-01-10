@@ -6,6 +6,7 @@ import { DeadlineRemind } from '@/components/email/DeadlineRemind';
 import { AllocateRemind } from '@/components/email/AllocateRemind';
 import { InvitedToEvent } from '@/components/email/InvitedToEvent';
 import { AdminChange } from '@/components/email/AdminChange';
+import { RemoveParticipants } from '@/components/email/RemoveParticipants';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -23,7 +24,8 @@ export async function POST(req) {
             time, 
             timeType,
             deadline,
-            becomeAdmin } = await req.json();
+            becomeAdmin,
+            adminName } = await req.json();
     
     let layout;
     switch (layout_choice) {
@@ -47,6 +49,9 @@ export async function POST(req) {
         break;
       case 'Admin':
         layout = AdminChange(becomeAdmin, eventName, event_link);
+        break;
+      case 'Remove':
+        layout = RemoveParticipants(adminName, eventName, event_link);
         break;
       default:
         console.log('This should not be printed out')
