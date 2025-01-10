@@ -80,7 +80,20 @@ async function deleteAllocateTimes(sql) {
       DELETE FROM 
         allocatetimes
       WHERE 
-        event_id IN (SELECT event_id FROM events WHERE event_allocated_start < NOW());
+        event_id IN (SELECT event_id FROM events WHERE event_allocated_end < NOW());
+    `;
+}
+
+async function deleteFreeTimes(sql) {
+  await sql`
+      DELETE FROM 
+        freetimes 
+      WHERE 
+        ue_id IN (
+          SELECT ue_id 
+          FROM userevent 
+          WHERE event_id IN (SELECT event_id FROM events WHERE event_allocated_end < NOW())
+        )
     `;
 }
 
@@ -118,7 +131,7 @@ async function checkEventDeadline(sql) {
 const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link) => {
   //https://allocato.net/api/send
   try {
-    const response = await fetch(`https://allocato.net/api/send`, {
+    const response = await fetch(`https://event-manager-opal.vercel.app/api/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -145,7 +158,7 @@ const sendDeadlineEmail = async (email, subject, eventName, deadline, event_link
 const sendAllocateEmail = async (email, subject, eventName, allocate, event_link) => {
   //https://allocato.net/api/send
   try {
-    const response = await fetch(`https://allocato.net/api/send`, {
+    const response = await fetch(`https://event-manager-opal.vercel.app/api/send`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -182,8 +195,10 @@ export async function GET(request) {
   console.log("Cron Job Ran at ", new Date());
 
   const sql = getDatabaseConnection();
-  // Delete all allocate times whose start time has passed
+  // Delete all allocate times whose event is over
   await deleteAllocateTimes(sql);
+  // Delete all free times whose event is over
+  await deleteFreeTimes(sql);
 
   // Find events whose deadline has passed
   const toBeAllocatedEvents = await fetchToBeAllocatedEvents(sql);
@@ -218,9 +233,9 @@ export async function GET(request) {
         addAllocateTime(sql, event_id, start.toISOString(), end.toISOString(), users.length);
       });
       // Delete all free times associated with the event
-      await deleteFreetimesForEvent(sql, event_id);
+      // await deleteFreetimesForEvent(sql, event_id);
 
-      const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
+      const participants = await fetch(`https://event-manager-opal.vercel.app/api/user-event/participants?link=${event_link}`);
 
       const data_participants = await participants.json();
 
@@ -233,7 +248,7 @@ export async function GET(request) {
   const events = await checkEventDeadline(sql);
   for (const event of events) {
     const { event_title, event_deadline, event_link } = event;
-    const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
+    const participants = await fetch(`https://event-manager-opal.vercel.app/api/user-event/participants?link=${event_link}`);
 
 
     const data_participants = await participants.json();
