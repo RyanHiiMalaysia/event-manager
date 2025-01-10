@@ -46,7 +46,7 @@ export async function POST(req) {
         layout = InvitedToEvent(userName, event_link);
         break;
       case 'Admin':
-        layout = AdminChange(becomeAdmin, event_link);
+        layout = AdminChange(becomeAdmin, eventName, event_link);
         break;
       default:
         console.log('This should not be printed out')
