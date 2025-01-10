@@ -31,6 +31,7 @@ async function getAllParticipants(event_link) {
 
 // Function to handle GET request to fetch all participants in an event
 export async function GET(req) {
+  console.log("GET req",request)
   try {
     const url = new URL(req.url);
     console.log("GET, before url")
@@ -40,6 +41,7 @@ export async function GET(req) {
     console.log("GET, before the participants")
     return NextResponse.json({ participants: participants }, { status: 200 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
