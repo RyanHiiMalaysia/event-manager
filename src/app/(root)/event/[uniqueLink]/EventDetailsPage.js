@@ -111,7 +111,7 @@ export default function EventDetailsPage({ params }) {
       const schedule = `${convertDateTimeToDate(event.event_schedule_start)} -${convertDateTimeToDate(
         event.event_schedule_end
       )}`;
-      const type = allocate !== null ? "Allocating time" : "Schedule Range";
+      const type = allocate !== null ? "Allocated time" : "Schedule Range";
 
       await sendEmail(emails, "Event is cancelled", event.event_title, event.user_name, schedule, allocate, type);
     } catch (error) {

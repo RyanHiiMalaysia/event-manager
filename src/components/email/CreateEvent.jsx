@@ -1,7 +1,8 @@
-export const CreateEvent = ( firstName, eventLink ) => (
+export const CreateEvent = ( firstName, eventLink, eventTitle ) => (
   <div>
     <h1>You have successfully created an event, {firstName}!</h1>
-    <p>Here is your event link: {eventLink}</p>
+    <p>Event title: {eventTitle}</p>
+    <p>Here is the event link: {eventLink}</p>
   </div>
 );
 
