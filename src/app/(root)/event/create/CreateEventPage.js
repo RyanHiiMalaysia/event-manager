@@ -117,7 +117,7 @@ export default function CreateEventPage() {
     if (hours === "0" && minutes === "0") {
       alert("Event duration cannot be 0 hours and 0 minutes");
       return;
-    } else if (deadline >= startDate) {
+    } else if (deadline > startDate) {
       alert("Registration deadline must be before the event start date");
       return;
     } else if (convertHourToMinute(endTime) - convertHourToMinute(startTime) < Number(hours) * 60 + Number(minutes)) {
