@@ -7,15 +7,7 @@ import {
   AccordionItem,
   Link,
   Button,
-  Avatar,
-  Card,
-  CardHeader,
   useDisclosure,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
 } from "@nextui-org/react";
 
 export default function EventDetailsPage({ params }) {
@@ -155,7 +147,7 @@ export default function EventDetailsPage({ params }) {
       const description = isEventPast
         ? "This event is finished"
         : isEventAllocated
-        ? "This event is allocated"
+        ? "This event has been allocated"
         : "This event is full";
 
       return (
@@ -184,17 +176,17 @@ export default function EventDetailsPage({ params }) {
       );
     }
     return (
-      <div>
-        <h1>You've been invited to {event.event_title}!</h1>
-        <div className="flex justify-between w-3/4">
-          <Button color="success" size="auto" variant="flat" onPress={handleJoin}>
-            Join
-          </Button>
-          <Button color="danger" size="auto" variant="flat" onPress={handleDecline}>
-            Decline
-          </Button>
-        </div>
-      </div>
+      <div style={{ fontFamily: 'Arial, sans-serif', color: '#333', lineHeight: '1.6', textAlign: 'center' }}>
+  <h1>You've been invited to <strong>{event.event_title}</strong>!</h1>
+  <div className="flex justify-center mt-4">
+    <Button color="success" size="auto" variant="flat" onPress={handleJoin} style={{ marginRight: '10px' }}>
+      Join
+    </Button>
+    <Button color="danger" size="auto" variant="flat" onPress={handleDecline} style={{ marginLeft: '10px' }}>
+      Decline
+    </Button>
+  </div>
+</div>
     );
   };
 
