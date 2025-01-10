@@ -181,6 +181,25 @@ const sendAllocateEmail = async (email, subject, eventName, allocate, event_link
   }
 };
 
+function convertDate(date) {
+  //let date = new Date(unformattedDate);
+
+  // Format the date
+  let formattedDate = date
+    .toLocaleString("en-MY", {
+      weekday: "long", // Optional: Add weekday name
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true, // Ensure the time is in 12-hour format
+    })
+    .replace(/,/, "")
+    .replace(/:/g, ".");
+  return formattedDate;
+}
+
 
 export async function GET(request) {
   const authHeader = request.headers.get('authorization');
@@ -235,7 +254,8 @@ export async function GET(request) {
       const participants = await fetch(`https://event-manager-opal.vercel.app/api/user-event/participants?link=${event_link}`);
       const data_participants = await participants.json();
       const emails = data_participants.participants.map((x) => x.email);
-      await sendAllocateEmail(emails, "Event time allocated", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link);
+      const fullEventLink = `https://allocato.net/event/${event_link}`;
+      await sendAllocateEmail(emails, "Event time allocated", event_title, `${convertDate(start)}-${convertDate(end)}`, fullEventLink);
     }
 
   }
@@ -246,9 +266,8 @@ export async function GET(request) {
     const participants = await fetch(`https://event-manager-opal.vercel.app/api/user-event/participants?link=${event_link}`);
     const data_participants = await participants.json();
     const emails = data_participants.participants.map((x) => x.email);
-    await sendDeadlineEmail(emails, "Event deadline approaching", event_title, new Date(event_deadline).toLocaleString(), event_link);
-
-
+    const fullEventLink = `https://allocato.net/event/${event_link}`;
+    await sendDeadlineEmail(emails, "Event deadline approaching", event_title, convertDate(new Date(event_deadline)), fullEventLink);
   }
 
   return NextResponse.json({
