@@ -168,6 +168,8 @@ const sendAllocateEmail = async (baseURL, email, subject, eventName, allocate, e
 
 
 export async function GET(request) {
+    console.log(request)
+    console.log("cron secret",process.env.CRON_SECRET)
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return new Response('Unauthorized', {
@@ -219,10 +221,9 @@ export async function GET(request) {
 
             //const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
             const participants = await fetch(`${baseURL}/user-event/participants?link=${event_link}`);
-            console.log("Allocate status",participants.status)
+            
             const data_participants = await participants.json();
-            console.log("Allocate text",await participants.text());
-            console.log("Allocate json",data_participants);
+            
             const emails = data_participants.participants.map((x) => x.email);
             await sendAllocateEmail(baseURL, emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link, request.url);
         }
@@ -234,18 +235,12 @@ export async function GET(request) {
        const { event_title, event_deadline, event_link } = event;
        //const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
        const participants = await fetch(`${baseURL}/user-event/participants?link=${event_link}`);
-       console.log(`${baseURL}/user-event/participants?link=${event_link}`);
-       console.log(participants)
-       console.log("Deadline status",participants.status)
-       try{
-        const data_participants = await participants.json();
-       console.log("Deadline json",data_participants);
+       
+       const data_participants = await participants.json();
+      
        const emails = data_participants.participants.map((x) => x.email);
        await sendDeadlineEmail(baseURL, emails, "Deadline of the event", event_title, event_deadline, event_link, request.url);
-       }catch(error){
-        console.log(error);
-        console.log("Deadline text",await participants.text());
-       }
+       
        
      }
 
