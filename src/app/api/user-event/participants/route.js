@@ -3,7 +3,6 @@ import { neon } from "@neondatabase/serverless";
 
 // Function to initialize the database connection
 function getDatabaseConnection() {
-  
   return neon(`${process.env.DATABASE_URL}`);
 }
 
@@ -33,11 +32,8 @@ async function getAllParticipants(event_link) {
 export async function GET(req) {
   try {
     const url = new URL(req.url);
-    
     const link = url.searchParams.get("link");
-    
     const participants = await getAllParticipants(link);
-    
     return NextResponse.json({ participants: participants }, { status: 200 });
   } catch (error) {
     console.log(error)
