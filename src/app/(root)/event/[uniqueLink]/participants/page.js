@@ -1,6 +1,6 @@
 "use client";
 import { TableWrapper } from "@/components/Table";
-import React,{ useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import {
   Button,
@@ -78,12 +78,14 @@ export default function Page() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user_email: email, 
-                              layout_choice: 'Admin' , 
-                              subject: subject, 
-                              event_link: fullEventLink,
-                              eventName: eventName,
-                              becomeAdmin: becomeAdmin}),
+        body: JSON.stringify({
+          user_email: email,
+          layout_choice: 'Admin',
+          subject: subject,
+          event_link: fullEventLink,
+          eventName: eventName,
+          becomeAdmin: becomeAdmin
+        }),
       });
       if (!response.ok) {
         throw new Error("Failed to send email");
@@ -175,7 +177,7 @@ export default function Page() {
       const segments = currentPath.split("/");
       const eventLink = segments[segments.length - 2];
       setEventLink(eventLink);
-      setFullEventLink(window.location.href.replace("/participants",""));
+      setFullEventLink(window.location.href.replace("/participants", ""));
     }
   }, []);
 
@@ -261,9 +263,9 @@ export default function Page() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user_email: emails, layout_choice: 'Invited' , subject: subject, userName: userName, event_link: fullEventLink }),
+        body: JSON.stringify({ user_email: emails, layout_choice: 'Invited', subject: subject, userName: userName, event_link: fullEventLink }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to send email");
       }
@@ -275,50 +277,81 @@ export default function Page() {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    const {description: data} = Object.fromEntries(new FormData(e.currentTarget));
+    const { description: data } = Object.fromEntries(new FormData(e.currentTarget));
     const emails = stringToEmails(data)
     setEmailsInvalidity(false);
-    if (emails){
+    if (emails) {
       setEmailsInvalidity(false);
       await sendInvitationEmail(emails, `Invitation to ${session.user.chosenName}'s ${eventTitle}!`, session.user.chosenName)
     }
-    else{
+    else {
       setEmailsInvalidity(true);
     }
   };
   const invitePage = (isInviteOpen, setIsInviteOpen, closeInvite) => {
+
     return (
       <div>
-      <Button color="primary" className="text-xl p-6 md:text-lg" onPress={() => { setIsInviteOpen(true); }}>
-        Invite Using Email
-      </Button>
-      <Modal isOpen={isInviteOpen} onOpenChange={setIsInviteOpen} onClose={closeInvite}>
-        <ModalContent>
-          <ModalHeader>
-            Invite your friends to this event!
-          </ModalHeader>
-          <ModalBody>
-            <Form onSubmit={onSubmit} validationBehavior="native">
-            <div className="flex flex-col items-center w-full max-w-md  space-y-3">
-              <Textarea
-              label="Emails (if more than one separate it by commas)"
-              labelPlacement="outside"
-              color={emailsInvalidity ? (wordCount == 0 ? "default" : "danger") : "default"}
-              errorMessage="One of the emails is invalid"
-              name="description"
-              placeholder="Enter the emails of the participants you want to invite separated by commas (,)"
-              />
-              <div style={{ color: "#F31260" }}>
-              {emailsInvalidity ? (wordCount == 0 ? "" : "One of the emails is invalid") : ""}
-              </div>
-              <Button type="submit" color="primary" className="self-end">
-              Submit
-              </Button>
-            </div>
-            </Form>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+        <Button color="primary" className="text-xl p-6 md:text-lg" onPress={() => {
+          setIsInviteOpen(true);
+          setIsVisible(false);
+        }}>
+          Invite
+        </Button>
+        <Modal isOpen={isInviteOpen} onOpenChange={setIsInviteOpen} onClose={closeInvite}>
+          <ModalContent>
+            <ModalHeader>
+              Invite your friends to this event!
+            </ModalHeader>
+            <ModalBody>
+              <Form onSubmit={onSubmit} validationBehavior="native">
+                <div className="flex flex-col items-center w-full max-w-md  space-y-3">
+                  <Textarea
+                    label="Emails (if more than one separate it by commas)"
+                    labelPlacement="outside"
+                    color={emailsInvalidity ? (wordCount == 0 ? "default" : "danger") : "default"}
+                    errorMessage="One of the emails is invalid"
+                    name="description"
+                    placeholder="Enter the emails of the participants you want to invite separated by commas (,)"
+                  />
+                  <div style={{ color: "#F31260" }}>
+                    {emailsInvalidity ? (wordCount == 0 ? "" : "One of the emails is invalid") : ""}
+                  </div>
+                  <div className="flex flex-row justify-between items-end w-full">
+                    {isVisible ? (
+                      <Button
+                        color="success"
+                        className="flex items-center justify-center text-white bg-green-500  "
+                        onPress={() => setIsVisible(false)} // Reset to original state when clicked
+                      >
+                        <span className="material-icons text-lg">Copied</span> {/* Checkmark icon */}
+                      </Button>
+                    ) : (
+                      <Tooltip content="Copy event link to clipboard">
+                        <Button
+                          color="primary"
+                          className="flex items-center justify-center p-2"
+                          onPress={copyLinktoClipboard}
+                        >
+                          Copy Link
+                        </Button>
+                      </Tooltip>
+                    )}
+
+                    <Button
+                      type="submit"
+                      color="primary"
+                      className="flex"
+                    >
+                      Submit
+                    </Button>
+                  </div>
+
+                </div>
+              </Form>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
       </div>
     );
   };
@@ -329,7 +362,7 @@ export default function Page() {
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
           <h1 className="text-4xl font-bold">Participants</h1>
           <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mt-4 md:mt-0">
-            {isVisible ? (
+            {/* {isVisible ? (
               <Alert
                 type="success"
                 fill="solid"
@@ -343,10 +376,10 @@ export default function Page() {
             ) : (
               <Tooltip content="Copy event link to clipboard">
                 <Button color="primary" className="text-xl p-6 md:text-lg" onPress={copyLinktoClipboard}>
-                  Invite Link
+                  Invite
                 </Button>
               </Tooltip>
-            )}
+            )} */}
             {invitePage(isInviteOpen, setIsInviteOpen, closeInvite)}
           </div>
         </div>
