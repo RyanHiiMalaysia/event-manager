@@ -219,7 +219,10 @@ export async function GET(request) {
 
             //const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
             const participants = await fetch(`${baseURL}/user-event/participants?link=${event_link}`);
+            console.log("Allocate status",participants.status)
             const data_participants = await participants.json();
+            console.log("Allocate text",await participants.text());
+            console.log("Allocate json",data_participants);
             const emails = data_participants.participants.map((x) => x.email);
             await sendAllocateEmail(baseURL, emails, "Allocate time of the event", event_title, `${start.toLocaleString()}-${end.toLocaleString()}`, event_link, request.url);
         }
@@ -231,7 +234,10 @@ export async function GET(request) {
        const { event_title, event_deadline, event_link } = event;
        //const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
        const participants = await fetch(`${baseURL}/user-event/participants?link=${event_link}`);
+       console.log("Deadline status",participants.status)
        const data_participants = await participants.json();
+       console.log("Deadline text",await participants.text());
+       console.log("Deadline json",data_participants);
        const emails = data_participants.participants.map((x) => x.email);
        await sendDeadlineEmail(baseURL, emails, "Deadline of the event", event_title, event_deadline, event_link, request.url);
      }
