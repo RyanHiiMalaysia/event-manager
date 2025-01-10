@@ -235,11 +235,16 @@ export async function GET(request) {
        //const participants = await fetch(`https://allocato.net/api/user-event/participants?link=${event_link}`);
        const participants = await fetch(`${baseURL}/user-event/participants?link=${event_link}`);
        console.log("Deadline status",participants.status)
-       const data_participants = await participants.json();
-       console.log("Deadline text",await participants.text());
+       try{
+        const data_participants = await participants.json();
        console.log("Deadline json",data_participants);
        const emails = data_participants.participants.map((x) => x.email);
        await sendDeadlineEmail(baseURL, emails, "Deadline of the event", event_title, event_deadline, event_link, request.url);
+       }catch(error){
+        console.log(error);
+        console.log("Deadline text",await participants.text());
+       }
+       
      }
 
     return NextResponse.json({
