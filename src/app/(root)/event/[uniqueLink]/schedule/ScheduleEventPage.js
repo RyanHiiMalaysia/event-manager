@@ -372,7 +372,7 @@ export default function Page() {
                 return startTime.minute % 15 !== 0 ?
                   "Please enter a valid time in 15-minute intervals" :
                   checkClosing() ?
-                    "" : `Freetime should between opening hour and closing hour(${open}-${close})`
+                    "" : `Freetime should between possible times (${open}-${close})`
               }
             }
           />
@@ -407,10 +407,17 @@ export default function Page() {
                 return endTime.minute % 15 !== 0 ?
                   "Please enter a valid time in 15-minute intervals" :
                   checkClosing() ?
-                    "" : `Freetime should between opening hour and closing hour(${open}-${close})`
+                    "" : `Freetime should be between possible times (${open}-${close})`
               }
             }
           />
+        </div>
+      </div>
+      <div className="text-center">
+        <div className="flex justify-center">
+          <p className="text-gray-500 text-sm">
+            {open && close ? `Possible times lie between: ${open} - ${close}` : "Loading..."}
+          </p>
         </div>
       </div>
       <div className="add-button-container text-center pt-1 pb-4 px-1 lg:px-0 md:pt-2">
