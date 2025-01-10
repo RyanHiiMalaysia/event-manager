@@ -1,5 +1,11 @@
 import { Resend } from 'resend';
-import { CreateEvent, SignUpAccount, CancelEvent, DeadlineRemind, AllocateRemind } from '@/components/email/CreateEvent';
+import { CreateEvent} from '@/components/email/CreateEvent';
+import { SignUpAccount } from '@/components/email/SignUpAccount';
+import { CancelEvent } from '@/components/email/CancelEvent';
+import { DeadlineRemind } from '@/components/email/DeadlineRemind';
+import { AllocateRemind } from '@/components/email/AllocateRemind';
+import { InvitedToEvent } from '@/components/email/InvitedToEvent';
+import { AdminChange } from '@/components/email/AdminChange';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -14,10 +20,10 @@ export async function POST(req) {
             userName, 
             event_link, 
             eventName, 
-            eventOwnerName, 
             time, 
             timeType,
-            deadline } = await req.json();
+            deadline,
+            becomeAdmin } = await req.json();
     
     let layout;
     switch (layout_choice) {
@@ -28,7 +34,7 @@ export async function POST(req) {
         layout = SignUpAccount(userName);
         break;
       case 'CancelEvent':
-        layout = CancelEvent(eventName, eventOwnerName, time, timeType);
+        layout = CancelEvent(eventName, userName, time, timeType);
         break;
       case 'Deadline':
         layout = DeadlineRemind(eventName, deadline, event_link);
@@ -36,14 +42,19 @@ export async function POST(req) {
       case 'Allocate':
         layout = AllocateRemind(eventName, time, event_link);
         break;
+      case 'Invited':
+        layout = InvitedToEvent(userName, event_link);
+        break;
+      case 'Admin':
+        layout = AdminChange(becomeAdmin, event_link);
+        break;
       default:
         console.log('This should not be printed out')
         break;
     }
-    console.log('Layout:', layout);
 
     const { data, error } = await resend.emails.send({
-      from: 'Do not reply to this email <noreply@allocato.net>', // 'Acme <noreply@allocato.net>'
+      from: 'Do not reply to this email <noreply@allocato.net>',
       to: Array.isArray(user_email) ? user_email : [user_email],
       subject: subject,
       react: layout,
