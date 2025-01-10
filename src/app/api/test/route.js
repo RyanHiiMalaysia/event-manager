@@ -29,7 +29,8 @@ async function fetchUserEvents(sql, event_id) {
   const query = sql`
       SELECT 
         ue_id, 
-        user_id 
+        user_id,
+        ue_is_admin
       FROM 
         userevent 
       WHERE 
@@ -244,10 +245,10 @@ export async function GET(request) {
 
     // For each user event of event, fetch freetimes and add to event object
     for (const userEvent of userEvents) {
-      const { ue_id, user_id } = userEvent;
+      const { ue_id, user_id, ue_is_admin } = userEvent;
       const freetimes = await fetchFreetimes(sql, ue_id);
 
-      const user = new User(user_id);
+      const user = new User(user_id, ue_is_admin);
       freetimes.forEach(({ start, end }) => {
         user.addFreeTime(new Date(start), new Date(end));
       });
