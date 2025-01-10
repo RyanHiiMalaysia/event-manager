@@ -49,7 +49,7 @@ export default function Page() {
     const fetchAdminStatus = async () => {
       try {
         const response = await fetch(
-          `/api/user-event?findIsUserIn=true&link=${eventLink}&email=${session.user.email}`,
+          `/api/user-event?findIsUserIn=true&isAdmin=true&link=${eventLink}&email=${session.user.email}`,
           {
             method: "GET",
             headers: { "Content-Type": "application/json" },
