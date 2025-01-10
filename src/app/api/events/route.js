@@ -48,6 +48,19 @@ async function getEventCreator(link) {
   `;
 }
 
+async function getForceAdmin(link) {
+  const sql = getDatabaseConnection();
+  return await sql`
+    SELECT 
+      event_force_admin,
+      event_allocated_start
+    FROM 
+      events 
+    WHERE 
+      event_link = ${link}
+  `;
+}
+
 async function fetchUserEventAndPaymentDetails(userId) {
   const sql = getDatabaseConnection();
   const result = await sql`
@@ -61,9 +74,9 @@ async function fetchUserEventAndPaymentDetails(userId) {
   };
 }
 
-async function checkIsEventPast(link){
+async function checkIsEventPast(link) {
   const sql = getDatabaseConnection();
-  const result = await sql `
+  const result = await sql`
     SELECT event_id 
     FROM events
     WHERE     event_link = ${link}
@@ -71,7 +84,7 @@ async function checkIsEventPast(link){
           AND event_allocated_end < NOW()
     `;
 
-    return result[0]?true:false;
+  return result[0] ? true : false;
 }
 
 export async function POST(req) {
@@ -91,6 +104,7 @@ export async function POST(req) {
       deadline,
       creator,
       edit,
+      forceAdmin,
     } = await req.json();
 
     const { userEventsCreated, userHasPaid } = await fetchUserEventAndPaymentDetails(creator);
@@ -122,6 +136,15 @@ export async function POST(req) {
           ${creator}, ${eventID}, true
         )
       `;
+
+      await sql`
+        UPDATE users
+        SET user_events_created = user_events_created + 1
+        WHERE user_id = ${creator}
+      `;
+    } else if (edit && forceAdmin !== undefined) {
+      await sql`
+        UPDATE events SET event_force_admin = ${forceAdmin} WHERE event_link = ${link}`;
     } else {
       await sql`
         UPDATE events
@@ -136,12 +159,6 @@ export async function POST(req) {
           event_link = ${link}
       `;
     }
-
-    await sql`
-      UPDATE users
-      SET user_events_created = user_events_created + 1
-      WHERE user_id = ${creator}
-    `;
 
     await sql`COMMIT`;
 
@@ -159,13 +176,19 @@ export async function GET(req) {
     const link = url.searchParams.get("link");
     const creator = url.searchParams.get("creator");
     const past = url.searchParams.get("past");
+    const forceAdmin = url.searchParams.get("forceAdmin");
+
     if (creator) {
       const eventData = await getEventCreator(link);
       return new Response(JSON.stringify({ eventData }), { status: 200 });
     }
-    if(past){
+    if (past) {
       const result = await checkIsEventPast(link);
-      return new Response(JSON.stringify({ result:result }), { status: 200 });
+      return new Response(JSON.stringify({ result: result }), { status: 200 });
+    }
+    if (forceAdmin) {
+      const result = await getForceAdmin(link);
+      return new Response(JSON.stringify({ result: result }), { status: 200 });
     }
 
     const eventData = await fetchEvent(link);

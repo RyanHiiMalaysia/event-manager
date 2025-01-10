@@ -132,7 +132,7 @@ export default function Page() {
     return null;
   } else if (!isAdmin) {
     return <Error statusCode={403} title="You do not have permission to view this page" />;
-  } else if (eventData.event_allocated_start !== null) {
+  } else if (eventData.event_allocated_end < new Date()) {
     return <Error statusCode={400} title="The registration deadline has passed" />;
   } else {
     return (
@@ -163,6 +163,7 @@ export default function Page() {
                 isRequired
                 minValue={today(getLocalTimeZone()).add({ days: 1 })}
                 defaultValue={parseDate(eventData.event_deadline.split("T")[0]).add({ days: 1 })}
+                isDisabled={eventData.event_allocated_start !== null}
               />
             </I18nProvider>
             <div className="group flex flex-col data-[has-helper=true]:pb-[calc(theme(fontSize.tiny)_+8px)] gap-y-1.5 w-full">
@@ -186,6 +187,7 @@ export default function Page() {
                       : "Hours must be between 0 and 23"
                   }
                   defaultValue={eventData.event_duration.hours ?? 0}
+                  isDisabled={eventData.event_allocated_start !== null}
                 />
                 <Input
                   label="Minutes"
@@ -199,6 +201,7 @@ export default function Page() {
                       : "Minutes must be between 0 and 59"
                   }
                   defaultValue={eventData.event_duration.minutes ?? 0}
+                  isDisabled={eventData.event_allocated_start !== null}
                 />
               </div>
             </div>

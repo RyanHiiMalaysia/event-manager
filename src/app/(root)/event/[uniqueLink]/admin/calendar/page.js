@@ -110,8 +110,8 @@ export default function Page() {
       );
     } else if (!isAdmin) {
       return <Error statusCode={403} title="You do not have permission to view this page" />;
-    } else if (eventData.event_allocated_start !== null) {
-      return <Error statusCode={400} title="The registration deadline has passed" />;
+    } else if (eventData.event_allocated_end < new Date()) {
+      return <Error statusCode={400} title="The event has already ended" />;
     } else {
       return (
         <div className="max-w-4xl mx-auto rounded-lg">
