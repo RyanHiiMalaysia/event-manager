@@ -34,43 +34,6 @@ export default function Page() {
   const [eventTitle, setEventTitle] = useState(null);
   const [fullEventLink, setFullEventLink] = useState(null);
 
-  function RemoveModal({ isOpen, onOpenChange, selectedParticipant }) {
-    const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
-    const handleOnPress = async () => {
-      const response = await fetch("/api/user-event", {
-        method: "POST",
-        body: JSON.stringify({ user_email: selectedParticipant.email, event_link: eventLink, leave: true }),
-      });
-      onOpenChange();
-
-      if (response.ok) {
-        setParticipants(participants.filter((participant) => participant.email !== selectedParticipant.email));
-        setSelectedParticipant(null);
-        alert(`Successfully removed ${selectedParticipant.name} from the event`);
-      } else {
-        const result = await response.json();
-        alert(result.message || "Error removing participant");
-      }
-    };
-    return (
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
-        <ModalContent>
-          {() => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">Remove {selectedParticipant.name}</ModalHeader>
-              <ModalBody>{getDescription(selectedParticipant.name)}</ModalBody>
-              <ModalFooter>
-                <Button color="danger" onPress={handleOnPress}>
-                  Remove
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
-    );
-  }
-
   const sendAdminEmail = async (email, subject, becomeAdmin, eventName) => {
     try {
       const response = await fetch(`/api/send`, {
@@ -95,7 +58,83 @@ export default function Page() {
     }
   };
 
+  const sendInvitationEmail = async (emails, subject, userName) => {
+    try {
+      const response = await fetch(`/api/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_email: emails, layout_choice: 'Invited', subject: subject, userName: userName, event_link: fullEventLink }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
+  };
+
+  const sendRemovePaticipantEmail = async (emails, subject, adminName) => {
+    try {
+      const response = await fetch(`/api/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_email: emails, layout_choice: 'Remove', subject: subject, adminName:adminName, eventName:eventTitle, event_link: fullEventLink }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send email");
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+    }
+  };
+
+  function RemoveModal({ isOpen, onOpenChange, selectedParticipant }) {
+    const getDescription = (name) => `Are you sure you want to remove ${name} from the event?`;
+    const handleOnPress = async () => {
+      const response = await fetch("/api/user-event", {
+        method: "POST",
+        body: JSON.stringify({ user_email: selectedParticipant.email, event_link: eventLink, leave: true }),
+      });
+      onOpenChange();
+
+      if (response.ok) {
+        setParticipants(participants.filter((participant) => participant.email !== selectedParticipant.email));
+        setSelectedParticipant(null);
+        alert(`Successfully removed ${selectedParticipant.name} from the event`);
+        await sendRemovePaticipantEmail(selectedParticipant.email, "You have been removed from an event", session.user.chosenName);
+      } else {
+        const result = await response.json();
+        alert(result.message || "Error removing participant");
+      }
+    };
+    return (
+      <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          {() => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">Remove {selectedParticipant.name}</ModalHeader>
+              <ModalBody>{getDescription(selectedParticipant.name)}</ModalBody>
+              <ModalFooter>
+                <Button color="danger" onPress={handleOnPress}>
+                  Remove
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    );
+  }
+
+
   function EditModal({ isOpen, onOpenChange, selectedParticipant }) {
+    
     const adminAction = ({ name, is_admin }) =>
       is_admin ? `remove ${name} from the admin list` : `make ${name} an admin`;
     const getDescription = (user) => `Are you sure you want to ${adminAction(user)}?`;
@@ -256,24 +295,6 @@ export default function Page() {
     return initialCount == finalCount ? emails : null
   }
 
-  const sendInvitationEmail = async (emails, subject, userName) => {
-    try {
-      const response = await fetch(`/api/send`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user_email: emails, layout_choice: 'Invited', subject: subject, userName: userName, event_link: fullEventLink }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send email");
-      }
-    } catch (error) {
-      console.error("Error sending email:", error);
-    }
-  }
-
   const onSubmit = async (e) => {
     e.preventDefault();
 
@@ -362,24 +383,6 @@ export default function Page() {
         <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
           <h1 className="text-4xl font-bold">Participants</h1>
           <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mt-4 md:mt-0">
-            {/* {isVisible ? (
-              <Alert
-                type="success"
-                fill="solid"
-                shadow="md"
-                color="success"
-                title="Link copied to clipboard"
-                description="Share this link to invite participants"
-                onClose={() => setIsVisible(false)}
-                closable
-              />
-            ) : (
-              <Tooltip content="Copy event link to clipboard">
-                <Button color="primary" className="text-xl p-6 md:text-lg" onPress={copyLinktoClipboard}>
-                  Invite
-                </Button>
-              </Tooltip>
-            )} */}
             {invitePage(isInviteOpen, setIsInviteOpen, closeInvite)}
           </div>
         </div>
