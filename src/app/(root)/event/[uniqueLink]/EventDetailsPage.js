@@ -143,7 +143,7 @@ export default function EventDetailsPage({ params }) {
   };
 
   const SetOrInviteOrEventPageButton = () => {
-    if (isEventAllocated || isEventPast || isEventFull) {
+    if (isEventAllocated || isEventPast || (isEventFull && !isUserIn)) {
       const description = isEventPast
         ? "This event is finished"
         : isEventAllocated
