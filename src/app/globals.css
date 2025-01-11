@@ -39,7 +39,7 @@ body {
 
 .add-button-container {
   display: flex;
-  justify-content: right;
+  /* justify-content: right; */
   margin: 0px auto;
   max-width: 800px;
 }

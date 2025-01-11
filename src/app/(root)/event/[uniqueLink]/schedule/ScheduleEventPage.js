@@ -1,6 +1,6 @@
 "use client";
 import { I18nProvider } from "@react-aria/i18n";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { ScheduleCalendar } from "@/components/Calendar";
 import { DatePicker } from "@nextui-org/date-picker";
 import { TimeInput } from "@nextui-org/date-input";
@@ -9,7 +9,6 @@ import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDi
 import { parseDate, parseTime, parseAbsolute, toLocalTimeZone, Time } from "@internationalized/date";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
 import moment from "moment";
-import { NONE } from "react-big-calendar/lib/utils/Resources";
 
 export default function Page() {
   const [selectedDate, setSelectedDate] = useState();
@@ -26,6 +25,23 @@ export default function Page() {
   const [endDate, setEndDateRange] = useState();
   const [open, setOpen] = useState();
   const [close, setClose] = useState();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const addFreeTime = (event) => {
+    setFreeTimes([...freeTimes, event]);
+  };
+
+  const handleSelectEvent = (event) => {
+    setSelectedEvent(event);
+    onOpen();
+  };
+
+  const deleteSelectedEvent = () => {
+    setFreeTimes(freeTimes.filter((event) => event.start !== selectedEvent.start && event.end !== selectedEvent.end));
+    setSelectedEvent(null);
+    onOpenChange();
+  };
 
   function convertDate(unformattedDate) {
     let date = new Date(unformattedDate);
@@ -44,6 +60,36 @@ export default function Page() {
       : "unknown";
     return convertedTime;
   }
+
+  function formatTimeRange(open, close) {
+    const options = { hour: "2-digit", minute: "2-digit", hour12: true };
+    const formatTime = (time) =>
+      new Date(`1970-01-01T${time}:00`).toLocaleTimeString([], options).replace(" ", "\u00A0");
+    return `${formatTime(open)}\u00A0-\u00A0${formatTime(close)}`;
+  }
+
+  const checkStarting = () => {
+    const dummyDate = "2024-01-01";
+    const event_opening = new Date(`${dummyDate}T${open}`);
+    const event_closing = new Date(`${dummyDate}T${close}`);
+    const user_opening = new Date(`${dummyDate}T${startTime}`);
+
+    return event_opening <= user_opening && user_opening <= event_closing;
+  };
+
+  const checkClosing = () => {
+    const dummyDate = "2024-01-01";
+    const event_closing = new Date(`${dummyDate}T${close}`);
+    const event_opening = new Date(`${dummyDate}T${open}`);
+    const user_closing = new Date(`${dummyDate}T${endTime}`);
+
+    return event_closing >= user_closing && user_closing >= event_opening;
+  };
+
+  const checkOverlap = (start, end) =>
+    freeTimes.find(
+      (freeTime) => (start >= freeTime.start && start < freeTime.end) || (end > freeTime.start && end <= freeTime.end)
+    );
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -104,22 +150,13 @@ export default function Page() {
     }
   }, [session, eventLink, dataFetched]);
 
-  const addFreeTime = (event) => {
-    setFreeTimes([...freeTimes, event]);
-  };
-
-  const checkOverlap = (start, end) =>
-    freeTimes.find(
-      (freeTime) => (start >= freeTime.start && start < freeTime.end) || (end > freeTime.start && end <= freeTime.end)
-    );
-
   const handleOnAddPress = () => {
     if (!selectedDate || !startTime || !endTime) {
       alert("Please fill all fields");
     } else if (endTime <= startTime) {
       alert("End time must be greater than start time");
     } else if (!(checkStarting() && checkClosing())) {
-      alert(`Freetime should between opening hour and closing hour(${open}-${close})`);
+      alert(`Freetime should be within possible times ${formatTimeRange(open, close)}`);
     } else {
       const startDateTime = new Date(`${selectedDate}T${startTime}`);
       const endDateTime = new Date(`${selectedDate}T${endTime}`);
@@ -141,32 +178,6 @@ export default function Page() {
     }
   };
 
-  const checkStarting = () => {
-    const dummyDate = "2024-01-01";
-    const event_opening = new Date(`${dummyDate}T${open}`);
-    const event_closing = new Date(`${dummyDate}T${close}`);
-    const user_opening = new Date(`${dummyDate}T${startTime}`);
-
-    return event_opening <= user_opening && user_opening <= event_closing;
-  };
-
-  const checkClosing = () => {
-    const dummyDate = "2024-01-01";
-    const event_closing = new Date(`${dummyDate}T${close}`);
-    const event_opening = new Date(`${dummyDate}T${open}`);
-    const user_closing = new Date(`${dummyDate}T${endTime}`);
-
-    return event_closing >= user_closing && user_closing >= event_opening;
-  };
-
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [selectedEvent, setSelectedEvent] = useState(null);
-
-  const handleSelectEvent = (event) => {
-    setSelectedEvent(event);
-    onOpen();
-  };
-
   const renderEventContent = () => {
     const startDate = moment(selectedEvent.start).format("MMMM Do YYYY, h:mm a");
     const endDate = moment(selectedEvent.end).format("MMMM Do YYYY, h:mm a");
@@ -180,35 +191,38 @@ export default function Page() {
   const renderEditEventContent = () => {
     return (
       <>
-        <DatePicker
-          isRequired
-          minValue={startDate}
-          maxValue={endDate}
-          className="max-w-[284px] border rounded p-2"
-          label="Date"
-          value={selectedDate}
-          onChange={setSelectedDate}
-        />
+        <I18nProvider locale="en-MY">
+          <DatePicker
+            isRequired
+            minValue={startDate}
+            maxValue={endDate}
+            className="max-w-[284px] border rounded p-2"
+            label="Date"
+            value={selectedDate}
+            onChange={setSelectedDate}
+          />
+        </I18nProvider>
         <TimeInput
           className="max-w-[284px] border rounded p-2"
           label="Start Time"
-          value={startTime}
           onChange={setStartTime}
+          value={startTime}
           isInvalid={startTime ? (startTime.minute % 15 !== 0 ? true : !checkStarting()) : false}
           errorMessage={() => {
-            if (!endTime) {
+            if (!startTime) {
               return "";
             }
-            return endTime.minute % 15 !== 0
+            return startTime.minute % 15 !== 0
               ? "Please enter a valid time in 15-minute intervals"
               : checkClosing()
               ? ""
-              : `Freetime should between opening hour and closing hour(${open}-${close})`;
+              : `Freetime should be within possible times ${formatTimeRange(open, close)}`;
           }}
         />
         <TimeInput
           className="max-w-[284px] border rounded p-2"
           label="End Time"
+          type="time"
           value={endTime}
           onChange={setEndTime}
           isInvalid={
@@ -228,21 +242,16 @@ export default function Page() {
             } else if (endTime <= startTime) {
               return "End time must be greater than start time ";
             }
+
             return endTime.minute % 15 !== 0
               ? "Please enter a valid time in 15-minute intervals"
               : checkClosing()
               ? ""
-              : `Freetime should between opening hour and closing hour(${open}-${close})`;
+              : `Freetime should be within possible times ${formatTimeRange(open, close)}`;
           }}
         />
       </>
     );
-  };
-
-  const deleteSelectedEvent = () => {
-    setFreeTimes(freeTimes.filter((event) => event.start !== selectedEvent.start && event.end !== selectedEvent.end));
-    setSelectedEvent(null);
-    onOpenChange();
   };
 
   const handleEditOpen = () => {
@@ -261,7 +270,7 @@ export default function Page() {
     } else if (endTime <= startTime) {
       alert("End time must be greater than start time");
     } else if (!(checkStarting() && checkClosing())) {
-      alert(`Freetime should between opening hour and closing hour(${open}-${close})`);
+      alert(`Freetime should be within possible times ${formatTimeRange(open, close)}`);
     } else {
       const startDateTime = new Date(`${selectedDate}T${startTime}`);
       const endDateTime = new Date(`${selectedDate}T${endTime}`);
@@ -274,12 +283,8 @@ export default function Page() {
         alert(`The times overlap with an existing free time: ${overlappingFreeTime.title}`);
       } else {
         const freeTime = freeTimes.find(
-          (event) =>
-            event.start.getTime() === selectedEvent.start.getTime() &&
-            event.end.getTime() === selectedEvent.end.getTime()
+          (event) => event.start === selectedEvent.start && event.end === selectedEvent.end
         );
-
-        console.log(freeTime);
         freeTime.start = startDateTime;
         freeTime.end = endDateTime;
         setSelectedDate(null);
@@ -345,87 +350,19 @@ export default function Page() {
           </ModalContent>
         </Modal>
       </div>
-      <div className="date-time-container text-center overflow-x-auto">
-        <I18nProvider locale="en-MY">
-          <DatePicker
-            isRequired
-            minValue={startDate}
-            maxValue={endDate}
-            className="max-w-[284px] border rounded p-2"
-            label="Date"
-            value={selectedDate}
-            onChange={setSelectedDate}
-          />
-        </I18nProvider>
-        <div className="w-full">
-          <TimeInput
-            className="max-w-[350px] border rounded p-2"
-            label="Start Time"
-            onChange={setStartTime}
-            value={startTime}
-            isInvalid={startTime ? (startTime.minute % 15 !== 0 ? true : !checkStarting()) : false}
-            errorMessage={() => {
-              if (!startTime) {
-                return "";
-              }
-              return startTime.minute % 15 !== 0
-                ? "Please enter a valid time in 15-minute intervals"
-                : checkClosing()
-                ? ""
-                : `Freetime should between possible times (${open}-${close})`;
-            }}
-          />
+      <div className="date-time-container text-center overflow-x-auto">{renderEditEventContent()}</div>
+      <div className="add-button-container flex justify-between items-center pt-1 pb-4 px-1 lg:px-0 md:pt-2">
+        <p className="text-gray-500 text-sm">
+          {open && close ? `Possible times lie between: ${formatTimeRange(open, close)}` : null}
+        </p>
+        <div className="flex space-x-2">
+          <Button onPress={handleOnAddPress} className="mr-2">
+            Add
+          </Button>
+          <Button color="primary" onPress={handleSavePress}>
+            Save
+          </Button>
         </div>
-        <div className="w-full">
-          <TimeInput
-            className="max-w-[350px] border rounded p-2"
-            label="End Time"
-            type="time"
-            value={endTime}
-            onChange={setEndTime}
-            // minValue={open ? new Time(Number(open.split(":")[0]), Number(open.split(":")[1])) : NONE}
-            // maxValue={open ? new Time(Number(close.split(":")[0]), Number(close.split(":")[1])) : NONE}
-            isInvalid={
-              endTime
-                ? endTime && startTime
-                  ? endTime <= startTime
-                    ? true
-                    : endTime.minute % 15 !== 0
-                    ? true
-                    : !checkClosing()
-                  : false
-                : false
-            }
-            errorMessage={() => {
-              if (!endTime) {
-                return "";
-              } else if (endTime <= startTime) {
-                return "End time must be greater than start time ";
-              }
-
-              return endTime.minute % 15 !== 0
-                ? "Please enter a valid time in 15-minute intervals"
-                : checkClosing()
-                ? ""
-                : `Freetime should be between possible times (${open}-${close})`;
-            }}
-          />
-        </div>
-      </div>
-      <div className="text-center">
-        <div className="flex justify-center">
-          <p className="text-gray-500 text-sm">
-            {open && close ? `Possible times lie between: ${open} - ${close}` : "Loading..."}
-          </p>
-        </div>
-      </div>
-      <div className="add-button-container text-center pt-1 pb-4 px-1 lg:px-0 md:pt-2">
-        <Button onPress={handleOnAddPress} className="mr-2">
-          Add
-        </Button>
-        <Button color="primary" onPress={handleSavePress}>
-          Save
-        </Button>
       </div>
     </div>
   );
