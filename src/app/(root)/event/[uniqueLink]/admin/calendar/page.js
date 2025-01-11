@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { EventCalendar } from "@/components/Calendar";
 import { ModalFooter, useDisclosure } from "@nextui-org/react";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, cn } from "@nextui-org/react";
 import moment from "moment";
 import Error from "next/error";
 
@@ -102,20 +102,10 @@ export default function Page() {
   }, [session, eventLink, dataFetched]);
 
   const renderPage = () => {
-    if (status === "loading" || !dataFetched) {
-      return (
-        <div className="max-w-4xl mx-auto rounded-lg hidden">
-          <EventCalendar events={[]} onSelectEvent={handleSelectEvent} />
-        </div>
-      );
-    } else if (!isAdmin) {
-      return <Error statusCode={403} title="You do not have permission to view this page" />;
-    } else if (eventData.event_allocated_end !== null && eventData.event_allocated_end < new Date()) {
-      return <Error statusCode={400} title="The event has already ended" />;
-    } else {
+    if (status === "loading" || !dataFetched || isAdmin) {
       return (
         <div className="max-w-4xl mx-auto rounded-lg">
-          <EventCalendar events={userEvents} onSelectEvent={handleSelectEvent} />
+          <EventCalendar events={userEvents} onSelectEvent={handleSelectEvent}/>
           <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
             <ModalContent>
               {() => (
@@ -129,6 +119,10 @@ export default function Page() {
           </Modal>
         </div>
       );
+    } else if (eventData.event_allocated_end !== null && eventData.event_allocated_end < new Date()) {
+      return <Error statusCode={400} title="The event has already ended" />;
+    } else {
+      return <Error statusCode={403} title="You do not have permission to view this page" />;
     }
   };
 
