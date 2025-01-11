@@ -20,7 +20,7 @@ const sendEmail = async (email, subject, user, eventLink, eventTitle) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_email: email, layout_choice: 'CreateEvent' , subject: subject, userName: user, event_link: eventLink, eventName: eventTitle }),
+      body: JSON.stringify({ user_email: email, layout_choice: 'CreateEvent', subject: subject, userName: user, event_link: eventLink, eventName: eventTitle }),
     });
 
     if (!response.ok) {
@@ -144,7 +144,7 @@ export default function CreateEventPage() {
       const eventLink = `${path}/event/${uniqueLink}`;
       setEventLink(eventLink);
       alert("Event created successfully!");
-      await sendEmail(session.user.email , "Event Created Successfully!", session.user.chosenName, eventLink, data.title);
+      await sendEmail(session.user.email, "Event Created Successfully!", session.user.chosenName, eventLink, data.title);
     } else {
       const result = await response.json();
       alert(result.message || "Error creating event.");
@@ -158,23 +158,23 @@ export default function CreateEventPage() {
         <div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50">
           {isVisible ? (
             <Alert
-            color="success"
-            className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
-            onClose={() => setIsVisible(false)}
-            endContent={
-              <p>
-                Share this link with participants:
+              color="success"
+              className="w-full h-auto flex flex-col justify-center items-center shadow-lg rounded-lg"
+              onClose={() => setIsVisible(false)}
+              endContent={
+                <p>
+                  Share this link with participants:
 
-                <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-all">
+                  <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-all">
 
-                  {eventLink}
-                </a>
-              </p>
-            }
-            title="Event created successfully!"
-            variant="faded"
-            font_size
-          />
+                    {eventLink}
+                  </a>
+                </p>
+              }
+              title="Event created successfully!"
+              variant="faded"
+              font_size
+            />
           ) : null}
 
         </div>
@@ -219,14 +219,34 @@ export default function CreateEventPage() {
             <TimeInput
               label="Starting Time"
               onChange={setStartTime}
+              isInvalid={startTime ? startTime.minute % 15 !== 0 : false}
+              errorMessage="Please enter a valid time in 15-minute intervals"
               description="What times will work?"
               isRequired
             />
             <TimeInput
               label="Ending Time"
               onChange={setEndTime}
-              isInvalid={endTime && startTime ? endTime <= startTime : false}
-              errorMessage="Ending time must be greater than starting time"
+              //isInvalid={endTime && startTime ? endTime <= startTime : false}
+              isInvalid={
+                endTime
+                  ? endTime.minute % 15 !== 0
+                    ? true :
+                    startTime
+                      ? endTime <= startTime :
+                      false :
+                  false
+              }
+              errorMessage={() => {
+                if (!endTime) {
+                  return "";
+                } else if (endTime <= startTime) {
+                  return "End time must be greater than start time ";
+                }
+                return endTime.minute % 15 !== 0
+                  ? "Please enter a valid time in 15-minute intervals"
+                  : ""
+              }}
               isRequired
             />
           </div>
