@@ -1,11 +1,19 @@
 "use client";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
-import { Form, Input, Button, TimeInput, DateRangePicker, DatePicker, Textarea } from "@nextui-org/react";
+import {
+  Form, Input, Button, TimeInput, DateRangePicker, DatePicker, Textarea, Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter, useDisclosure
+} from "@nextui-org/react";
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import { Alert } from "@nextui-org/react";
 import { I18nProvider } from "@react-aria/i18n";
+import { InfoIcon } from "@/components/icons/eventDetails/info-icon";
+import './CreateEventPage.css';
 
 const generateUniqueLink = () => {
   const timestamp = Date.now();
@@ -32,6 +40,7 @@ const sendEmail = async (email, subject, user, eventLink, eventTitle) => {
 };
 
 export default function CreateEventPage() {
+  const { isOpen: isInfoModalOpen, onOpen: onInfoModalOpen, onOpenChange: onInfoModalOpenChange } = useDisclosure();
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [eventLink, setEventLink] = useState("");
@@ -204,17 +213,23 @@ export default function CreateEventPage() {
               }
             }}
           />
-          <I18nProvider locale="en-MY">
-            <DateRangePicker
-              label="Event Range"
-              startName="startDate"
-              endName="endDate"
-              labelPlacement="outside"
-              isRequired
-              description="What dates will work?"
-              minValue={today(getLocalTimeZone()).add({ days: 1 })}
-            />
-          </I18nProvider>
+          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            <I18nProvider locale="en-MY">
+              <DateRangePicker
+                label="Event Range"
+                startName="startDate"
+                endName="endDate"
+                labelPlacement="outside"
+                isRequired
+                description="What dates will work?"
+                minValue={today(getLocalTimeZone()).add({ days: 1 })}
+              />
+            </I18nProvider>
+            <Button isIconOnly onPress={onInfoModalOpen} color='FFFFFF' size="sm" radius="sm" className="move-left move-up">
+              <InfoIcon />
+            </Button>
+          </div>
+
           <div className="flex gap-4">
             <TimeInput
               label="Starting Time"
@@ -324,6 +339,16 @@ export default function CreateEventPage() {
         </div>
       </Form>
       <EventLinkPopup />
+      <Modal isOpen={isInfoModalOpen} onOpenChange={onInfoModalOpenChange} size="xs" placement="top-center">
+        <ModalContent>
+          <ModalHeader>Info</ModalHeader>
+          <ModalBody>
+            <p><b>Event Range:</b> The date and time range that you want the event to be in. Participants setting their availability will have to set their free times within this specific date and time.</p>
+          </ModalBody>
+          <ModalFooter>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
