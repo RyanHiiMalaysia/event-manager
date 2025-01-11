@@ -107,7 +107,6 @@ export default function Page() {
       if (response.ok) {
         setParticipants(participants.filter((participant) => participant.email !== selectedParticipant.email));
         setSelectedParticipant(null);
-        alert(`Successfully removed ${selectedParticipant.name} from the event`);
         await sendRemovePaticipantEmail(selectedParticipant.email, "You have been removed from an event", session.user.chosenName);
       } else {
         const result = await response.json();
@@ -153,7 +152,6 @@ export default function Page() {
           )
         );
         setSelectedParticipant(null);
-        alert(`Successfully made ${selectedParticipant.name} an admin`);
 
         //Send email
         await sendAdminEmail(selectedParticipant.email, "Added to admin list", true, eventTitle);
@@ -177,7 +175,6 @@ export default function Page() {
           )
         );
         setSelectedParticipant(null);
-        alert(`Successfully removed ${selectedParticipant.name} from the admin list`);
 
         //Send email
         await sendAdminEmail(selectedParticipant.email, "Removed from admin list", false, eventTitle);
