@@ -28,6 +28,65 @@ export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const currentPath = window.location.pathname;
+      const segments = currentPath.split("/");
+      const eventLink = segments[segments.length - 2];
+      setEventLink(eventLink);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchFreetimes = async () => {
+      try {
+        const response = await fetch(`/api/user-event/schedule?link=${eventLink}&email=${session.user.email}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        const response_event_date = await fetch(`/api/events?link=${eventLink}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        const result = await response.json();
+        const result_event_date = await response_event_date.json();
+
+        //const start = result_event_date.eventData[0].event_schedule_start.split("T")[0];
+        const start = convertDate(result_event_date.eventData[0].event_schedule_start);
+        setStartDateRange(parseDate(start));
+        // const end = result_event_date.eventData[0].event_schedule_end.split("T")[0];
+        const end = convertDate(result_event_date.eventData[0].event_schedule_end);
+        setEndDateRange(parseDate(end));
+
+        setOpen(convertTime(result_event_date.eventData[0].event_opening_hour));
+        setClose(convertTime(result_event_date.eventData[0].event_closing_hour));
+
+        if (!response.ok || !response_event_date.ok) {
+          setError(result.message);
+          setLoading(false);
+          return;
+        }
+        let freeTimeCounter = 1;
+        result.freeTimes.map((freeTime) => {
+          freeTime.start = new Date(freeTime.start);
+          freeTime.end = new Date(freeTime.end);
+          freeTime.title = `Free Time ${freeTimeCounter++}`;
+        });
+        setFreeTimes(result.freeTimes);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+        setDataFetched(true);
+      }
+    };
+
+    if (session && eventLink && !dataFetched) {
+      fetchFreetimes();
+    }
+  }, [session, eventLink, dataFetched]);
+
   const addFreeTime = (event) => {
     setFreeTimes([...freeTimes, event]);
   };
@@ -91,65 +150,6 @@ export default function Page() {
       (freeTime) => (start >= freeTime.start && start < freeTime.end) || (end > freeTime.start && end <= freeTime.end)
     );
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const currentPath = window.location.pathname;
-      const segments = currentPath.split("/");
-      const eventLink = segments[segments.length - 2];
-      setEventLink(eventLink);
-    }
-  }, []);
-
-  useEffect(() => {
-    const fetchFreetimes = async () => {
-      try {
-        const response = await fetch(`/api/user-event/schedule?link=${eventLink}&email=${session.user.email}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        const response_event_date = await fetch(`/api/events?link=${eventLink}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const result = await response.json();
-        const result_event_date = await response_event_date.json();
-
-        //const start = result_event_date.eventData[0].event_schedule_start.split("T")[0];
-        const start = convertDate(result_event_date.eventData[0].event_schedule_start);
-        setStartDateRange(parseDate(start));
-        // const end = result_event_date.eventData[0].event_schedule_end.split("T")[0];
-        const end = convertDate(result_event_date.eventData[0].event_schedule_end);
-        setEndDateRange(parseDate(end));
-
-        setOpen(convertTime(result_event_date.eventData[0].event_opening_hour));
-        setClose(convertTime(result_event_date.eventData[0].event_closing_hour));
-
-        if (!response.ok || !response_event_date.ok) {
-          setError(result.message);
-          setLoading(false);
-          return;
-        }
-        let freeTimeCounter = 1;
-        result.freeTimes.map((freeTime) => {
-          freeTime.start = new Date(freeTime.start);
-          freeTime.end = new Date(freeTime.end);
-          freeTime.title = `Free Time ${freeTimeCounter++}`;
-        });
-        setFreeTimes(result.freeTimes);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-        setDataFetched(true);
-      }
-    };
-
-    if (session && eventLink && !dataFetched) {
-      fetchFreetimes();
-    }
-  }, [session, eventLink, dataFetched]);
-
   const handleOnAddPress = () => {
     if (!selectedDate || !startTime || !endTime) {
       alert("Please fill all fields");
@@ -175,6 +175,64 @@ export default function Page() {
         setStartTime("");
         setEndTime("");
       }
+    }
+  };
+
+  const handleEditOpen = () => {
+    onOpenChange();
+    setIsEditOpen(true);
+    const eventStart = toLocalTimeZone(parseAbsolute(selectedEvent.start.toISOString()));
+    const eventEnd = toLocalTimeZone(parseAbsolute(selectedEvent.end.toISOString()));
+    setSelectedDate(parseDate(eventStart.toString().split("T")[0]));
+    setStartTime(parseTime(eventStart.toString().split("T")[1].slice(0, 5)));
+    setEndTime(parseTime(eventEnd.toString().split("T")[1].slice(0, 5)));
+  };
+
+  const handleEditSavePress = () => {
+    if (!selectedDate || !startTime || !endTime) {
+      alert("Please fill all fields");
+    } else if (endTime <= startTime) {
+      alert("End time must be greater than start time");
+    } else if (!(checkStarting() && checkClosing())) {
+      alert(`Freetime should be within possible times ${formatTimeRange(open, close)}`);
+    } else {
+      const startDateTime = new Date(`${selectedDate}T${startTime}`);
+      const endDateTime = new Date(`${selectedDate}T${endTime}`);
+      const overlappingFreeTime = checkOverlap(startDateTime, endDateTime);
+      if (
+        overlappingFreeTime &&
+        overlappingFreeTime.start !== selectedEvent.start &&
+        overlappingFreeTime.end !== selectedEvent.end
+      ) {
+        alert(`The times overlap with an existing free time: ${overlappingFreeTime.title}`);
+      } else {
+        const freeTime = freeTimes.find(
+          (event) => event.start === selectedEvent.start && event.end === selectedEvent.end
+        );
+        freeTime.start = startDateTime;
+        freeTime.end = endDateTime;
+        setSelectedDate(null);
+        setStartTime("");
+        setEndTime("");
+        setIsEditOpen(false);
+      }
+    }
+  };
+
+  const handleSavePress = async () => {
+    const response = await fetch("/api/user-event/schedule", {
+      method: "POST",
+      body: JSON.stringify({
+        user_email: session.user.email,
+        event_link: eventLink,
+        freetimes: freeTimes,
+      }),
+    });
+
+    if (response.ok) {
+      alert("Successfully updated your free times");
+    } else {
+      alert("An error occurred while updating your free times");
     }
   };
 
@@ -252,64 +310,6 @@ export default function Page() {
         />
       </>
     );
-  };
-
-  const handleEditOpen = () => {
-    onOpenChange();
-    setIsEditOpen(true);
-    const eventStart = toLocalTimeZone(parseAbsolute(selectedEvent.start.toISOString()));
-    const eventEnd = toLocalTimeZone(parseAbsolute(selectedEvent.end.toISOString()));
-    setSelectedDate(parseDate(eventStart.toString().split("T")[0]));
-    setStartTime(parseTime(eventStart.toString().split("T")[1].slice(0, 5)));
-    setEndTime(parseTime(eventEnd.toString().split("T")[1].slice(0, 5)));
-  };
-
-  const handleEditSavePress = () => {
-    if (!selectedDate || !startTime || !endTime) {
-      alert("Please fill all fields");
-    } else if (endTime <= startTime) {
-      alert("End time must be greater than start time");
-    } else if (!(checkStarting() && checkClosing())) {
-      alert(`Freetime should be within possible times ${formatTimeRange(open, close)}`);
-    } else {
-      const startDateTime = new Date(`${selectedDate}T${startTime}`);
-      const endDateTime = new Date(`${selectedDate}T${endTime}`);
-      const overlappingFreeTime = checkOverlap(startDateTime, endDateTime);
-      if (
-        overlappingFreeTime &&
-        overlappingFreeTime.start !== selectedEvent.start &&
-        overlappingFreeTime.end !== selectedEvent.end
-      ) {
-        alert(`The times overlap with an existing free time: ${overlappingFreeTime.title}`);
-      } else {
-        const freeTime = freeTimes.find(
-          (event) => event.start === selectedEvent.start && event.end === selectedEvent.end
-        );
-        freeTime.start = startDateTime;
-        freeTime.end = endDateTime;
-        setSelectedDate(null);
-        setStartTime("");
-        setEndTime("");
-        setIsEditOpen(false);
-      }
-    }
-  };
-
-  const handleSavePress = async () => {
-    const response = await fetch("/api/user-event/schedule", {
-      method: "POST",
-      body: JSON.stringify({
-        user_email: session.user.email,
-        event_link: eventLink,
-        freetimes: freeTimes,
-      }),
-    });
-
-    if (response.ok) {
-      alert("Successfully updated your free times");
-    } else {
-      alert("An error occurred while updating your free times");
-    }
   };
 
   return (
