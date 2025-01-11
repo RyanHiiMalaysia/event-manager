@@ -63,7 +63,13 @@ const NavbarClient = ({ session }) => {
 
   const renderNavbarMenuItem = (href, label) => (
     <NavbarMenuItem>
-      <Link className="w-full" href={href} size="lg" color={currentPath === href ? 'primary' : 'foreground'}>
+      <Link
+        className="w-full"
+        href={href}
+        size="lg"
+        color={currentPath === href ? 'primary' : 'foreground'}
+        onPress={() => setIsMenuOpen(false)}
+      >
         {label}
       </Link>
     </NavbarMenuItem>
