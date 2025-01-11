@@ -5,9 +5,3 @@
   .move-up {
     margin-top: -6px; /* Adjust the value as needed */
   }
-  
-  @media (max-width: 768px) {
-    .move-left {
-      margin-left: -30px; /* Adjust the value for mobile devices */
-    }
-  }
