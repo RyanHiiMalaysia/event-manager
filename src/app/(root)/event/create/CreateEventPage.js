@@ -343,7 +343,7 @@ export default function CreateEventPage() {
         <ModalContent>
           <ModalHeader>Info</ModalHeader>
           <ModalBody>
-            <p><b>Event Range:</b> The date and time range that you want the event to be in. Participants setting their availability will have to set their free times within this specific date and time.</p>
+            <p><b>Event Range:</b> The date and time range that you want the event to be in. Participants setting their availability will have to set their free times within these specific dates and times.</p>
           </ModalBody>
           <ModalFooter>
           </ModalFooter>
