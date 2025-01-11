@@ -13,12 +13,26 @@ import {
   Input,
   CardBody,
 } from "@nextui-org/react";
-import moment from 'moment-timezone'
+import moment from "moment-timezone";
+import { useRouter } from "next/navigation";
 
 export default function eventModal({ isOpen, onOpenChange, selectedEvent }) {
+  const router = useRouter();
   const handleOnPress = () => {
     const url = `${window.location.origin}/event/${selectedEvent.event_link}`;
-    window.open(url, "_blank");
+
+    // Function to detect if the device is a PC
+    const isPC = () => {
+      const userAgent = navigator.userAgent;
+      const mobileDevices = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+      return !mobileDevices.test(userAgent);
+    };
+
+    if (isPC()) {
+      window.open(url, "_blank");
+    } else {
+      router.push(url);
+    }
   };
 
   const renderEventContent = (event) => {
