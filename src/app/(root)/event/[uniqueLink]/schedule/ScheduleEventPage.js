@@ -273,8 +273,8 @@ export default function Page() {
             return startTime.minute % 15 !== 0
               ? "Please enter a valid time in 15-minute intervals"
               : checkClosing()
-              ? ""
-              : `Freetime should be within possible times ${formatTimeRange(open, close)}`;
+                ? ""
+                : `Freetime should be within possible times ${formatTimeRange(open, close)}`;
           }}
         />
         <TimeInput
@@ -283,15 +283,26 @@ export default function Page() {
           type="time"
           value={endTime}
           onChange={setEndTime}
+          // isInvalid={
+          //   endTime
+          //     ? endTime && startTime
+          //       ? endTime <= startTime
+          //         ? true
+          //         : endTime.minute % 15 !== 0
+          //         ? true
+          //         : !checkClosing()
+          //       : false
+          //     : false
+          // }
           isInvalid={
             endTime
-              ? endTime && startTime
-                ? endTime <= startTime
-                  ? true
-                  : endTime.minute % 15 !== 0
-                  ? true
-                  : !checkClosing()
-                : false
+              ? endTime.minute % 15 !== 0
+                ? true 
+                : startTime
+                  ? endTime <= startTime
+                    ? true 
+                    : !checkClosing()
+                  : false
               : false
           }
           errorMessage={() => {
@@ -304,8 +315,8 @@ export default function Page() {
             return endTime.minute % 15 !== 0
               ? "Please enter a valid time in 15-minute intervals"
               : checkClosing()
-              ? ""
-              : `Freetime should be within possible times ${formatTimeRange(open, close)}`;
+                ? ""
+                : `Freetime should be within possible times ${formatTimeRange(open, close)}`;
           }}
         />
       </>
