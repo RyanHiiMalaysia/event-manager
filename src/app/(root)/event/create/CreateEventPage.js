@@ -23,7 +23,7 @@ import { I18nProvider } from "@react-aria/i18n";
 import { InfoIcon } from "@/components/icons/eventDetails/info-icon";
 import "./CreateEventPage.css";
 
-const isSameTime = (time1, time2) => time1.hour === time2.hour && time1.minute === time2.minute;
+const isSameTime = (time1, time2) => time1?.hour === time2?.hour && time1?.minute === time2?.minute;
 
 const generateUniqueLink = () => {
   const timestamp = Date.now();
@@ -232,19 +232,19 @@ export default function CreateEventPage() {
   const isInvalidEndTime =
     (!endTime && validateTimes) || (endTime && (endTime.minute % 15 !== 0 || isSameTime(startTime, endTime)));
 
-  const startTimeErrorMessage = startTime
-    ? startTime.minute % 15 !== 0
-      ? "Please enter a valid time in 15-minute intervals"
-      : ""
-    : "Please enter a starting time";
+    const startTimeErrorMessage = !startTime
+    ? "Please enter a starting time"
+    : startTime.minute % 15 !== 0
+    ? "Please enter a valid time in 15-minute intervals"
+    : "";
 
-  const endTimeErrorMessage = endTime
-    ? endTime.minute % 15 !== 0
-      ? "Please enter a valid time in 15-minute intervals"
-      : isSameTime(startTime, endTime)
-      ? "Ending time must not be equal to starting time"
-      : ""
-    : "Please enter an ending time";
+  const endTimeErrorMessage = !endTime
+  ? "Please enter an ending time"
+  : endTime.minute % 15 !== 0
+  ? "Please enter a valid time in 15-minute intervals"
+  : isSameTime(startTime, endTime)
+  ? "Ending time must not be equal to starting time"
+  : "";
 
   return (
     <div>

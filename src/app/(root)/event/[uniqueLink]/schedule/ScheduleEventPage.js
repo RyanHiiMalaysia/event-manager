@@ -276,7 +276,7 @@ export default function Page() {
       </p>
     );
   };
-  const isSameTime = (time1, time2) => time1.hour === time2.hour && time1.minute === time2.minute;
+  const isSameTime = (time1, time2) => time1?.hour === time2?.hour && time1?.minute === time2?.minute;
 
   const isInvalidStartTime =
     (!startTime && validateTimes) || (startTime && (startTime.minute % 15 !== 0 || !isStartTimeWithinRange()));
