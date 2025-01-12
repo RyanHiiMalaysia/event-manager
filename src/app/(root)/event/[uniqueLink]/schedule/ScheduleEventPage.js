@@ -2,11 +2,20 @@
 import { I18nProvider } from "@react-aria/i18n";
 import React, { useState, useEffect } from "react";
 import { ScheduleCalendar } from "@/components/Calendar";
-import { DatePicker } from "@nextui-org/date-picker";
-import { TimeInput } from "@nextui-org/date-input";
 import { useSession } from "next-auth/react";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure } from "@nextui-org/react";
-import { parseDate, parseTime, parseAbsolute, toLocalTimeZone, Time } from "@internationalized/date";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
+  useDisclosure,
+  DateRangePicker,
+  TimeInput,
+  DatePicker,
+} from "@nextui-org/react";
+import { parseDate, parseTime, parseAbsolute, toLocalTimeZone } from "@internationalized/date";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
 import moment from "moment";
 
@@ -27,6 +36,7 @@ export default function Page() {
   const [close, setClose] = useState();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [validateTimes, setValidateTimes] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -127,22 +137,39 @@ export default function Page() {
     return `${formatTime(open)}\u00A0-\u00A0${formatTime(close)}`;
   }
 
-  const checkStarting = () => {
+  const isStartTimeWithinRange = () => {
     const dummyDate = "2024-01-01";
-    const event_opening = new Date(`${dummyDate}T${open}`);
-    const event_closing = new Date(`${dummyDate}T${close}`);
-    const user_opening = new Date(`${dummyDate}T${startTime}`);
 
-    return event_opening <= user_opening && user_opening <= event_closing;
+    const eventOpening = new Date(`${dummyDate}T${open}`);
+    const eventClosing = new Date(`${dummyDate}T${close}`);
+    const userOpening = new Date(`${dummyDate}T${startTime}`);
+
+    // Adjust event closing time if it is after midnight
+    if (eventClosing <= eventOpening) {
+      eventClosing.setDate(eventClosing.getDate() + 1);
+    }
+
+    return eventOpening <= userOpening && userOpening <= eventClosing;
   };
 
-  const checkClosing = () => {
+  const isEndTimeWithinRange = () => {
     const dummyDate = "2024-01-01";
-    const event_closing = new Date(`${dummyDate}T${close}`);
-    const event_opening = new Date(`${dummyDate}T${open}`);
-    const user_closing = new Date(`${dummyDate}T${endTime}`);
 
-    return event_closing >= user_closing && user_closing >= event_opening;
+    const eventOpening = new Date(`${dummyDate}T${open}`);
+    const eventClosing = new Date(`${dummyDate}T${close}`);
+    const userClosing = new Date(`${dummyDate}T${endTime}`);
+
+    // Adjust event closing time if it is after midnight
+    if (eventClosing <= eventOpening) {
+      eventClosing.setDate(eventClosing.getDate() + 1);
+    }
+
+    // Adjust user closing time if it is after midnight
+    if (userClosing <= eventOpening) {
+      userClosing.setDate(userClosing.getDate() + 1);
+    }
+
+    return eventOpening <= userClosing && userClosing <= eventClosing;
   };
 
   const checkOverlap = (start, end) =>
@@ -152,14 +179,15 @@ export default function Page() {
 
   const handleOnAddPress = () => {
     if (!selectedDate || !startTime || !endTime) {
-      alert("Please fill all fields");
-    } else if (endTime <= startTime) {
-      alert("End time must be greater than start time");
-    } else if (!(checkStarting() && checkClosing())) {
+      setValidateTimes(true);
+    } else if (!(isStartTimeWithinRange() && isEndTimeWithinRange())) {
       alert(`Freetime should be within possible times ${formatTimeRange(open, close)}`);
     } else {
       const startDateTime = new Date(`${selectedDate}T${startTime}`);
       const endDateTime = new Date(`${selectedDate}T${endTime}`);
+      if (endTime < startTime) {
+        endDateTime.setDate(endDateTime.getDate() + 1);
+      }
       const overlappingFreeTime = checkOverlap(startDateTime, endDateTime);
 
       if (overlappingFreeTime) {
@@ -174,6 +202,7 @@ export default function Page() {
         setSelectedDate(null);
         setStartTime("");
         setEndTime("");
+        setValidateTimes(false);
       }
     }
   };
@@ -190,14 +219,15 @@ export default function Page() {
 
   const handleEditSavePress = () => {
     if (!selectedDate || !startTime || !endTime) {
-      alert("Please fill all fields");
-    } else if (endTime <= startTime) {
-      alert("End time must be greater than start time");
-    } else if (!(checkStarting() && checkClosing())) {
+      setValidateTimes(true);
+    } else if (!(isStartTimeWithinRange() && isEndTimeWithinRange())) {
       alert(`Freetime should be within possible times ${formatTimeRange(open, close)}`);
     } else {
       const startDateTime = new Date(`${selectedDate}T${startTime}`);
       const endDateTime = new Date(`${selectedDate}T${endTime}`);
+      if (endTime < startTime) {
+        endDateTime.setDate(endDateTime.getDate() + 1);
+      }
       const overlappingFreeTime = checkOverlap(startDateTime, endDateTime);
       if (
         overlappingFreeTime &&
@@ -214,6 +244,7 @@ export default function Page() {
         setSelectedDate(null);
         setStartTime("");
         setEndTime("");
+        setValidateTimes(false);
         setIsEditOpen(false);
       }
     }
@@ -245,6 +276,32 @@ export default function Page() {
       </p>
     );
   };
+  const isSameTime = (time1, time2) => time1.hour === time2.hour && time1.minute === time2.minute;
+
+  const isInvalidStartTime =
+    (!startTime && validateTimes) || (startTime && (startTime.minute % 15 !== 0 || !isStartTimeWithinRange()));
+
+  const isInvalidEndTime =
+    (!endTime && validateTimes) ||
+    (endTime && (endTime.minute % 15 !== 0 || isSameTime(startTime, endTime) || !isEndTimeWithinRange()));
+
+  const startTimeErrorMessage = !startTime
+    ? "Please enter a starting time"
+    : startTime.minute % 15 !== 0
+    ? "Please enter a valid time in 15-minute intervals"
+    : !isStartTimeWithinRange()
+    ? `Start time should be within ${formatTimeRange(open, close)}`
+    : "";
+
+  const endTimeErrorMessage = !endTime
+    ? "Please enter an ending time"
+    : endTime.minute % 15 !== 0
+    ? "Please enter a valid time in 15-minute intervals"
+    : isSameTime(startTime, endTime)
+    ? "Ending time must not be equal to starting time"
+    : !isEndTimeWithinRange(endTime, open, close)
+    ? `End time should be within ${formatTimeRange(open, close)}`
+    : "";
 
   const renderEditEventContent = () => {
     return (
@@ -255,76 +312,38 @@ export default function Page() {
             minValue={startDate}
             maxValue={endDate}
             className="max-w-[284px] border rounded p-2"
-            label="Date"
+            label="Start Date"
             value={selectedDate}
             onChange={setSelectedDate}
+            isInvalid={!selectedDate && validateTimes}
+            errorMessage="Please select a date"
           />
         </I18nProvider>
         <TimeInput
+          isRequired
           className="max-w-[284px] border rounded p-2"
           label="Start Time"
           onChange={setStartTime}
           value={startTime}
-          isInvalid={startTime ? (startTime.minute % 15 !== 0 ? true : !checkStarting()) : false}
-          errorMessage={() => {
-            if (!startTime) {
-              return "";
-            }
-            return startTime.minute % 15 !== 0
-              ? "Please enter a valid time in 15-minute intervals"
-              : checkClosing()
-                ? ""
-                : `Freetime should be within possible times ${formatTimeRange(open, close)}`;
-          }}
+          isInvalid={isInvalidStartTime}
+          errorMessage={startTimeErrorMessage}
         />
         <TimeInput
+          isRequired
           className="max-w-[284px] border rounded p-2"
           label="End Time"
           type="time"
           value={endTime}
           onChange={setEndTime}
-          // isInvalid={
-          //   endTime
-          //     ? endTime && startTime
-          //       ? endTime <= startTime
-          //         ? true
-          //         : endTime.minute % 15 !== 0
-          //         ? true
-          //         : !checkClosing()
-          //       : false
-          //     : false
-          // }
-          isInvalid={
-            endTime
-              ? endTime.minute % 15 !== 0
-                ? true 
-                : startTime
-                  ? endTime <= startTime
-                    ? true 
-                    : !checkClosing()
-                  : false
-              : false
-          }
-          errorMessage={() => {
-            if (!endTime) {
-              return "";
-            } else if (endTime <= startTime) {
-              return "End time must be greater than start time ";
-            }
-
-            return endTime.minute % 15 !== 0
-              ? "Please enter a valid time in 15-minute intervals"
-              : checkClosing()
-                ? ""
-                : `Freetime should be within possible times ${formatTimeRange(open, close)}`;
-          }}
+          isInvalid={isInvalidEndTime}
+          errorMessage={endTimeErrorMessage}
         />
       </>
     );
   };
 
   return (
-    <div className="mt-6 md:mt-4 min-h-screen" ref={useOverflowHandler(730)}>
+    <div className="mt-6 md:mt-4 min-h-screen" ref={useOverflowHandler(790)}>
       <div className="max-w-4xl mx-auto rounded-lg">
         <ScheduleCalendar onSelectEvent={handleSelectEvent} start={startDate} freeTimes={freeTimes} />
         <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
