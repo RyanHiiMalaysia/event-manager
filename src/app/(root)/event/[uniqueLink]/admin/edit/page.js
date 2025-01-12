@@ -75,19 +75,37 @@ export default function Page() {
     const convertHourToMinute = (time) => {
       return Number(time.split(":")[0]) * 60 + Number(time.split(":")[1]);
     };
-    const convertToAmPm = (time) => {
-      const [hour, minute] = time.split(":").map(Number);
-      const ampm = hour >= 12 ? "PM" : "AM";
-      const adjustedHour = hour % 12 || 12; // Convert 0 to 12 for 12 AM
-      return `${adjustedHour}:${minute.toString().padStart(2, "0")} ${ampm}`;
-    };
+    function timeRange(open, close) {
+      if (!open && !close) return "unknown";
+
+      const options = { hour: "2-digit", minute: "2-digit", hour12: true };
+      const openingTime = open
+        ? new Intl.DateTimeFormat("en-US", options).format(
+            new Date(Date.UTC(2025, 0, 4, ...open.split(":").map(Number)))
+          )
+        : "unknown";
+
+      const closingTime = close
+        ? new Intl.DateTimeFormat("en-US", options).format(
+            new Date(Date.UTC(2025, 0, 4, ...close.split(":").map(Number)))
+          )
+        : "unknown";
+
+      return `${openingTime} - ${closingTime}`;
+    }
     const convertDurationToHoursAndMinutes = (totalMinutes) => {
       const hours = Math.floor(totalMinutes / 60);
       const minutes = totalMinutes % 60;
       return `${hours} hours ${minutes} minutes`;
     };
-    const getDifference = () =>
-      convertHourToMinute(eventData.event_closing_hour) - convertHourToMinute(eventData.event_opening_hour);
+    const getTimeDifference = (startTime, endTime) => {
+      if (endTime < startTime) {
+        return 24 * 60 - convertHourToMinute(startTime) + convertHourToMinute(endTime);
+      }
+      return convertHourToMinute(endTime) - convertHourToMinute(startTime);
+    };
+
+    const getDifference = () => getTimeDifference(eventData.event_opening_hour, eventData.event_closing_hour);
 
     // Get the form data and validate it
     event.preventDefault();
@@ -101,12 +119,9 @@ export default function Page() {
       alert("Registration deadline must be before the event start date");
       return;
     } else if (getDifference() < Number(hours) * 60 + Number(minutes)) {
-      const openingHourAmPm = convertToAmPm(eventData.event_opening_hour);
-      const closingHourAmPm = convertToAmPm(eventData.event_closing_hour);
+      const range = timeRange(eventData.event_opening_hour, eventData.event_closing_hour);
       const difference = convertDurationToHoursAndMinutes(getDifference());
-      alert(
-        `The event duration must not exceed the time difference of ${difference} (${openingHourAmPm} - ${closingHourAmPm}).`
-      );
+      alert(`The event duration must not exceed the time difference of ${difference} (${range}).`);
       return;
     }
     // Send the data to the server

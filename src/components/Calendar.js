@@ -28,6 +28,7 @@ export function EventCalendar({ events, onSelectEvent }) {
       onSelectEvent={onSelectEvent}
       views={views}
       popup
+      showMultiDayTimes
     />
   );
 }
@@ -57,6 +58,7 @@ export function ScheduleCalendar({ onSelectEvent, start, freeTimes }) {
       scrollToTime={defaultDate}
       popup
       onSelectEvent={onSelectEvent}
+      showMultiDayTimes
     />
   );
 }

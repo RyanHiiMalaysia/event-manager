@@ -2,18 +2,28 @@
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import {
-  Form, Input, Button, TimeInput, DateRangePicker, DatePicker, Textarea, Modal,
+  Form,
+  Input,
+  Button,
+  TimeInput,
+  DateRangePicker,
+  DatePicker,
+  Textarea,
+  Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
-  ModalFooter, useDisclosure
+  ModalFooter,
+  useDisclosure,
 } from "@nextui-org/react";
 import React, { useState } from "react";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import { Alert } from "@nextui-org/react";
 import { I18nProvider } from "@react-aria/i18n";
 import { InfoIcon } from "@/components/icons/eventDetails/info-icon";
-import './CreateEventPage.css';
+import "./CreateEventPage.css";
+
+const isSameTime = (time1, time2) => time1?.hour === time2?.hour && time1?.minute === time2?.minute;
 
 const generateUniqueLink = () => {
   const timestamp = Date.now();
@@ -28,7 +38,14 @@ const sendEmail = async (email, subject, user, eventLink, eventTitle) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user_email: email, layout_choice: 'CreateEvent', subject: subject, userName: user, event_link: eventLink, eventName: eventTitle }),
+      body: JSON.stringify({
+        user_email: email,
+        layout_choice: "CreateEvent",
+        subject: subject,
+        userName: user,
+        event_link: eventLink,
+        eventName: eventTitle,
+      }),
     });
 
     if (!response.ok) {
@@ -50,6 +67,7 @@ export default function CreateEventPage() {
   const [loading, setLoading] = useState(true);
   const [path, setPath] = useState("");
   const [dataFetched, setDataFetched] = useState(false);
+  const [validateTimes, setValidateTimes] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -117,7 +135,15 @@ export default function CreateEventPage() {
     };
     const getDeadlineDateTime = (deadline) => new Date(deadline + "T00:00:00").toISOString();
     const getDuration = (hours, minutes) => `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-    const convertHourToMinute = (time) => { return (Number(time.hour) * 60 + Number(time.minute)) }
+    const convertHourToMinute = (time) => {
+      return Number(time.hour) * 60 + Number(time.minute);
+    };
+    const getTimeDifference = (startTime, endTime) => {
+      if (endTime < startTime) {
+        return 24 * 60 - convertHourToMinute(startTime) + convertHourToMinute(endTime);
+      }
+      return convertHourToMinute(endTime) - convertHourToMinute(startTime);
+    };
 
     // Get the form data and validate it
     event.preventDefault();
@@ -129,7 +155,7 @@ export default function CreateEventPage() {
     } else if (deadline > startDate) {
       alert("Registration deadline must be before the event start date");
       return;
-    } else if (convertHourToMinute(endTime) - convertHourToMinute(startTime) < Number(hours) * 60 + Number(minutes)) {
+    } else if (getTimeDifference(startTime, endTime) < Number(hours) * 60 + Number(minutes)) {
       alert("The event duration must not exceed the time difference between the starting and ending times.");
       return;
     }
@@ -153,7 +179,13 @@ export default function CreateEventPage() {
       const eventLink = `${path}/event/${uniqueLink}`;
       setEventLink(eventLink);
       alert("Event created successfully!");
-      await sendEmail(session.user.email, "Event Created Successfully!", session.user.chosenName, eventLink, data.title);
+      await sendEmail(
+        session.user.email,
+        "Event Created Successfully!",
+        session.user.chosenName,
+        eventLink,
+        data.title
+      );
     } else {
       const result = await response.json();
       alert(result.message || "Error creating event.");
@@ -173,9 +205,12 @@ export default function CreateEventPage() {
               endContent={
                 <p>
                   Share this link with participants:
-
-                  <a href={eventLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline break-all">
-
+                  <a
+                    href={eventLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 underline break-all"
+                  >
                     {eventLink}
                   </a>
                 </p>
@@ -185,13 +220,31 @@ export default function CreateEventPage() {
               font_size
             />
           ) : null}
-
         </div>
       );
     }
   };
 
   const validateInteger = (value) => (Number.isInteger(Number(value)) ? null : "Please enter an integer");
+
+  const isInvalidStartTime = (!startTime && validateTimes) || (startTime && startTime.minute % 15 !== 0);
+
+  const isInvalidEndTime =
+    (!endTime && validateTimes) || (endTime && (endTime.minute % 15 !== 0 || isSameTime(startTime, endTime)));
+
+    const startTimeErrorMessage = !startTime
+    ? "Please enter a starting time"
+    : startTime.minute % 15 !== 0
+    ? "Please enter a valid time in 15-minute intervals"
+    : "";
+
+  const endTimeErrorMessage = !endTime
+  ? "Please enter an ending time"
+  : endTime.minute % 15 !== 0
+  ? "Please enter a valid time in 15-minute intervals"
+  : isSameTime(startTime, endTime)
+  ? "Ending time must not be equal to starting time"
+  : "";
 
   return (
     <div>
@@ -213,7 +266,7 @@ export default function CreateEventPage() {
               }
             }}
           />
-          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
             <I18nProvider locale="en-MY">
               <DateRangePicker
                 label="Event Range"
@@ -225,7 +278,14 @@ export default function CreateEventPage() {
                 minValue={today(getLocalTimeZone()).add({ days: 1 })}
               />
             </I18nProvider>
-            <Button isIconOnly onPress={onInfoModalOpen} color='FFFFFF' size="sm" radius="sm" className="move-left move-up">
+            <Button
+              isIconOnly
+              onPress={onInfoModalOpen}
+              color="FFFFFF"
+              size="sm"
+              radius="sm"
+              className="move-left move-up"
+            >
               <InfoIcon />
             </Button>
           </div>
@@ -234,34 +294,17 @@ export default function CreateEventPage() {
             <TimeInput
               label="Starting Time"
               onChange={setStartTime}
-              isInvalid={startTime ? startTime.minute % 15 !== 0 : false}
-              errorMessage="Please enter a valid time in 15-minute intervals"
+              isInvalid={isInvalidStartTime}
+              errorMessage={startTimeErrorMessage}
               description="What times will work?"
               isRequired
             />
             <TimeInput
               label="Ending Time"
               onChange={setEndTime}
-              //isInvalid={endTime && startTime ? endTime <= startTime : false}
-              isInvalid={
-                endTime
-                  ? endTime.minute % 15 !== 0
-                    ? true :
-                    startTime
-                      ? endTime <= startTime :
-                      false :
-                  false
-              }
-              errorMessage={() => {
-                if (!endTime) {
-                  return "";
-                } else if (endTime <= startTime) {
-                  return "End time must be greater than start time ";
-                }
-                return endTime.minute % 15 !== 0
-                  ? "Please enter a valid time in 15-minute intervals"
-                  : ""
-              }}
+              isInvalid={isInvalidEndTime}
+              errorMessage={endTimeErrorMessage}
+              validate={(value) => (value ? null : "Please enter an ending time")}
               isRequired
             />
           </div>
@@ -333,7 +376,7 @@ export default function CreateEventPage() {
             name="description"
             placeholder="Enter event description"
           />
-          <Button type="submit" color="primary" className="self-end">
+          <Button type="submit" color="primary" className="self-end" onPress={() => setValidateTimes(true)}>
             Submit
           </Button>
         </div>
@@ -343,10 +386,12 @@ export default function CreateEventPage() {
         <ModalContent>
           <ModalHeader>Info</ModalHeader>
           <ModalBody>
-            <p><b>Event Range:</b> The date and time range that you want the event to be in. Participants setting their availability will have to set their free times within these specific dates and times.</p>
+            <p>
+              <b>Event Range:</b> The date and time range that you want the event to be in. Participants setting their
+              availability will have to set their free times within these specific dates and times.
+            </p>
           </ModalBody>
-          <ModalFooter>
-          </ModalFooter>
+          <ModalFooter></ModalFooter>
         </ModalContent>
       </Modal>
     </div>
