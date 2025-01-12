@@ -22,7 +22,6 @@ import { Alert } from "@nextui-org/react";
 import { I18nProvider } from "@react-aria/i18n";
 import { InfoIcon } from "@/components/icons/eventDetails/info-icon";
 import "./CreateEventPage.css";
-import { get } from "http";
 
 const isSameTime = (time1, time2) => time1.hour === time2.hour && time1.minute === time2.minute;
 
@@ -160,7 +159,7 @@ export default function CreateEventPage() {
       alert("The event duration must not exceed the time difference between the starting and ending times.");
       return;
     }
-    
+
     // Send the data to the server
     const uniqueLink = generateUniqueLink();
     const response = await fetch("/api/events", {
