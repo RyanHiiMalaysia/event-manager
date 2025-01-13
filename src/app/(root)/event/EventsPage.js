@@ -194,7 +194,7 @@ export default function Page() {
                             priority={true}
                           />
                         </CardBody>
-                        <CardFooter className="text-small justify-between flex flex-col items-center text-center sm:flex-row">
+                        <CardFooter className="text-small justify-between flex flex-col flex-grow items-center text-center sm:flex-row">
                           <b className="mb-2 sm:mb-0">{item.event_title}</b>
                           <p className="text-default-500">
                             <span className="block sm:inline text-left">
