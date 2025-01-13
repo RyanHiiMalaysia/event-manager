@@ -196,7 +196,10 @@ export default function CreateEventPage() {
     const [isVisible, setIsVisible] = React.useState(true);
     if (eventLink) {
       return (
-        <div className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50">
+        <div
+          className="absolute top-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-[600px] z-50"
+          id="event-link-section"
+        >
           {isVisible ? (
             <Alert
               color="success"
@@ -232,19 +235,19 @@ export default function CreateEventPage() {
   const isInvalidEndTime =
     (!endTime && validateTimes) || (endTime && (endTime.minute % 15 !== 0 || isSameTime(startTime, endTime)));
 
-    const startTimeErrorMessage = !startTime
+  const startTimeErrorMessage = !startTime
     ? "Please enter a starting time"
     : startTime.minute % 15 !== 0
     ? "Please enter a valid time in 15-minute intervals"
     : "";
 
   const endTimeErrorMessage = !endTime
-  ? "Please enter an ending time"
-  : endTime.minute % 15 !== 0
-  ? "Please enter a valid time in 15-minute intervals"
-  : isSameTime(startTime, endTime)
-  ? "Ending time must not be equal to starting time"
-  : "";
+    ? "Please enter an ending time"
+    : endTime.minute % 15 !== 0
+    ? "Please enter a valid time in 15-minute intervals"
+    : isSameTime(startTime, endTime)
+    ? "Ending time must not be equal to starting time"
+    : "";
 
   return (
     <div>
