@@ -4,13 +4,16 @@ import { auth } from '@/auth';
 export async function middleware(req) {
   const session = await auth();
 
-  if (!session) {
-    // Redirect to signup page if user is not authenticated
+  const userAgent = req.headers.get('user-agent') || '';
+  const isBot = /bot|crawler|spider|crawling/i.test(userAgent);
+
+  if (!session && !isBot) {
+    // Redirect to signup page if user is not authenticated and not a bot
     return NextResponse.redirect(new URL('/signup', req.url));
   }
 
-  const userHasPaid = session.user.user_has_paid;
-  const userEventsCreated = session.user.user_events_created;
+  const userHasPaid = session?.user?.user_has_paid;
+  const userEventsCreated = session?.user?.user_events_created;
   const pathname = req.nextUrl.pathname;
 
   if (!userHasPaid && userEventsCreated >= 5 && pathname === '/event/create') {
