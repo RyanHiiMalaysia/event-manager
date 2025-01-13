@@ -5,7 +5,7 @@ export async function middleware(req) {
   const session = await auth();
 
   const userAgent = req.headers.get('user-agent') || '';
-  const isBot = /bot|crawler|spider|crawling/i.test(userAgent);
+  const isBot = /bot|crawler|spider|crawling|facebook|whatsapp|instagram|twitter|linkedin|pinterest|snapchat|tiktok|reddit|tumblr/i.test(userAgent);
 
   if (!session && !isBot) {
     // Redirect to signup page if user is not authenticated and not a bot
