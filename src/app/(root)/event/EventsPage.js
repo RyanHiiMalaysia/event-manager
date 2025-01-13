@@ -1,11 +1,21 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import {
-  Tabs, Tab, Card, CardBody, CardFooter, Checkbox, useDisclosure, Button, Link, Tooltip, Modal,
+  Tabs,
+  Tab,
+  Card,
+  CardBody,
+  CardFooter,
+  Checkbox,
+  useDisclosure,
+  Button,
+  Link,
+  Tooltip,
+  Modal,
   ModalContent,
   ModalHeader,
   ModalBody,
-  ModalFooter
+  ModalFooter,
 } from "@nextui-org/react";
 import EventModal from "../../../components/EventModal";
 import moment from "moment";
@@ -95,7 +105,10 @@ export default function Page() {
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
       <div className="flex justify-between items-center">
         <h1 className="text-4xl font-bold">
-          Events {userDetails.user_has_paid ? "" : (
+          Events{" "}
+          {userDetails.user_has_paid ? (
+            ""
+          ) : (
             <span>
               <Tooltip content="Purchase the Pro plan to create unlimited events">
                 <span className={userDetails.user_events_created >= 5 ? "text-red-500" : ""}>
@@ -104,8 +117,8 @@ export default function Page() {
               </Tooltip>
             </span>
           )}
-          <Button isIconOnly onPress={onInfoModalOpen} color='FFFFFF' auto size="sm">
-            < InfoIcon />
+          <Button isIconOnly onPress={onInfoModalOpen} color="FFFFFF" auto size="sm">
+            <InfoIcon />
           </Button>
         </h1>
         <Button
@@ -125,7 +138,7 @@ export default function Page() {
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {schedulingEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) :
+                ) : (
                   schedulingEvents.map(
                     (
                       item,
@@ -152,7 +165,7 @@ export default function Page() {
                       </Card>
                     )
                   )
-                }
+                )}
               </div>
             </CardBody>
           </Card>
@@ -163,14 +176,14 @@ export default function Page() {
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {allocatedEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) :
+                ) : (
                   allocatedEvents.map(
                     (
                       item,
                       index // if not working, try changing userEvents to eventData
                     ) => (
-                      <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
-                        <CardBody className="overflow-visible p-0">
+                      <Card className="justify-stretch" key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
+                        <CardBody className="overflow-visible p-0 h-[140px] flex-none">
                           <Image
                             alt={item.event_title}
                             className="w-full object-cover h-[140px]"
@@ -181,20 +194,21 @@ export default function Page() {
                             priority={true}
                           />
                         </CardBody>
-                        <CardFooter className="text-small justify-between">
-                          <b>{item.event_title}</b>
+                        <CardFooter className="text-small justify-between flex flex-col items-center text-center sm:flex-row">
+                          <b className="mb-2 sm:mb-0">{item.event_title}</b>
                           <p className="text-default-500">
-                            <span className="block sm:inline">
+                            <span className="block sm:inline text-left">
                               {moment(item.event_allocated_start).format("MMMM Do YYYY")}
                             </span>
-                            <span className="block sm:inline">
+                            <span className="block sm:inline text-left">
                               {moment(item.event_allocated_start).format(" h:mm a")}
                             </span>
                           </p>
                         </CardFooter>
                       </Card>
                     )
-                  )}
+                  )
+                )}
               </div>
             </CardBody>
           </Card>
@@ -205,7 +219,7 @@ export default function Page() {
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {organisingEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) :
+                ) : (
                   organisingEvents.map((item, index) => (
                     <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
                       <CardBody className="overflow-visible p-0">
@@ -223,18 +237,21 @@ export default function Page() {
                         <b>{item.event_title}</b>
                       </CardFooter>
                     </Card>
-                  ))}
+                  ))
+                )}
               </div>
             </CardBody>
           </Card>
         </Tab>
-        <Tab key="past" title="Past"> {/* New tab for past events */}
+        <Tab key="past" title="Past">
+          {" "}
+          {/* New tab for past events */}
           <Card>
             <CardBody>
               <div className="gap-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {pastEvents.length === 0 ? (
                   <p>No events to display.</p>
-                ) :
+                ) : (
                   pastEvents.map((item, index) => (
                     <Card key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
                       <CardBody className="overflow-visible p-0">
@@ -252,7 +269,8 @@ export default function Page() {
                         <b>{item.event_title}</b>
                       </CardFooter>
                     </Card>
-                  ))}
+                  ))
+                )}
               </div>
             </CardBody>
           </Card>
@@ -265,10 +283,20 @@ export default function Page() {
         <ModalContent>
           <ModalHeader>Info</ModalHeader>
           <ModalBody>
-            <p><b>Scheduling:</b> Events that are currently being scheduled and are not yet allocated. The checkbox indicates whether you have set your availability for the event.</p>
-            <p><b>Allocated:</b> Events that have been allocated to a date and time that suits the most participants as possible.</p>
-            <p><b>Organising:</b> Events that you created or have been made an admin of.</p>
-            <p><b>Past:</b> Events whose allocated ending time has passed.</p>
+            <p>
+              <b>Scheduling:</b> Events that are currently being scheduled and are not yet allocated. The checkbox
+              indicates whether you have set your availability for the event.
+            </p>
+            <p>
+              <b>Allocated:</b> Events that have been allocated to a date and time that suits the most participants as
+              possible.
+            </p>
+            <p>
+              <b>Organising:</b> Events that you created or have been made an admin of.
+            </p>
+            <p>
+              <b>Past:</b> Events whose allocated ending time has passed.
+            </p>
           </ModalBody>
           <ModalFooter>
             <Button onPress={onInfoModalOpenChange}>Close</Button>
