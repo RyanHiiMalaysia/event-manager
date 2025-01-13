@@ -74,6 +74,19 @@ async function fetchUserEventAndPaymentDetails(userId) {
   };
 }
 
+async function fetchMetadata(link) {
+  const sql = getDatabaseConnection();
+  return await sql`
+    SELECT 
+      event_title as title, 
+      event_description as description
+    FROM 
+      events 
+    WHERE 
+      event_link = ${link}
+  `;
+}
+
 async function checkIsEventPast(link) {
   const sql = getDatabaseConnection();
   const result = await sql`
@@ -177,7 +190,12 @@ export async function GET(req) {
     const creator = url.searchParams.get("creator");
     const past = url.searchParams.get("past");
     const forceAdmin = url.searchParams.get("forceAdmin");
+    const metadata = url.searchParams.get("metadata");
 
+    if (metadata) {
+      const eventData = await fetchMetadata(link);
+      return new Response(JSON.stringify({ eventData }), { status: 200 });
+    }
     if (creator) {
       const eventData = await getEventCreator(link);
       return new Response(JSON.stringify({ eventData }), { status: 200 });
