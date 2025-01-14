@@ -111,7 +111,13 @@ export default function Page() {
     event.preventDefault();
     const data = Object.fromEntries(new FormData(event.currentTarget));
 
-    const { hours, minutes, deadline } = data;
+    let { hours, minutes, deadline } = data;
+    if (eventData.event_allocated_start !== null) {
+      hours = eventData.event_duration.hours ?? 0;
+      minutes = eventData.event_duration.minutes ?? 0;
+      deadline = eventData.event_deadline.split("T")[0];
+    }
+
     if (hours === "0" && minutes === "0") {
       alert("Event duration cannot be 0 hours and 0 minutes");
       return;
