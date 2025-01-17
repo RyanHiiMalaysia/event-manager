@@ -9,6 +9,7 @@ import {
   Button,
   useDisclosure,
 } from "@nextui-org/react";
+import { getData, checkAdmin, checkParticipant } from "@/utils/api";
 
 export default function EventDetailsPage({ params }) {
   const router = useRouter();
@@ -87,8 +88,7 @@ export default function EventDetailsPage({ params }) {
 
   const handleCancel = async () => {
     try {
-      const participants = await fetch(`/api/user-event/participants?link=${uniqueLink}`);
-      const data_participants = await participants.json();
+      const data_participants = await getData(`/api/user-event/participants?link=${uniqueLink}`);
       const emails = data_participants.participants.map((x) => x.email);
 
       await fetch("/api/user-event", {
@@ -294,60 +294,36 @@ export default function EventDetailsPage({ params }) {
 
       setHasFetchedUser(true);
       try {
-        const response_isUserAdmin = await fetch(
-          `/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true&isAdmin=true`
-        );
-        const data_isUserAdmin = await response_isUserAdmin.json();
-        setIsUserAdmin(data_isUserAdmin.result);
+        const isAdminData = await checkAdmin(uniqueLink, session)
+        setIsUserAdmin(isAdminData);
 
         // If the user is the admin of this event, he/she is of couse in this event
-        if (data_isUserAdmin.result) {
+        if (isAdminData) {
           setIsUserIn(true);
         } else {
-          const response_isUserIn = await fetch(
-            `/api/user-event?email=${session.user.email}&link=${uniqueLink}&findIsUserIn=true`
-          );
-          const data_response = await response_isUserIn.json();
-          setIsUserIn(data_response.result);
+          const isParticipant = await checkParticipant(uniqueLink, session);
+          setIsUserIn(isParticipant);
         }
       } catch (error) {
-        throw new Error(error);
+        console.error("Error fetching user:", error);
       }
     };
 
     const fetchEvent = async () => {
       try {
-        const response_event = await fetch(`${path}/api/events?link=${uniqueLink}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        if (!response_event.ok) throw new Error("Failed to fetch event details");
-
-        const data_events = await response_event.json();
-        if (data_events.eventData.length === 0) throw new Error("Failed to fetch event details");
-        const matchedEvent = data_events.eventData[0];
+        const eventData = await getData(`${path}/api/events?link=${uniqueLink}`)
+        if (eventData.eventData.length === 0) throw new Error("Failed to fetch event details");
+        const matchedEvent = eventData.eventData[0];
         setEvent(matchedEvent || null); // Set null if no event matches
         setIsEventAllocated(matchedEvent.event_allocated_start !== null);
 
         //Check is the event full
-        const response_numberOfParticipants = await fetch(
-          `/api/user-event?link=${uniqueLink}&findNumberOfParticipants=true`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-
-        if (!response_numberOfParticipants.ok) throw new Error("Failed to fetch number of participants");
-        const data_numberOfParticipants = await response_numberOfParticipants.json();
-        const numberOfParticipants = data_numberOfParticipants.result;
+        const participantsData = await getData(`/api/user-event?link=${uniqueLink}&findNumberOfParticipants=true`);
+        const numberOfParticipants = participantsData.result;
         setIsEventFull(numberOfParticipants[0].count === matchedEvent.event_max_participants.toString());
 
-        const response_past = await fetch(`/api/events?link=${uniqueLink}&past=true`);
-        if (!response_past.ok) throw new Error("Failed to fetch event");
-        const data_past = await response_past.json();
-        setIsEventPast(data_past.result);
+        const isPastData = await getData(`/api/events?link=${uniqueLink}&past=true`);
+        setIsEventPast(isPastData.result);
       } catch (error) {
         console.error("Error fetching event:", error.message);
         setEvent(null); // Handle not found

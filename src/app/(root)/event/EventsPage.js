@@ -26,6 +26,7 @@ import grey from "../../../../public/grey.svg";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { InfoIcon } from "@/components/icons/eventDetails/info-icon";
+import { getData, getUserEvents } from "@/utils/api";
 
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -36,8 +37,6 @@ export default function Page() {
   const [organisingEvents, setOrganisingEvents] = useState([]);
   const [pastEvents, setPastEvents] = useState([]);
   const { data: session, status } = useSession();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [dataFetched, setDataFetched] = useState(false);
   const [userDetails, setUserDetails] = useState({ user_has_paid: true, user_events_created: 0 });
 
@@ -47,59 +46,31 @@ export default function Page() {
   };
 
   useEffect(() => {
+    const getEvents = getUserEvents(session);
     const fetchUserDetails = async () => {
-      if (session?.user?.email) {
-        try {
-          const headers = {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          };
-
-          const fetchEvents = async (param) => {
-            const response = await fetch(`/api/user-event?email=${session.user.email}&${param}`, headers);
-            const result = await response.json();
-            if (!response.ok) {
-              throw new Error(result.message || "Failed to fetch events");
-            }
-            return result.eventData;
-          };
-
-          const userResponse = await fetch(`/api/user?email=${session.user.email}`, headers);
-          const userResult = await userResponse.json();
-          if (!userResponse.ok) {
-            throw new Error(userResult.message || "Failed to fetch user details");
-          }
-          setUserDetails(userResult);
-
-          const [scheduling, allocated, organising, past] = await Promise.all([
-            fetchEvents("hasAllocated=false&isPast=false"),
-            fetchEvents("hasAllocated=true&isPast=false"),
-            fetchEvents("isAdmin=true&isPast=false"),
-            fetchEvents("isPast=true"),
-          ]);
-
-          setSchedulingEvents(scheduling);
-          setAllocatedEvents(allocated);
-          setOrganisingEvents(organising);
-          setPastEvents(past);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
+      try {
+        const userData = await getData(`/api/user?email=${session.user.email}`);
+        const [scheduling, allocated, organising, past] = await Promise.all([
+          getEvents("hasAllocated=false&isPast=false"),
+          getEvents("hasAllocated=true&isPast=false"),
+          getEvents("isAdmin=true&isPast=false"),
+          getEvents("isPast=true"),
+        ]);
+        setUserDetails(userData);
+        setSchedulingEvents(scheduling);
+        setAllocatedEvents(allocated);
+        setOrganisingEvents(organising);
+        setPastEvents(past);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setDataFetched(true)
       }
     };
     if (session && !dataFetched) {
       fetchUserDetails();
-      setDataFetched(true);
     }
   }, [status, session, dataFetched]);
-
-  if (error) {
-    return <div>{error}</div>;
-  }
 
   return (
     <div className="flex flex-col space-y-4 lg:px-16 sm:px-8 px-4 py-4">
@@ -182,7 +153,13 @@ export default function Page() {
                       item,
                       index // if not working, try changing userEvents to eventData
                     ) => (
-                      <Card className="justify-stretch" key={index} isPressable shadow="sm" onPress={() => handleSelectEvent(item)}>
+                      <Card
+                        className="justify-stretch"
+                        key={index}
+                        isPressable
+                        shadow="sm"
+                        onPress={() => handleSelectEvent(item)}
+                      >
                         <CardBody className="overflow-visible p-0 h-[140px] flex-none">
                           <Image
                             alt={item.event_title}
