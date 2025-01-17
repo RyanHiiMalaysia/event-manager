@@ -15,6 +15,7 @@ import {
   Textarea,
   Form,
 } from "@nextui-org/react";
+import { getData, checkAdmin } from "@/utils/api";
 
 export default function Page() {
   const [error, setError] = useState(null);
@@ -221,30 +222,17 @@ export default function Page() {
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
-        const headers = {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        };
-
-        const fetchData = async (link) => {
-          const response = await fetch(link, headers);
-          const result = await response.json();
-          if (!response.ok) {
-            throw new Error(result.message || "Failed to fetch events");
-          }
-          return result;
-        };
-
-        const [participantsData, eventData, adminData, event] = await Promise.all([
-          fetchData(`/api/user-event/participants?link=${eventLink}`),
-          fetchData(`/api/events?creator=true&link=${eventLink}`),
-          fetchData(`/api/user-event?findIsUserIn=true&link=${eventLink}&email=${session.user.email}&isAdmin=true`),
-          fetchData(`/api/events?link=${eventLink}`),
+        const isAdminData = await checkAdmin(eventLink, session);
+        const [participantsData, eventData, event] = await Promise.all([
+          getData(`/api/user-event/participants?link=${eventLink}`),
+          getData(`/api/events?creator=true&link=${eventLink}`),
+          getData(`/api/events?link=${eventLink}`),
         ]);
         setParticipants(participantsData.participants);
         setCreator(eventData.eventData[0].event_creator);
         setEventTitle(event.eventData[0].event_title)
-        setIsAdmin(adminData.result);
+        setIsAdmin(isAdminData);
+
       } catch (error) {
         setError(error);
       }
@@ -308,7 +296,6 @@ export default function Page() {
     }
   };
   const invitePage = (isInviteOpen, setIsInviteOpen, closeInvite) => {
-
     return (
       <div>
         <Button color="primary" className="text-xl p-6 md:text-lg" onPress={() => {

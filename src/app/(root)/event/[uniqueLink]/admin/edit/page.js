@@ -5,13 +5,13 @@ import Error from "next/error";
 import { Form, Input, Button, DatePicker, Textarea } from "@nextui-org/react";
 import { I18nProvider } from "@react-aria/i18n";
 import { today, getLocalTimeZone, parseDate } from "@internationalized/date";
+import { getData, checkAdmin } from "@/utils/api";
 
 export default function Page() {
   const { data: session, status } = useSession();
   const [eventLink, setEventLink] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
-  const [error, setError] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [path, setPath] = useState("");
 
@@ -28,34 +28,14 @@ export default function Page() {
   useEffect(() => {
     const fetchAdminStatus = async () => {
       try {
-        const response = await fetch(
-          `/api/user-event?findIsUserIn=true&isAdmin=true&link=${eventLink}&email=${session.user.email}`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-
-        const result = await response.json();
-        if (!response.ok) {
-          setError(result.message);
-          return;
-        }
-        setIsAdmin(result.result);
-        if (result.result) {
-          const response = await fetch(`/api/events?link=${eventLink}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          });
-          const result = await response.json();
-          if (!response.ok) {
-            setError(result.message);
-            return;
-          }
-          setEventData(result.eventData[0]);
+        const isAdminData = await checkAdmin(eventLink, session);
+        setIsAdmin(isAdminData);
+        if (isAdminData) {
+          const eventResult = await getData(`/api/events?link=${eventLink}`);
+          setEventData(eventResult.eventData[0]);
         }
       } catch (error) {
-        setError(error);
+        console.error(error);
       } finally {
         setDataFetched(true);
       }

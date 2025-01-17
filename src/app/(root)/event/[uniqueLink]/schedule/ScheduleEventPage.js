@@ -11,13 +11,13 @@ import {
   ModalFooter,
   Button,
   useDisclosure,
-  DateRangePicker,
   TimeInput,
   DatePicker,
 } from "@nextui-org/react";
 import { parseDate, parseTime, parseAbsolute, toLocalTimeZone } from "@internationalized/date";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
 import moment from "moment";
+import { getData } from "@/utils/api";
 
 export default function Page() {
   const [selectedDate, setSelectedDate] = useState();
@@ -27,7 +27,6 @@ export default function Page() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [eventLink, setEventLink] = useState("");
   const [dataFetched, setDataFetched] = useState(false);
   const [startDate, setStartDateRange] = useState();
@@ -50,42 +49,28 @@ export default function Page() {
   useEffect(() => {
     const fetchFreetimes = async () => {
       try {
-        const response = await fetch(`/api/user-event/schedule?link=${eventLink}&email=${session.user.email}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
+        const [eventResult, freeTimesResult] = await Promise.all([
+          getData(`/api/events?link=${eventLink}`),
+          getData(`/api/user-event/schedule?link=${eventLink}&email=${session.user.email}`),
+        ]);
+        const event = eventResult.eventData[0];
+        const start = convertDate(event.event_schedule_start);
+        const end = convertDate(event.event_schedule_end);
 
-        const response_event_date = await fetch(`/api/events?link=${eventLink}`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const result = await response.json();
-        const result_event_date = await response_event_date.json();
-
-        //const start = result_event_date.eventData[0].event_schedule_start.split("T")[0];
-        const start = convertDate(result_event_date.eventData[0].event_schedule_start);
         setStartDateRange(parseDate(start));
-        // const end = result_event_date.eventData[0].event_schedule_end.split("T")[0];
-        const end = convertDate(result_event_date.eventData[0].event_schedule_end);
         setEndDateRange(parseDate(end));
+        setOpen(convertTime(event.event_opening_hour));
+        setClose(convertTime(event.event_closing_hour));
 
-        setOpen(convertTime(result_event_date.eventData[0].event_opening_hour));
-        setClose(convertTime(result_event_date.eventData[0].event_closing_hour));
-
-        if (!response.ok || !response_event_date.ok) {
-          setError(result.message);
-          setLoading(false);
-          return;
-        }
         let freeTimeCounter = 1;
-        result.freeTimes.map((freeTime) => {
+        freeTimesResult.freeTimes.map((freeTime) => {
           freeTime.start = new Date(freeTime.start);
           freeTime.end = new Date(freeTime.end);
           freeTime.title = `Free Time ${freeTimeCounter++}`;
         });
-        setFreeTimes(result.freeTimes);
+        setFreeTimes(freeTimesResult.freeTimes);
       } catch (error) {
-        setError(error);
+        console.error(error);
       } finally {
         setLoading(false);
         setDataFetched(true);

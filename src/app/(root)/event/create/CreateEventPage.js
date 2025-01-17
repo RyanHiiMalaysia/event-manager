@@ -22,6 +22,7 @@ import { Alert } from "@nextui-org/react";
 import { I18nProvider } from "@react-aria/i18n";
 import { InfoIcon } from "@/components/icons/eventDetails/info-icon";
 import "./CreateEventPage.css";
+import { getData } from "@/utils/api";
 
 const isSameTime = (time1, time2) => time1?.hour === time2?.hour && time1?.minute === time2?.minute;
 
@@ -63,7 +64,6 @@ export default function CreateEventPage() {
   const [eventLink, setEventLink] = useState("");
   const [user, setUser] = useState(null);
   const { data: session, status } = useSession();
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [path, setPath] = useState("");
   const [dataFetched, setDataFetched] = useState(false);
@@ -88,17 +88,10 @@ export default function CreateEventPage() {
     const fetchUserDetails = async () => {
       if (status === "authenticated" && session?.user?.email) {
         try {
-          const response = await fetch(`/api/user?email=${session.user.email}`);
-          if (!response.ok) {
-            const result = await response.json();
-            setError(result.message);
-            setLoading(false);
-            return;
-          }
-          const userData = await response.json();
+          const userData = await getData(`/api/user?email=${session.user.email}`);
           setUser(userData);
         } catch (error) {
-          setError("An unexpected error occurred.");
+          console.error("Error fetching user details:", error);
         } finally {
           setLoading(false);
         }
@@ -117,9 +110,6 @@ export default function CreateEventPage() {
     return <div>Loading...</div>;
   }
 
-  if (error) {
-    return <div>{error}</div>;
-  }
 
   if (!user) {
     return <div>Loading......</div>;

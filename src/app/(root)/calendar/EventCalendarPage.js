@@ -5,14 +5,13 @@ import EventModal from "@/components/EventModal";
 import { useDisclosure } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
+import { getEvents } from "@/utils/api";
 
 function EventCalendarPage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
   const { data: session, status } = useSession();
-  const [error, setError] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [dataFetched, setDataFetched] = useState(false);
 
   const handleSelectEvent = (event) => {
@@ -23,17 +22,9 @@ function EventCalendarPage() {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const response = await fetch(`/api/user-event?email=${session.user.email}&hasAllocated=true`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const result = await response.json();
-        if (!response.ok) {
-          setError(result.message || "Failed to fetch events");
-          return;
-        }
+        const result = await getEvents(session)("hasAllocated=true");
         setUserEvents(
-          result.eventData.map((event) => ({
+          result.map((event) => ({
             ...event,
             start: new Date(event.event_allocated_start),
             end: new Date(event.event_allocated_end),
@@ -41,15 +32,14 @@ function EventCalendarPage() {
           }))
         );
       } catch (error) {
-        setError(error);
+        console.error(error);
       } finally {
-        setLoading(false);
+        setDataFetched(true);
       }
     };
 
     if (session && !dataFetched) {
       fetchUserDetails();
-      setDataFetched(true);
     }
   }, [status, session, dataFetched]);
 

@@ -6,13 +6,13 @@ import Error from "next/error";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import { Card, CardBody, Divider, Switch, cn, Select, SelectItem } from "@nextui-org/react";
+import { getData, checkAdmin } from "@/utils/api";
 
 export default function Page() {
   const { data: session, status } = useSession();
   const [eventLink, setEventLink] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
-  const [error, setError] = useState(null);
   const [forceAdmin, setForceAdmin] = useState(false);
   const [allocatedStart, setAllocatedStart] = useState(null);
   const [allocateTimes, setAllocateTimes] = useState([]);
@@ -30,50 +30,38 @@ export default function Page() {
   useEffect(() => {
     const fetchAdminStatus = async () => {
       try {
-        const headers = {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        };
+        const isAdminData = await checkAdmin(eventLink, session);
+        setIsAdmin(isAdminData);
 
-        const fetchData = async (link) => {
-          const response = await fetch(link, headers);
-          const result = await response.json();
-          if (!response.ok) {
-            throw new Error(result.message || "Failed to fetch events");
-          }
-          return result;
-        };
+        if (isAdminData) {
+          const [forceAdminData, allocateTimesData] = await Promise.all([
+            getData(`/api/events?link=${eventLink}&forceAdmin=true`),
+            getData(`/api/allocatetimes?link=${eventLink}`),
+          ]);
+          setForceAdmin(forceAdminData.result[0].event_force_admin);
+          setAllocatedStart(forceAdminData.result[0].event_allocated_start);
+          setAllocateTimes(
+            allocateTimesData.allocateTimes.map((time, index) => {
+              const startDate = new Date(time.at_start);
+              const endDate = new Date(time.at_end);
+              const dateOptions = { day: "2-digit", month: "2-digit", year: "numeric" };
+              const startDateString = startDate.toLocaleDateString("en-GB", dateOptions);
+              const endDateString = endDate.toLocaleDateString("en-GB", dateOptions);
+              const timeOptions = { hour: "2-digit", minute: "2-digit" };
+              const startTimeString = startDate.toLocaleTimeString([], timeOptions);
+              const endTimeString = endDate.toLocaleTimeString([], timeOptions);
 
-        const [forceAdminData, isAdminData, allocateTimesData] = await Promise.all([
-          fetchData(`/api/events?link=${eventLink}&forceAdmin=true`),
-          fetchData(`/api/user-event?findIsUserIn=true&isAdmin=true&link=${eventLink}&email=${session.user.email}`),
-          fetchData(`/api/allocatetimes?link=${eventLink}`),
-        ]);
+              const label =
+                startDateString === endDateString
+                  ? `${startDateString} ${startTimeString} - ${endTimeString}`
+                  : `${startDateString} ${startTimeString} - ${endDateString} ${endTimeString}`;
 
-        setForceAdmin(forceAdminData.result[0].event_force_admin);
-        setAllocatedStart(forceAdminData.result[0].event_allocated_start);
-        setIsAdmin(isAdminData.result);
-        setAllocateTimes(
-          allocateTimesData.allocateTimes.map((time, index) => {
-            const startDate = new Date(time.at_start);
-            const endDate = new Date(time.at_end);
-            const dateOptions = { day: "2-digit", month: "2-digit", year: "numeric" };
-            const startDateString = startDate.toLocaleDateString("en-GB", dateOptions);
-            const endDateString = endDate.toLocaleDateString("en-GB", dateOptions);
-            const timeOptions = { hour: "2-digit", minute: "2-digit" };
-            const startTimeString = startDate.toLocaleTimeString([], timeOptions);
-            const endTimeString = endDate.toLocaleTimeString([], timeOptions);
-
-            const label =
-              startDateString === endDateString
-                ? `${startDateString} ${startTimeString} - ${endTimeString}`
-                : `${startDateString} ${startTimeString} - ${endDateString} ${endTimeString}`;
-
-            return { ...time, key: index, label };
-          })
-        );
+              return { ...time, key: index, label };
+            })
+          );
+        }
       } catch (error) {
-        setError(error);
+        console.error(error);
       } finally {
         setDataFetched(true);
       }
@@ -99,11 +87,10 @@ export default function Page() {
 
         const result = await response.json();
         if (!response.ok) {
-          setError(result.message);
-          return;
+          throw new Error(result.message);
         }
       } catch (error) {
-        setError(error);
+        console.error(error);
       }
     };
     setForceAdmin(value);
@@ -123,11 +110,10 @@ export default function Page() {
         });
         const result = await response.json();
         if (!response.ok) {
-          setError(result.message);
-          return;
+          throw new Error(result.message);
         }
       } catch (error) {
-        setError(error);
+        console.error(error);
       }
     };
     update(at_id);

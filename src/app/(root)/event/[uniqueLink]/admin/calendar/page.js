@@ -4,16 +4,16 @@ import { useState, useEffect } from "react";
 import { EventCalendar } from "@/components/Calendar";
 import { ModalFooter, useDisclosure } from "@nextui-org/react";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
-import { Modal, ModalContent, ModalHeader, ModalBody, cn } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
 import moment from "moment";
 import Error from "next/error";
+import { getData, checkAdmin } from "@/utils/api";
 
 export default function Page() {
   const { data: session, status } = useSession();
   const [eventLink, setEventLink] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [dataFetched, setDataFetched] = useState(false);
-  const [error, setError] = useState(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
@@ -48,49 +48,24 @@ export default function Page() {
   useEffect(() => {
     const fetchAdminStatus = async () => {
       try {
-        const response = await fetch(
-          `/api/user-event?findIsUserIn=true&isAdmin=true&link=${eventLink}&email=${session.user.email}`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-        const result = await response.json();
-        if (!response.ok) {
-          setError(result.message);
-          return;
-        }
-        setIsAdmin(result.result);
-        if (result.result) {
-          const response = await fetch(`/api/user-event/schedule?link=${eventLink}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          });
-          const result = await response.json();
-          if (!response.ok) {
-            setError(result.message || "Failed to fetch events");
-            return;
-          }
+        const isAdminData = await checkAdmin(eventLink, session);
+        setIsAdmin(isAdminData);
+        if (isAdminData) {
+          const [userEventsResult, eventResult] = await Promise.all([
+            getData(`/api/user-event/schedule?link=${eventLink}`),
+            getData(`/api/events?link=${eventLink}`),
+          ]);
           setUserEvents(
-            result.freeTimes.map((ft) => ({
+            userEventsResult.freeTimes.map((ft) => ({
               title: ft.title,
               start: new Date(ft.start),
               end: new Date(ft.end),
             }))
           );
-          const eventResponse = await fetch(`/api/events?link=${eventLink}`, {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-          });
-          const eventResult = await eventResponse.json();
-          if (!eventResponse.ok) {
-            setError(eventResult.message);
-            return;
-          }
           setEventData(eventResult.eventData[0]);
         }
       } catch (error) {
-        setError(error);
+        console.error(error);
       } finally {
         setDataFetched(true);
       }
@@ -105,7 +80,7 @@ export default function Page() {
     if (status === "loading" || !dataFetched || isAdmin) {
       return (
         <div className="max-w-4xl mx-auto rounded-lg">
-          <EventCalendar events={userEvents} onSelectEvent={handleSelectEvent}/>
+          <EventCalendar events={userEvents} onSelectEvent={handleSelectEvent} />
           <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
             <ModalContent>
               {() => (

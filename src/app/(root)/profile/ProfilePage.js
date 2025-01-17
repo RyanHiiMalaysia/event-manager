@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Spinner } from "@nextui-org/react";
 import { Card, CardBody, CardHeader, CardFooter, Alert, Button, Link, Input, Form } from "@nextui-org/react";
 import { Avatar } from "@nextui-org/react";
+import { getData } from '@/utils/api';
 
 export const EditIcon = ({ fill = "currentColor", filled, size, height, width, ...props }) => {
   return (
@@ -37,16 +38,9 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchUserDetails = async () => {
-      if (status === 'authenticated' && session?.user?.email) {
+      if (status === 'authenticated' && session) {
         try {
-          const response = await fetch(`/api/user?email=${session.user.email}`);
-          if (!response.ok) {
-            const result = await response.json();
-            setError(result.message);
-            setLoading(false);
-            return;
-          }
-          const userData = await response.json();
+          const userData = await getData(`/api/user?email=${session.user.email}`)
           setUser(userData);
           setNewName(userData.user_name); // Initialize newName with the current user name
         } catch (error) {
