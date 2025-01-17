@@ -9,7 +9,7 @@ import {
   Button,
   useDisclosure,
 } from "@nextui-org/react";
-import { getData, getEvents, checkAdmin, checkParticipant } from "@/utils/api";
+import { getData, checkAdmin, checkParticipant } from "@/utils/api";
 
 export default function EventDetailsPage({ params }) {
   const router = useRouter();

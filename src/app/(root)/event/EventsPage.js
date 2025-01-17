@@ -26,7 +26,7 @@ import grey from "../../../../public/grey.svg";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { InfoIcon } from "@/components/icons/eventDetails/info-icon";
-import { getData, getEvents } from "@/utils/api";
+import { getData, getUserEvents } from "@/utils/api";
 
 export default function Page() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -46,15 +46,15 @@ export default function Page() {
   };
 
   useEffect(() => {
-    const getUserEvents = getEvents(session);
+    const getEvents = getUserEvents(session);
     const fetchUserDetails = async () => {
       try {
         const userData = await getData(`/api/user?email=${session.user.email}`);
         const [scheduling, allocated, organising, past] = await Promise.all([
-          getUserEvents("hasAllocated=false&isPast=false"),
-          getUserEvents("hasAllocated=true&isPast=false"),
-          getUserEvents("isAdmin=true&isPast=false"),
-          getUserEvents("isPast=true"),
+          getEvents("hasAllocated=false&isPast=false"),
+          getEvents("hasAllocated=true&isPast=false"),
+          getEvents("isAdmin=true&isPast=false"),
+          getEvents("isPast=true"),
         ]);
         setUserDetails(userData);
         setSchedulingEvents(scheduling);

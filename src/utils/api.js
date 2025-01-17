@@ -26,7 +26,7 @@ export const checkAdmin = async (eventLink, session) => {
   return checkParticipant(eventLink, session, "isAdmin=true");
 };
 
-export const getEvents = (session) => async (param) => {
+export const getUserEvents = (session) => async (param) => {
   const result = await getData(`/api/user-event?email=${session.user.email}&${param}`);
   return result.eventData;
 };

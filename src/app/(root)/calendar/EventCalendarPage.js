@@ -5,7 +5,7 @@ import EventModal from "@/components/EventModal";
 import { useDisclosure } from "@nextui-org/react";
 import { useSession } from "next-auth/react";
 import useOverflowHandler from "@/hooks/useOverflowHandler";
-import { getEvents } from "@/utils/api";
+import { getUserEvents } from "@/utils/api";
 
 function EventCalendarPage() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -22,7 +22,7 @@ function EventCalendarPage() {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        const result = await getEvents(session)("hasAllocated=true");
+        const result = await getUserEvents(session)("hasAllocated=true");
         setUserEvents(
           result.map((event) => ({
             ...event,
