@@ -27,7 +27,7 @@ export default function PricingPage() {
             </li>
             <li className="flex items-start">
               <span className="mr-2">4.</span>
-              <span>Message 016-3308777 on Whatsapp with proof of payment (screenshot of payment) along with your email address.</span>
+              <span>Message -- on Whatsapp with proof of payment (screenshot of payment) along with your email address.</span>
             </li>
             <li className="flex items-start">
               <span className="mr-2">5.</span>
